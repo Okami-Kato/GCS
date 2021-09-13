@@ -1,0 +1,13 @@
+# IntelliJ project files
+.idea
+.jpb
+*.iml
+out
+gen
+
+# Gradle auto-genereated files
+.gradle
+gradle
+build
+gradlew.bat
+gradlew
