@@ -1,0 +1,30 @@
+plugins {
+    id 'java'
+}
+
+group 'com.epam.esm'
+version '0.0.1'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation project(':entity')
+
+    implementation 'org.springframework.boot:spring-boot-starter:2.5.4'
+    implementation 'org.springframework:spring-orm:5.3.9'
+    implementation 'org.hibernate:hibernate-core:5.5.7.Final'
+
+    implementation 'org.apache.tomcat:tomcat-jdbc:10.0.11'
+    implementation 'com.h2database:h2:1.4.200'
+    implementation 'mysql:mysql-connector-java:8.0.26'
+
+
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
+}
+
+test {
+    useJUnitPlatform()
+}
