@@ -4,6 +4,7 @@ import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -13,24 +14,28 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import java.time.Instant;
 
+@Entity
 @Table(name = "user_order", indexes = {
         @Index(name = "user_id", columnList = "user_id, certificate_id", unique = true)
 })
-@Entity
 public class UserOrder {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @GenericGenerator(name = "native", strategy = "native")
     @Column(name = "id", nullable = false)
     private Integer id;
-    @ManyToOne
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
-    @ManyToOne
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "certificate_id")
     private Certificate certificate;
+
     @Column(name = "cost")
     private Integer cost;
+
     @Column(name = "timestamp", nullable = false)
     private Instant timestamp;
 

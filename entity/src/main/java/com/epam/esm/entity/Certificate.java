@@ -11,13 +11,16 @@ import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.Lob;
 import javax.persistence.ManyToMany;
+import javax.persistence.NamedAttributeNode;
+import javax.persistence.NamedEntityGraph;
 import javax.persistence.Table;
 import java.time.Instant;
 import java.util.Objects;
 import java.util.Set;
 
-@Table(name = "certificate")
 @Entity
+@Table(name = "certificate")
+@NamedEntityGraph(name = "graph.certificate.tags", attributeNodes = @NamedAttributeNode("tags"))
 public class Certificate {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -43,6 +46,7 @@ public class Certificate {
 
     @Column(name = "create_date", nullable = false)
     private Instant createDate;
+
     @ManyToMany
     @JoinTable(
             name = "certificate_tag",

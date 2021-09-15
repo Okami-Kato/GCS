@@ -8,11 +8,14 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
+import javax.persistence.NamedAttributeNode;
+import javax.persistence.NamedEntityGraph;
 import javax.persistence.Table;
 import java.util.Set;
 
-@Table(name = "tag")
 @Entity
+@Table(name = "tag")
+@NamedEntityGraph(name = "graph.tag.certificates", attributeNodes = @NamedAttributeNode("certificates"))
 public class Tag {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
