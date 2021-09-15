@@ -10,7 +10,7 @@ public interface Dao<T, K> {
 
     T create(T t);
 
-    boolean update(T t);
+    void update(T t);
 
     boolean delete(K id);
 
