@@ -7,6 +7,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.test.context.ActiveProfiles;
 
@@ -53,6 +54,9 @@ class CertificateDaoImplTest {
         Optional<Certificate> persisted = certificateDao.get(CERTIFICATE.getId());
         assertTrue(persisted.isPresent());
         assertEquals(persisted.get(), CERTIFICATE);
+
+        CERTIFICATE.setName(null);
+        assertThrows(DataIntegrityViolationException.class, () -> certificateDao.update(CERTIFICATE));
     }
 
     @Test
@@ -60,8 +64,10 @@ class CertificateDaoImplTest {
         certificateDao.create(CERTIFICATE);
         Optional<Certificate> persisted = certificateDao.get(CERTIFICATE.getId());
         assertTrue(persisted.isPresent());
-        certificateDao.delete(CERTIFICATE.getId());
+        assertDoesNotThrow(() -> certificateDao.delete(CERTIFICATE.getId()));
         assertFalse(certificateDao.get(CERTIFICATE.getId()).isPresent());
+        assertThrows(InvalidDataAccessApiUsageException.class, () -> certificateDao.delete(CERTIFICATE.getId()));
+        assertThrows(InvalidDataAccessApiUsageException.class, () -> certificateDao.delete(null));
     }
 
     @Test
