@@ -37,7 +37,7 @@ public class CertificateDaoImpl implements CertificateDao {
     }
 
     @Override
-    public List<Certificate> getAll() {
+    public List<Certificate> getAll(int pageNumber, int pageSize) {
         return null;
     }
 

@@ -6,7 +6,7 @@ import java.util.Optional;
 public interface Dao<T, K> {
     Optional<T> get(K id);
 
-    List<T> getAll();
+    List<T> getAll(int pageNumber, int pageSize);
 
     void create(T t);
 
