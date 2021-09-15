@@ -1,8 +1,6 @@
 package com.epam.esm.util;
 
 public class CertificateFilter {
-    private int pageNumber;
-    private int pageSize;
     private String namePart;
     private String descriptionPart;
     private String[] tagNames;
@@ -35,16 +33,6 @@ public class CertificateFilter {
         private CertificateFilterBuilder() {
         }
 
-        public CertificateFilterBuilder fromPageNumber(int pageNumber) {
-            CertificateFilter.this.pageNumber = pageNumber;
-            return this;
-        }
-
-        public CertificateFilterBuilder withPageSize(int pageSize) {
-            CertificateFilter.this.pageSize = pageSize;
-            return this;
-        }
-
         public CertificateFilterBuilder withPartInName(String namePart) {
             CertificateFilter.this.namePart = namePart;
             return this;
@@ -67,8 +55,6 @@ public class CertificateFilter {
 
         public CertificateFilter build() {
             CertificateFilter certificateFilter = new CertificateFilter();
-            certificateFilter.pageNumber = CertificateFilter.this.pageNumber;
-            certificateFilter.pageSize = CertificateFilter.this.pageSize;
             certificateFilter.namePart = CertificateFilter.this.namePart;
             certificateFilter.descriptionPart = CertificateFilter.this.descriptionPart;
             certificateFilter.tagNames = CertificateFilter.this.tagNames;
