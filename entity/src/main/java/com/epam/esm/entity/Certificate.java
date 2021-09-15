@@ -13,6 +13,7 @@ import javax.persistence.Lob;
 import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 import java.time.Instant;
+import java.util.Objects;
 import java.util.Set;
 
 @Table(name = "certificate")
@@ -42,7 +43,6 @@ public class Certificate {
 
     @Column(name = "create_date", nullable = false)
     private Instant createDate;
-
     @ManyToMany
     @JoinTable(
             name = "certificate_tag",
@@ -61,6 +61,33 @@ public class Certificate {
         this.lastUpdateDate = lastUpdateDate;
         this.createDate = createDate;
         this.tags = tags;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, name, description, price, duration, lastUpdateDate, createDate);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Certificate that = (Certificate) o;
+        return Objects.equals(id, that.id) && name.equals(that.name) && description.equals(that.description) && price.equals(that.price) && duration.equals(that.duration) && lastUpdateDate.equals(that.lastUpdateDate) && createDate.equals(that.createDate);
+    }
+
+    @Override
+    public String toString() {
+        return "Certificate{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", description='" + description + '\'' +
+                ", price=" + price +
+                ", duration=" + duration +
+                ", lastUpdateDate=" + lastUpdateDate +
+                ", createDate=" + createDate +
+                ", tags=" + tags +
+                '}';
     }
 
     public Instant getCreateDate() {
