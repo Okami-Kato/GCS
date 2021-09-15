@@ -8,11 +8,9 @@ public interface Dao<T, K> {
 
     List<T> getAll();
 
-    T create(T t);
+    void create(T t);
 
     void update(T t);
 
-    boolean delete(K id);
-
-    boolean idExists(K id);
+    void delete(K id);
 }

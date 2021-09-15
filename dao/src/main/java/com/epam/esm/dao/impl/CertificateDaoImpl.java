@@ -42,9 +42,8 @@ public class CertificateDaoImpl implements CertificateDao {
     }
 
     @Override
-    public Certificate create(Certificate certificate) {
+    public void create(Certificate certificate) {
         manager.persist(certificate);
-        return certificate;
     }
 
     @Override
@@ -53,12 +52,12 @@ public class CertificateDaoImpl implements CertificateDao {
     }
 
     @Override
-    public boolean delete(Integer id) {
-        return false;
-    }
-
-    @Override
-    public boolean idExists(Integer id) {
-        return false;
+    public void delete(Integer id) {
+        Optional<Certificate> certificate = get(id);
+        if (certificate.isPresent()) {
+            manager.remove(certificate.get());
+        } else {
+            throw new IllegalArgumentException(String.format("Entity wasn't found (%s)", "id=" + id));
+        }
     }
 }
