@@ -11,6 +11,7 @@ import javax.persistence.ManyToMany;
 import javax.persistence.NamedAttributeNode;
 import javax.persistence.NamedEntityGraph;
 import javax.persistence.Table;
+import java.util.Objects;
 import java.util.Set;
 
 @Entity
@@ -35,6 +36,28 @@ public class Tag {
     public Tag(String name, Set<Certificate> certificates) {
         this.name = name;
         this.certificates = certificates;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Tag tag = (Tag) o;
+        return name.equals(tag.name);
+    }
+
+    @Override
+    public String toString() {
+        return "Tag{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", certificates=" + certificates +
+                '}';
     }
 
     public String getName() {
