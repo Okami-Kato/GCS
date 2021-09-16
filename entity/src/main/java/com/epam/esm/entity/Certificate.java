@@ -2,6 +2,7 @@ package com.epam.esm.entity;
 
 import org.hibernate.annotations.GenericGenerator;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -47,7 +48,7 @@ public class Certificate {
     @Column(name = "create_date", nullable = false)
     private Instant createDate;
 
-    @ManyToMany
+    @ManyToMany(cascade = CascadeType.PERSIST)
     @JoinTable(
             name = "certificate_tag",
             joinColumns = @JoinColumn(name = "certificate_id"),
@@ -90,7 +91,6 @@ public class Certificate {
                 ", duration=" + duration +
                 ", lastUpdateDate=" + lastUpdateDate +
                 ", createDate=" + createDate +
-                ", tags=" + tags +
                 '}';
     }
 
@@ -144,5 +144,13 @@ public class Certificate {
 
     public void setId(Integer id) {
         this.id = id;
+    }
+
+    public boolean addTag(Tag tag){
+        return tags.add(tag);
+    }
+
+    public boolean removeTag(Tag tag){
+        return tags.remove(tag);
     }
 }
