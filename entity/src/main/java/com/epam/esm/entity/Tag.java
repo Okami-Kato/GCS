@@ -56,12 +56,7 @@ public class Tag {
         return "Tag{" +
                 "id=" + id +
                 ", name='" + name + '\'' +
-                ", certificates=" + certificates +
                 '}';
-    }
-
-    public String getName() {
-        return name;
     }
 
     public Integer getId() {
@@ -70,5 +65,21 @@ public class Tag {
 
     public void setId(Integer id) {
         this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public boolean addCertificate(Certificate certificate) {
+        return certificates.add(certificate);
+    }
+
+    public boolean removeCertificate(Certificate certificate) {
+        return certificates.remove(certificate);
     }
 }
