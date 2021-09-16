@@ -69,7 +69,7 @@ public class Certificate {
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, description, price, duration, lastUpdateDate, createDate);
+        return Objects.hash(name, description, price, duration, lastUpdateDate, createDate);
     }
 
     @Override
@@ -77,7 +77,7 @@ public class Certificate {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Certificate that = (Certificate) o;
-        return Objects.equals(id, that.id) && name.equals(that.name) && description.equals(that.description) && price.equals(that.price) && duration.equals(that.duration) && lastUpdateDate.equals(that.lastUpdateDate) && createDate.equals(that.createDate);
+        return name.equals(that.name) && description.equals(that.description) && price.equals(that.price) && duration.equals(that.duration) && lastUpdateDate.equals(that.lastUpdateDate) && createDate.equals(that.createDate);
     }
 
     @Override
