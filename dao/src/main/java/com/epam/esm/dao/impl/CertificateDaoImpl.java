@@ -63,6 +63,11 @@ public class CertificateDaoImpl implements CertificateDao {
     }
 
     @Override
+    public int getCount() {
+        return manager.createQuery("SELECT COUNT(c) FROM Certificate c", Integer.class).getSingleResult();
+    }
+
+    @Override
     public Optional<Certificate> get(Integer id) {
         EntityGraph<?> graph = manager.getEntityGraph("graph.certificate.tags");
         Map<String, Object> hints = new HashMap<>();
