@@ -3,6 +3,7 @@ package com.epam.esm.dao.impl;
 import com.epam.esm.dao.CertificateDao;
 import com.epam.esm.dao.config.DaoConfig;
 import com.epam.esm.entity.Certificate;
+import com.epam.esm.entity.Tag;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,49 +25,53 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @SpringBootTest(classes = DaoConfig.class)
 @ActiveProfiles("test")
 class CertificateDaoImplTest {
-    private static Certificate CERTIFICATE;
+    private Certificate certificate;
+    private Tag firstTag = new Tag("first tag", new HashSet<>());
+    private Tag secondTag = new Tag("second tag", new HashSet<>());
 
     @Autowired
     private CertificateDao certificateDao;
 
     @BeforeEach
     void afterEach() {
-        CERTIFICATE = new Certificate(
+        certificate = new Certificate(
                 "name", "description", 5, 5, Instant.now(), Instant.now(), new HashSet<>()
         );
+        certificate.addTag(firstTag);
+        certificate.addTag(secondTag);
     }
 
     @Test
     void create() {
-        assertDoesNotThrow(() -> certificateDao.create(CERTIFICATE));
-        assertThrows(InvalidDataAccessApiUsageException.class, () -> certificateDao.create(CERTIFICATE));
-        assertTrue(certificateDao.get(CERTIFICATE.getId()).isPresent());
-        assertFalse(certificateDao.get(CERTIFICATE.getId() + 1).isPresent());
+        assertDoesNotThrow(() -> certificateDao.create(certificate));
+        assertThrows(InvalidDataAccessApiUsageException.class, () -> certificateDao.create(certificate));
+        assertTrue(certificateDao.get(certificate.getId()).isPresent());
+        assertFalse(certificateDao.get(certificate.getId() + 1).isPresent());
         assertThrows(InvalidDataAccessApiUsageException.class, () -> certificateDao.get(null));
     }
 
     @Test
     void update() {
-        certificateDao.create(CERTIFICATE);
-        CERTIFICATE.setName("new name");
-        CERTIFICATE.setDescription("new description");
-        assertDoesNotThrow(() -> certificateDao.update(CERTIFICATE));
-        Optional<Certificate> persisted = certificateDao.get(CERTIFICATE.getId());
+        certificateDao.create(certificate);
+        certificate.setName("new name");
+        certificate.setDescription("new description");
+        assertDoesNotThrow(() -> certificateDao.update(certificate));
+        Optional<Certificate> persisted = certificateDao.get(certificate.getId());
         assertTrue(persisted.isPresent());
-        assertEquals(persisted.get(), CERTIFICATE);
+        assertEquals(persisted.get(), certificate);
 
-        CERTIFICATE.setName(null);
-        assertThrows(DataIntegrityViolationException.class, () -> certificateDao.update(CERTIFICATE));
+        certificate.setName(null);
+        assertThrows(DataIntegrityViolationException.class, () -> certificateDao.update(certificate));
     }
 
     @Test
     void delete() {
-        certificateDao.create(CERTIFICATE);
-        Optional<Certificate> persisted = certificateDao.get(CERTIFICATE.getId());
+        certificateDao.create(certificate);
+        Optional<Certificate> persisted = certificateDao.get(certificate.getId());
         assertTrue(persisted.isPresent());
-        assertDoesNotThrow(() -> certificateDao.delete(CERTIFICATE.getId()));
-        assertFalse(certificateDao.get(CERTIFICATE.getId()).isPresent());
-        assertThrows(InvalidDataAccessApiUsageException.class, () -> certificateDao.delete(CERTIFICATE.getId()));
+        assertDoesNotThrow(() -> certificateDao.delete(certificate.getId()));
+        assertFalse(certificateDao.get(certificate.getId()).isPresent());
+        assertThrows(InvalidDataAccessApiUsageException.class, () -> certificateDao.delete(certificate.getId()));
         assertThrows(InvalidDataAccessApiUsageException.class, () -> certificateDao.delete(null));
     }
 

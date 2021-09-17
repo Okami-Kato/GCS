@@ -7,7 +7,7 @@ import java.util.List;
 public interface CertificateDao extends Dao<Certificate, Integer> {
     void addTag(Integer certificateId, Integer tagId);
 
-    boolean removeTag(Integer certificateId, Integer tagId);
+    void removeTag(Integer certificateId, Integer tagId);
 
-    List<Certificate> getAllByTags(Integer... ids);
+    List<Certificate> getAll(int pageNumber, int pageSize, Integer... tagIds);
 }
