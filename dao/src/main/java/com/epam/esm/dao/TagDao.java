@@ -5,7 +5,7 @@ import com.epam.esm.entity.Tag;
 import java.util.List;
 
 public interface TagDao extends Dao<Tag, Integer> {
-    List<Tag> getAllByCertificateId(Integer certificateId);
+    List<Tag> getAll(Integer certificateId);
 
     boolean nameExists(String name);
 }
