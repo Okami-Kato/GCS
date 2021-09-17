@@ -11,6 +11,7 @@ import javax.persistence.ManyToMany;
 import javax.persistence.NamedAttributeNode;
 import javax.persistence.NamedEntityGraph;
 import javax.persistence.Table;
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
@@ -75,11 +76,21 @@ public class Tag {
         this.name = name;
     }
 
-    public boolean addCertificate(Certificate certificate) {
-        return certificates.add(certificate);
+    public Set<Certificate> getCertificates() {
+        return new HashSet<>(certificates);
     }
 
-    public boolean removeCertificate(Certificate certificate) {
-        return certificates.remove(certificate);
+    public void addCertificate(Certificate certificate) {
+        if (certificates.contains(certificate))
+            return;
+        certificates.add(certificate);
+        certificate.addTag(this);
+    }
+
+    public void removeCertificate(Certificate certificate) {
+        if (!certificates.contains(certificate))
+            return;
+        certificates.remove(certificate);
+        certificate.removeTag(this);
     }
 }

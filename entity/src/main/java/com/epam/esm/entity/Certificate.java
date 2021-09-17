@@ -16,6 +16,7 @@ import javax.persistence.NamedAttributeNode;
 import javax.persistence.NamedEntityGraph;
 import javax.persistence.Table;
 import java.time.Instant;
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
@@ -48,7 +49,7 @@ public class Certificate {
     @Column(name = "create_date", nullable = false)
     private Instant createDate;
 
-    @ManyToMany(cascade = CascadeType.PERSIST)
+    @ManyToMany(cascade = CascadeType.MERGE)
     @JoinTable(
             name = "certificate_tag",
             joinColumns = @JoinColumn(name = "certificate_id"),
@@ -94,40 +95,12 @@ public class Certificate {
                 '}';
     }
 
-    public Instant getCreateDate() {
-        return createDate;
+    public Integer getId() {
+        return id;
     }
 
-    public Instant getLastUpdateDate() {
-        return lastUpdateDate;
-    }
-
-    public void setLastUpdateDate(Instant lastUpdateDate) {
-        this.lastUpdateDate = lastUpdateDate;
-    }
-
-    public Integer getDuration() {
-        return duration;
-    }
-
-    public void setDuration(Integer duration) {
-        this.duration = duration;
-    }
-
-    public Integer getPrice() {
-        return price;
-    }
-
-    public void setPrice(Integer price) {
-        this.price = price;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
+    public void setId(Integer id) {
+        this.id = id;
     }
 
     public String getName() {
@@ -138,19 +111,61 @@ public class Certificate {
         this.name = name;
     }
 
-    public Integer getId() {
-        return id;
+    public String getDescription() {
+        return description;
     }
 
-    public void setId(Integer id) {
-        this.id = id;
+    public void setDescription(String description) {
+        this.description = description;
     }
 
-    public boolean addTag(Tag tag){
-        return tags.add(tag);
+    public Integer getPrice() {
+        return price;
     }
 
-    public boolean removeTag(Tag tag){
-        return tags.remove(tag);
+    public void setPrice(Integer price) {
+        this.price = price;
+    }
+
+    public Integer getDuration() {
+        return duration;
+    }
+
+    public void setDuration(Integer duration) {
+        this.duration = duration;
+    }
+
+    public Instant getLastUpdateDate() {
+        return lastUpdateDate;
+    }
+
+    public void setLastUpdateDate(Instant lastUpdateDate) {
+        this.lastUpdateDate = lastUpdateDate;
+    }
+
+    public Instant getCreateDate() {
+        return createDate;
+    }
+
+    public void setCreateDate(Instant createDate) {
+        this.createDate = createDate;
+    }
+
+    public Set<Tag> getTags() {
+        return new HashSet<>(tags);
+    }
+
+    public void addTag(Tag tag) {
+        if (tags.contains(tag))
+            return;
+        tags.add(tag);
+        tag.addCertificate(this);
+    }
+
+    public void removeTag(Tag tag) {
+        if (!tags.contains(tag))
+            return;
+        tags.remove(tag);
+        tag.removeCertificate(this);
     }
 }
