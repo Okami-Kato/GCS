@@ -3,7 +3,7 @@ package com.epam.esm.util;
 public class CertificateFilter {
     private String namePart;
     private String descriptionPart;
-    private String[] tagNames;
+    private Integer[] tagIds;
     private Sort sort;
 
     public CertificateFilter() {
@@ -17,12 +17,12 @@ public class CertificateFilter {
         return namePart;
     }
 
-    public String getDescriptionPart() {
-        return descriptionPart;
+    public Integer[] getTagIds() {
+        return tagIds;
     }
 
-    public String[] getTagNames() {
-        return tagNames;
+    public String getDescriptionPart() {
+        return descriptionPart;
     }
 
     public Sort getSort() {
@@ -43,8 +43,8 @@ public class CertificateFilter {
             return this;
         }
 
-        public CertificateFilterBuilder withTags(String[] tagNames) {
-            CertificateFilter.this.tagNames = tagNames;
+        public CertificateFilterBuilder withTags(Integer[] tagIds) {
+            CertificateFilter.this.tagIds = tagIds;
             return this;
         }
 
@@ -57,7 +57,7 @@ public class CertificateFilter {
             CertificateFilter certificateFilter = new CertificateFilter();
             certificateFilter.namePart = CertificateFilter.this.namePart;
             certificateFilter.descriptionPart = CertificateFilter.this.descriptionPart;
-            certificateFilter.tagNames = CertificateFilter.this.tagNames;
+            certificateFilter.tagIds = CertificateFilter.this.tagIds;
             certificateFilter.sort = CertificateFilter.this.sort;
             return certificateFilter;
         }
