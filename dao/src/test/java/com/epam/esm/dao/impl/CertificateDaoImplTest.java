@@ -5,6 +5,8 @@ import com.epam.esm.dao.TagDao;
 import com.epam.esm.dao.config.DaoConfig;
 import com.epam.esm.entity.Certificate;
 import com.epam.esm.entity.Tag;
+import com.epam.esm.util.CertificateFilter;
+import com.epam.esm.util.Sort;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -13,12 +15,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.PostConstruct;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
@@ -30,8 +32,14 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @SpringBootTest(classes = DaoConfig.class)
 @ActiveProfiles("test")
 class CertificateDaoImplTest {
-    private final Certificate certificate = new Certificate(
-            "name", "description", 5, 5, Instant.now(), Instant.now(), new HashSet<>()
+    private final Certificate firstCertificate = new Certificate(
+            "first certificate", "first description", 1, 3, Instant.now(), Instant.now(), new HashSet<>()
+    );
+    private final Certificate secondCertificate = new Certificate(
+            "second certificate", "second description", 2, 5, Instant.now(), Instant.now(), new HashSet<>()
+    );
+    private final Certificate thirdCertificate = new Certificate(
+            "third certificate", "third description", 2, 7, Instant.now(), Instant.now(), new HashSet<>()
     );
 
     private final Tag firstTag = new Tag("first tag", new HashSet<>());
@@ -47,34 +55,46 @@ class CertificateDaoImplTest {
     void init() {
         tagDao.create(firstTag);
         tagDao.create(secondTag);
+
+        firstCertificate.addTag(firstTag);
+        firstCertificate.addTag(secondTag);
+        secondCertificate.addTag(firstTag);
+        thirdCertificate.addTag(secondTag);
+    }
+
+    @BeforeEach
+    void createAll() {
+        certificateDao.create(firstCertificate);
+        certificateDao.create(secondCertificate);
+        certificateDao.create(thirdCertificate);
     }
 
     @AfterEach
-    void resetIds(){
-        certificate.setId(null);
+    void resetIds() {
+        certificateDao.delete(firstCertificate.getId());
+        certificateDao.delete(secondCertificate.getId());
+        certificateDao.delete(thirdCertificate.getId());
     }
 
     @Test
     void create() {
-        certificate.addTag(firstTag);
-        certificate.addTag(secondTag);
+        assertThrows(InvalidDataAccessApiUsageException.class, () -> certificateDao.create(firstCertificate));
 
-        assertDoesNotThrow(() -> certificateDao.create(certificate));
-        assertThrows(InvalidDataAccessApiUsageException.class, () -> certificateDao.create(certificate));
-        Optional<Certificate> optionalCertificate = certificateDao.get(certificate.getId());
-        assertTrue(optionalCertificate.isPresent());
-        assertTrue(optionalCertificate.get().getTags().containsAll(Arrays.asList(firstTag, secondTag)));
-        assertFalse(certificateDao.get(certificate.getId() + 1).isPresent());
+        Optional<Certificate> persisted = certificateDao.get(firstCertificate.getId());
+        assertTrue(persisted.isPresent());
+        assertTrue(persisted.get().getTags().containsAll(Arrays.asList(firstTag, secondTag)));
+        assertFalse(certificateDao.get(firstCertificate.getId() + 1000).isPresent());
         assertThrows(InvalidDataAccessApiUsageException.class, () -> certificateDao.get(null));
     }
 
     @Test
     void update() {
-        certificateDao.create(certificate);
+        Certificate certificate = certificateDao.get(thirdCertificate.getId()).get();
         certificate.setName("new name");
         certificate.setDescription("new description");
+        certificate.addTag(firstTag);
         assertDoesNotThrow(() -> certificateDao.update(certificate));
-        Optional<Certificate> persisted = certificateDao.get(certificate.getId());
+        Optional<Certificate> persisted = certificateDao.get(thirdCertificate.getId());
         assertTrue(persisted.isPresent());
         assertEquals(persisted.get(), certificate);
 
@@ -84,7 +104,10 @@ class CertificateDaoImplTest {
 
     @Test
     void delete() {
-        certificateDao.create(certificate);
+        Certificate certificate = new Certificate(
+                "certificate", "description", 1, 3, Instant.now(), Instant.now(), new HashSet<>()
+        );
+        assertDoesNotThrow(() -> certificateDao.create(certificate));
         Optional<Certificate> persisted = certificateDao.get(certificate.getId());
         assertTrue(persisted.isPresent());
         assertDoesNotThrow(() -> certificateDao.delete(certificate.getId()));
@@ -95,18 +118,39 @@ class CertificateDaoImplTest {
 
     @Test
     void getAll() {
-        certificateDao.create(certificate);
-        Certificate certificate1 = new Certificate(
-                "name", "description", 5, 5, Instant.now(), Instant.now(), new HashSet<>()
-        );
-        certificateDao.create(certificate1);
-        Certificate certificate2 = new Certificate(
-                "name", "description", 5, 5, Instant.now(), Instant.now(), new HashSet<>()
-        );
-        certificateDao.create(certificate2);
         assertEquals(3, certificateDao.getAll(1, 3).size());
         assertEquals(2, certificateDao.getAll(1, 2).size());
         assertThrows(InvalidDataAccessApiUsageException.class, () -> certificateDao.getAll(-1, 10));
         assertThrows(InvalidDataAccessApiUsageException.class, () -> certificateDao.getAll(1, -10));
+
+        int count = (int) certificateDao.getCount();
+        assertEquals(3, certificateDao.getAll(1, count,
+                CertificateFilter.newBuilder().withPartInName("certificate").build()).size());
+        assertEquals(1, certificateDao.getAll(1, count,
+                CertificateFilter.newBuilder().withPartInName("first").build()).size());
+        assertEquals(0, certificateDao.getAll(1, count,
+                CertificateFilter.newBuilder().withPartInName("certificatee").build()).size());
+
+        assertEquals(3, certificateDao.getAll(1, count,
+                CertificateFilter.newBuilder().withPartInDescription("description").build()).size());
+        assertEquals(1, certificateDao.getAll(1, count,
+                CertificateFilter.newBuilder().withPartInDescription("first").build()).size());
+        assertEquals(0, certificateDao.getAll(1, count,
+                CertificateFilter.newBuilder().withPartInDescription("descriptionn").build()).size());
+
+        List<Certificate> all = certificateDao.getAll(1, count,
+                CertificateFilter.newBuilder().withTags(firstTag.getId()).build());
+        assertEquals(2, all.size());
+        assertTrue(all.containsAll(Arrays.asList(firstCertificate, secondCertificate)));
+
+        all = certificateDao.getAll(1, count,
+                CertificateFilter.newBuilder().withTags(secondTag.getId()).build());
+        assertEquals(2, all.size());
+        assertTrue(all.containsAll(Arrays.asList(firstCertificate, thirdCertificate)));
+
+        all = certificateDao.getAll(1, count,
+                CertificateFilter.newBuilder().withTags(firstTag.getId(), secondTag.getId()).build());
+        assertEquals(1, all.size());
+        assertTrue(all.contains(firstCertificate));
     }
 }

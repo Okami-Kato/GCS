@@ -1,5 +1,5 @@
 plugins {
-    id 'java'
+    id 'java-library'
 }
 
 group 'com.epam.esm'
@@ -9,8 +9,11 @@ repositories {
     mavenCentral()
 }
 
+
+
 dependencies {
-    implementation project(':entity')
+    api project(':entity')
+    api project(':util')
 
     implementation 'org.springframework.boot:spring-boot-starter:2.5.4'
     implementation 'org.springframework:spring-orm:5.3.9'

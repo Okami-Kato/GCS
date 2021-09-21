@@ -8,7 +8,7 @@ public interface Dao<T, K> {
 
     List<T> getAll(int pageNumber, int pageSize);
 
-    int getCount();
+    long getCount();
 
     void create(T t);
 

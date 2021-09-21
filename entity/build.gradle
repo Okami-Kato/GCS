@@ -9,8 +9,22 @@ repositories {
     mavenCentral()
 }
 
+tasks.withType(JavaCompile) {
+    options.annotationProcessorGeneratedSourcesDirectory = file("build/generated/java")
+}
+
+
+sourceSets {
+    generated {
+        java {
+            srcDirs = ['build/generated/java']
+        }
+    }
+}
+
 dependencies {
     implementation 'org.hibernate:hibernate-core:5.5.7.Final'
+    annotationProcessor('org.hibernate:hibernate-jpamodelgen:5.5.7.Final')
 }
 
 test {

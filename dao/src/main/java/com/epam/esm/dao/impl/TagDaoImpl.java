@@ -47,8 +47,8 @@ public class TagDaoImpl implements TagDao {
     }
 
     @Override
-    public int getCount() {
-        return manager.createQuery("SELECT COUNT(t) FROM Tag t", Integer.class).getSingleResult();
+    public long getCount() {
+        return manager.createQuery("SELECT COUNT(t) FROM Tag t", Long.class).getSingleResult();
     }
 
     @Override
