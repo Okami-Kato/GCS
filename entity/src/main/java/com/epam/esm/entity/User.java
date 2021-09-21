@@ -7,10 +7,15 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.NamedAttributeNode;
+import javax.persistence.NamedEntityGraph;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import java.util.Set;
 
 @Entity
 @Table(name = "user")
+@NamedEntityGraph(name = "graph.user.orders", attributeNodes = @NamedAttributeNode("orders"))
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -23,6 +28,9 @@ public class User {
 
     @Column(name = "last_name", nullable = false, length = 25)
     private String lastName;
+
+    @OneToMany(mappedBy = "user")
+    private Set<UserOrder> orders;
 
     protected User() {
     }
