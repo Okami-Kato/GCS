@@ -43,12 +43,12 @@ public class CertificateFilter {
             return this;
         }
 
-        public CertificateFilterBuilder withTags(Integer[] tagIds) {
+        public CertificateFilterBuilder withTags(Integer... tagIds) {
             CertificateFilter.this.tagIds = tagIds;
             return this;
         }
 
-        public CertificateFilterBuilder sortBy(Sort sort) {
+        public CertificateFilterBuilder withSort(Sort sort) {
             CertificateFilter.this.sort = sort;
             return this;
         }
