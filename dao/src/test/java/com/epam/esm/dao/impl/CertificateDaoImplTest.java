@@ -70,7 +70,7 @@ class CertificateDaoImplTest {
     }
 
     @AfterEach
-    void resetIds() {
+    void deleteAll() {
         certificateDao.delete(firstCertificate.getId());
         certificateDao.delete(secondCertificate.getId());
         certificateDao.delete(thirdCertificate.getId());
@@ -103,7 +103,7 @@ class CertificateDaoImplTest {
     }
 
     @Test
-    void delete() {
+    void createAndDelete() {
         Certificate certificate = new Certificate(
                 "certificate", "description", 1, 3, Instant.now(), Instant.now(), new HashSet<>()
         );
@@ -152,5 +152,16 @@ class CertificateDaoImplTest {
                 CertificateFilter.newBuilder().withTags(firstTag.getId(), secondTag.getId()).build());
         assertEquals(1, all.size());
         assertTrue(all.contains(firstCertificate));
+
+        assertThrows(InvalidDataAccessApiUsageException.class, () -> certificateDao.getAll(1, count,
+                CertificateFilter.newBuilder()
+                        .withSort(Sort.by(Sort.Order.desc(null)))
+                        .build())
+        );
+        assertThrows(InvalidDataAccessApiUsageException.class, () -> certificateDao.getAll(1, count,
+                CertificateFilter.newBuilder()
+                        .withSort(Sort.by(Sort.Order.desc("")))
+                        .build())
+        );
     }
 }
