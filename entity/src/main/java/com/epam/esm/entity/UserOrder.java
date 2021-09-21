@@ -25,15 +25,15 @@ public class UserOrder {
     @Column(name = "id", nullable = false)
     private Integer id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "certificate_id")
+    @ManyToOne
+    @JoinColumn(name = "certificate_id", nullable = false)
     private Certificate certificate;
 
-    @Column(name = "cost")
+    @Column(name = "cost", nullable = false)
     private Integer cost;
 
     @Column(name = "timestamp", nullable = false)
