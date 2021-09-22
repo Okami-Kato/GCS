@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.persistence.EntityGraph;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 import java.util.HashMap;
 import java.util.List;
@@ -17,6 +18,40 @@ import java.util.Optional;
 @Repository
 @Transactional
 public class TagDaoImpl implements TagDao {
+    private final String GET_THE_MOST_USED_TAG_OF_USER_WITH_THE_HIGHEST_COST =
+            "WITH user_cost_sum AS (" +
+                    "    SELECT user_id, SUM(cost) cost_sum" +
+                    "    FROM user_order" +
+                    "    GROUP BY user_id" +
+                    ")," +
+                    "     tag_certificate_count AS (" +
+                    "         SELECT tag_id, COUNT(certificate_id) certificate_count" +
+                    "         FROM certificate_tag" +
+                    "         WHERE certificate_id IN (" +
+                    "             SELECT certificate_id" +
+                    "             FROM user_order" +
+                    "             WHERE user_id = (" +
+                    "                 SELECT user_id" +
+                    "                 FROM user_cost_sum" +
+                    "                 WHERE cost_sum = (" +
+                    "                     SELECT MAX(cost_sum)" +
+                    "                     FROM user_cost_sum" +
+                    "                 )" +
+                    "             )" +
+                    "         )" +
+                    "         GROUP BY tag_id" +
+                    "     )" +
+                    "SELECT t.id, t.name " +
+                    "FROM tag t" +
+                    "         INNER JOIN (" +
+                    "    SELECT tag_id" +
+                    "    FROM tag_certificate_count" +
+                    "    WHERE certificate_count = (" +
+                    "        SELECT MAX(certificate_count)" +
+                    "        FROM tag_certificate_count" +
+                    "    )" +
+                    ") t_id on t.id = t_id.tag_id";
+
     @PersistenceContext
     private EntityManager manager;
 
@@ -69,6 +104,12 @@ public class TagDaoImpl implements TagDao {
         } else {
             throw new IllegalArgumentException(String.format("Entity wasn't found (%s)", "id=" + id));
         }
+    }
+
+    @Override
+    public Tag getTheMostUsedTagOfUserWithTheMaximumCost() {
+        Query nativeQuery = manager.createNativeQuery(GET_THE_MOST_USED_TAG_OF_USER_WITH_THE_HIGHEST_COST, Tag.class);
+        return (Tag) nativeQuery.getSingleResult();
     }
 
     @Override

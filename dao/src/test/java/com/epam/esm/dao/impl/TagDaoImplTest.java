@@ -2,17 +2,20 @@ package com.epam.esm.dao.impl;
 
 import com.epam.esm.dao.CertificateDao;
 import com.epam.esm.dao.TagDao;
+import com.epam.esm.dao.UserDao;
+import com.epam.esm.dao.UserOrderDao;
 import com.epam.esm.dao.config.DaoConfig;
 import com.epam.esm.entity.Certificate;
 import com.epam.esm.entity.Tag;
-import com.epam.esm.util.CertificateFilter;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
+import com.epam.esm.entity.User;
+import com.epam.esm.entity.UserOrder;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.jdbc.Sql;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.PostConstruct;
 import java.time.Instant;
@@ -20,7 +23,11 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest(classes = DaoConfig.class)
 @ActiveProfiles("test")
@@ -40,9 +47,13 @@ class TagDaoImplTest {
     private CertificateDao certificateDao;
     @Autowired
     private TagDao tagDao;
+    @Autowired
+    private UserOrderDao userOrderDao;
+    @Autowired
+    private UserDao userDao;
 
     @PostConstruct
-    void init(){
+    void init() {
         tagDao.create(firstTag);
         tagDao.create(secondTag);
         tagDao.create(thirdTag);
@@ -81,6 +92,40 @@ class TagDaoImplTest {
         assertFalse(tagDao.get(tag.getId()).isPresent());
         assertThrows(InvalidDataAccessApiUsageException.class, () -> tagDao.delete(tag.getId()));
         assertThrows(InvalidDataAccessApiUsageException.class, () -> tagDao.delete(null));
+    }
+
+    @Test
+    @Transactional
+    @Sql("classpath:sql/user-test-data.sql")
+    void getTheMostUsedTagOfUserWithTheMaximumCost() {
+        Certificate thirdCertificate = new Certificate(
+                "third certificate", "third description", 1, 3, Instant.now(), Instant.now(), new HashSet<>()
+        );
+        Certificate forthCertificate = new Certificate(
+                "forth certificate", "forth description", 1, 3, Instant.now(), Instant.now(), new HashSet<>()
+        );
+        thirdCertificate.addTag(firstTag);
+        thirdCertificate.addTag(thirdTag);
+        forthCertificate.addTag(thirdTag);
+
+        certificateDao.create(thirdCertificate);
+        certificateDao.create(forthCertificate);
+
+        Optional<User> optionalUser = userDao.get(1);
+        assertTrue(optionalUser.isPresent());
+        User user = optionalUser.get();
+        userOrderDao.create(new UserOrder(user, firstCertificate, 10 ,Instant.now()));
+        userOrderDao.create(new UserOrder(user, secondCertificate, 10 ,Instant.now()));
+        userOrderDao.create(new UserOrder(user, thirdCertificate, 10 ,Instant.now()));
+
+        optionalUser = userDao.get(2);
+        assertTrue(optionalUser.isPresent());
+        user = optionalUser.get();
+        userOrderDao.create(new UserOrder(user, secondCertificate, 5 ,Instant.now()));
+        userOrderDao.create(new UserOrder(user, thirdCertificate, 5 ,Instant.now()));
+        userOrderDao.create(new UserOrder(user, forthCertificate, 5 ,Instant.now()));
+
+        assertEquals(firstTag, tagDao.getTheMostUsedTagOfUserWithTheMaximumCost());
     }
 
     @Test
