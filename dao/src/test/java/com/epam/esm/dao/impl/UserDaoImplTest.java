@@ -9,6 +9,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
+import org.springframework.transaction.annotation.Transactional;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -25,7 +26,8 @@ class UserDaoImplTest {
     UserDao userDao;
 
     @Test
-    @Sql({"classpath:sql/test-user-data.sql"})
+    @Sql({"classpath:sql/user-test-data.sql"})
+    @Transactional
     void getAll() {
         int count = (int) userDao.getCount();
         assertDoesNotThrow(() -> userDao.getAll(1, count));
