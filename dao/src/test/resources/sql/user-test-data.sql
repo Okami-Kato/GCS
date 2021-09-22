@@ -8,3 +8,4 @@ INSERT INTO user
 VALUES (4, 'Rahima', 'Suarez');
 INSERT INTO user
 VALUES (5, 'Arvin', 'Wolfe');
+
