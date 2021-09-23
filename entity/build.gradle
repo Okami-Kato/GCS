@@ -9,17 +9,19 @@ repositories {
     mavenCentral()
 }
 
-tasks.withType(JavaCompile) {
-    options.annotationProcessorGeneratedSourcesDirectory = file("build/generated/java")
+ext {
+    generatedMainJava = "${buildDir}/generated/main/java"
 }
 
-
 sourceSets {
-    generated {
-        java {
-            srcDirs = ['build/generated/java']
-        }
-    }
+    // Add generated sources directory.
+    main.java.srcDir generatedMainJava
+}
+
+compileJava {
+    options.compilerArgs += ['-AaddGenerationDate=true']
+    // Specific to Hibernate JPA meta model generation processor.
+    options.annotationProcessorGeneratedSourcesDirectory = file(generatedMainJava)
 }
 
 dependencies {
