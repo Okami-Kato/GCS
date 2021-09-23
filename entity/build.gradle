@@ -1,14 +1,3 @@
-plugins {
-    id 'java'
-}
-
-group 'com.epam.esm'
-version '0.0.1'
-
-repositories {
-    mavenCentral()
-}
-
 ext {
     generatedMainJava = "${buildDir}/generated/main/java"
 }
@@ -27,8 +16,4 @@ compileJava {
 dependencies {
     implementation 'org.hibernate:hibernate-core:5.5.7.Final'
     annotationProcessor('org.hibernate:hibernate-jpamodelgen:5.5.7.Final')
-}
-
-test {
-    useJUnitPlatform()
 }
