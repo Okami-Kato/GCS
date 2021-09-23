@@ -1,5 +1,6 @@
 rootProject.name = 'GFS'
 include 'entity'
-include 'dao'
+include 'dao-starter'
 include 'util'
+include 'service'
 
