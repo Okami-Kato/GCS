@@ -4,7 +4,7 @@ import com.epam.esm.dao.CertificateDao;
 import com.epam.esm.dao.TagDao;
 import com.epam.esm.dao.UserDao;
 import com.epam.esm.dao.UserOrderDao;
-import com.epam.esm.dao.config.DaoConfig;
+import com.epam.esm.dao.DaoConfig;
 import com.epam.esm.entity.Certificate;
 import com.epam.esm.entity.Tag;
 import com.epam.esm.entity.User;

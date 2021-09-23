@@ -11,3 +11,4 @@ gradle
 build
 gradlew.bat
 gradlew
+/dao-starter/src/test/resources/application-test.properties

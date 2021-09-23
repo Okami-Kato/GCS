@@ -1,6 +1,8 @@
+import org.springframework.boot.gradle.plugin.SpringBootPlugin
+
 plugins {
-    id 'org.springframework.boot' version '2.5.2' apply false
-    id "io.spring.dependency-management" version "1.0.11.RELEASE"
+    id 'java-library'
+    id 'org.springframework.boot' version '2.1.6.RELEASE' apply false
 }
 
 subprojects {
@@ -15,9 +17,19 @@ subprojects {
         mavenCentral()
     }
 
+    dependencies {
+        testImplementation 'org.springframework.boot:spring-boot-starter-test'
+        testImplementation 'org.junit.jupiter:junit-jupiter-api:5.3.1'
+        testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.3.1'
+    }
+
+    test {
+        useJUnitPlatform()
+    }
+
     dependencyManagement {
         imports {
-            mavenBom org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES
+            mavenBom SpringBootPlugin.BOM_COORDINATES
         }
     }
 }

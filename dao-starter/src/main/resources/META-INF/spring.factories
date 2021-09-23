@@ -1,2 +1,2 @@
-org.springframework.boot.autoconfigure.EnableAutoConfiguration=com.epam.esm.dao.config.DaoConfig
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=com.epam.esm.dao.DaoConfig
 
