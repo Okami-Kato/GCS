@@ -4,7 +4,6 @@ import com.epam.esm.dao.CertificateDao;
 import com.epam.esm.dao.TagDao;
 import com.epam.esm.dao.UserDao;
 import com.epam.esm.dao.UserOrderDao;
-import com.epam.esm.dao.DaoConfig;
 import com.epam.esm.entity.Certificate;
 import com.epam.esm.entity.Tag;
 import com.epam.esm.entity.User;
@@ -29,7 +28,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@SpringBootTest(classes = DaoConfig.class)
+@SpringBootTest
 @ActiveProfiles("test")
 class TagDaoImplTest {
     private final Certificate firstCertificate = new Certificate(
@@ -114,16 +113,16 @@ class TagDaoImplTest {
         Optional<User> optionalUser = userDao.get(1);
         assertTrue(optionalUser.isPresent());
         User user = optionalUser.get();
-        userOrderDao.create(new UserOrder(user, firstCertificate, 10 ,Instant.now()));
-        userOrderDao.create(new UserOrder(user, secondCertificate, 10 ,Instant.now()));
-        userOrderDao.create(new UserOrder(user, thirdCertificate, 10 ,Instant.now()));
+        userOrderDao.create(new UserOrder(user, firstCertificate, 10, Instant.now()));
+        userOrderDao.create(new UserOrder(user, secondCertificate, 10, Instant.now()));
+        userOrderDao.create(new UserOrder(user, thirdCertificate, 10, Instant.now()));
 
         optionalUser = userDao.get(2);
         assertTrue(optionalUser.isPresent());
         user = optionalUser.get();
-        userOrderDao.create(new UserOrder(user, secondCertificate, 5 ,Instant.now()));
-        userOrderDao.create(new UserOrder(user, thirdCertificate, 5 ,Instant.now()));
-        userOrderDao.create(new UserOrder(user, forthCertificate, 5 ,Instant.now()));
+        userOrderDao.create(new UserOrder(user, secondCertificate, 5, Instant.now()));
+        userOrderDao.create(new UserOrder(user, thirdCertificate, 5, Instant.now()));
+        userOrderDao.create(new UserOrder(user, forthCertificate, 5, Instant.now()));
 
         assertEquals(firstTag, tagDao.getTheMostUsedTagOfUserWithTheMaximumCost());
     }
