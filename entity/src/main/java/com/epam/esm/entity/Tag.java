@@ -17,7 +17,6 @@ import java.util.Set;
 
 @Entity
 @Table(name = "tag")
-@NamedEntityGraph(name = "graph.tag.certificates", attributeNodes = @NamedAttributeNode("certificates"))
 public class Tag {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)

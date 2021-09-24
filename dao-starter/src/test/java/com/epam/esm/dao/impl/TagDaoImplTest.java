@@ -8,6 +8,7 @@ import com.epam.esm.entity.Certificate;
 import com.epam.esm.entity.Tag;
 import com.epam.esm.entity.User;
 import com.epam.esm.entity.UserOrder;
+import com.epam.esm.util.CertificateFilter;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -71,7 +72,14 @@ class TagDaoImplTest {
         assertThrows(InvalidDataAccessApiUsageException.class, () -> tagDao.create(firstTag));
         Optional<Tag> persisted = tagDao.get(firstTag.getId());
         assertTrue(persisted.isPresent());
-        assertTrue(persisted.get().getCertificates().containsAll(Arrays.asList(firstCertificate, secondCertificate)));
+        Integer tagId = persisted.get().getId();
+        int certificateDaoCount = (int) certificateDao.getCount();
+        assertEquals(Arrays.asList(firstCertificate, secondCertificate),
+                certificateDao.getAll(1, certificateDaoCount,
+                        CertificateFilter.newBuilder()
+                                .withTags(tagId)
+                                .build())
+        );
         assertFalse(tagDao.get(firstTag.getId() + 1000).isPresent());
         assertThrows(InvalidDataAccessApiUsageException.class, () -> tagDao.get(null));
     }

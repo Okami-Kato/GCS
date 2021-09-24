@@ -57,11 +57,7 @@ public class TagDaoImpl implements TagDao {
 
     @Override
     public Optional<Tag> get(Integer id) {
-        EntityGraph<?> graph = manager.getEntityGraph("graph.tag.certificates");
-        Map<String, Object> hints = new HashMap<>();
-        hints.put("javax.persistence.fetchgraph", graph);
-
-        return Optional.ofNullable(manager.find(Tag.class, id, hints));
+        return Optional.ofNullable(manager.find(Tag.class, id));
     }
 
     @Override
@@ -72,12 +68,9 @@ public class TagDaoImpl implements TagDao {
                 .setMaxResults(pageSize)
                 .getResultList();
 
-        EntityGraph<?> graph = manager.getEntityGraph("graph.tag.certificates");
-
         TypedQuery<Tag> tagQuery = manager.createQuery("SELECT t FROM Tag t WHERE t.id in (:ids)", Tag.class);
         return tagQuery
                 .setParameter("ids", tagIds)
-                .setHint("javax.persistence.fetchgraph", graph)
                 .getResultList();
     }
 
@@ -121,12 +114,9 @@ public class TagDaoImpl implements TagDao {
                 .setMaxResults(pageSize)
                 .getResultList();
 
-        EntityGraph<?> graph = manager.getEntityGraph("graph.tag.certificates");
-
         TypedQuery<Tag> tagQuery = manager.createQuery("SELECT t FROM Tag t WHERE t.id in (:ids)", Tag.class);
         return tagQuery
                 .setParameter("ids", tagIds)
-                .setHint("javax.persistence.fetchgraph", graph)
                 .getResultList();
     }
 }
