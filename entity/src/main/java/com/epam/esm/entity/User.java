@@ -16,7 +16,6 @@ import java.util.Set;
 
 @Entity
 @Table(name = "user")
-@NamedEntityGraph(name = "graph.user.orders", attributeNodes = @NamedAttributeNode("orders"))
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)

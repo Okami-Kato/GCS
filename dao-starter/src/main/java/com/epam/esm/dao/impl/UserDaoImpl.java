@@ -23,11 +23,7 @@ public class UserDaoImpl implements UserDao {
 
     @Override
     public Optional<User> get(Integer id) {
-        EntityGraph<?> graph = manager.getEntityGraph("graph.user.orders");
-        Map<String, Object> hints = new HashMap<>();
-        hints.put("javax.persistence.fetchgraph", graph);
-
-        return Optional.ofNullable(manager.find(User.class, id, hints));
+        return Optional.ofNullable(manager.find(User.class, id));
     }
 
     @Override
@@ -38,12 +34,9 @@ public class UserDaoImpl implements UserDao {
                 .setMaxResults(pageSize)
                 .getResultList();
 
-        EntityGraph<?> graph = manager.getEntityGraph("graph.user.orders");
-
         TypedQuery<User> userQuery = manager.createQuery("SELECT u FROM User u WHERE u.id in (:ids)", User.class);
         return userQuery
                 .setParameter("ids", userIds)
-                .setHint("javax.persistence.fetchgraph", graph)
                 .getResultList();
     }
 
