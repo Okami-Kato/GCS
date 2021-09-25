@@ -1,6 +1,7 @@
 package com.epam.esm.dao.impl;
 
 import com.epam.esm.dao.UserOrderDao;
+import com.epam.esm.entity.Tag;
 import com.epam.esm.entity.UserOrder;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,6 +28,21 @@ public class UserOrderDaoImpl implements UserOrderDao {
         TypedQuery<UserOrder> idQuery = manager.createQuery("SELECT o FROM UserOrder o", UserOrder.class);
         return idQuery.setFirstResult((pageNumber - 1) * pageSize)
                 .setMaxResults(pageSize)
+                .getResultList();
+    }
+
+    @Override
+    public List<UserOrder> getAll(int pageNumber, int pageSize, int userId) {
+        TypedQuery<Integer> idQuery = manager.createQuery("SELECT uo.id FROM UserOrder uo WHERE uo.user.id=:userId ORDER BY uo.id", Integer.class);
+        List<Integer> userOrderIds = idQuery
+                .setParameter("userId", userId)
+                .setFirstResult((pageNumber - 1) * pageSize)
+                .setMaxResults(pageSize)
+                .getResultList();
+
+        TypedQuery<UserOrder> tagQuery = manager.createQuery("SELECT uo FROM UserOrder uo WHERE uo.id in (:ids)", UserOrder.class);
+        return tagQuery
+                .setParameter("ids", userOrderIds)
                 .getResultList();
     }
 
