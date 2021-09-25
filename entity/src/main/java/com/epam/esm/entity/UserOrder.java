@@ -54,8 +54,8 @@ public class UserOrder {
 
     @PrePersist
     private void toCreate(){
-        setTimestamp(Instant.now());
-        setCost(certificate.getPrice());
+        timestamp = Instant.now();
+        cost = certificate.getPrice();
     }
 
     public Integer getId() {
@@ -71,30 +71,22 @@ public class UserOrder {
     }
 
     public void setUser(User user) {
+        if (this.user != null){
+            return;
+        }
         this.user = user;
+        user.addOrder(this);
     }
 
     public Certificate getCertificate() {
         return certificate;
     }
 
-    public void setCertificate(Certificate certificate) {
-        this.certificate = certificate;
-    }
-
     public Integer getCost() {
         return cost;
     }
 
-    public void setCost(Integer cost) {
-        this.cost = cost;
-    }
-
     public Instant getTimestamp() {
         return timestamp;
-    }
-
-    public void setTimestamp(Instant timestamp) {
-        this.timestamp = timestamp;
     }
 }

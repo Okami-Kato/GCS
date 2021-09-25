@@ -35,7 +35,10 @@ public class Tag {
 
     public Tag(String name, Set<Certificate> certificates) {
         this.name = name;
-        this.certificates = certificates;
+        this.certificates = new HashSet<>();
+        for (Certificate certificate : certificates) {
+            addCertificate(certificate);
+        }
     }
 
     @Override
@@ -69,10 +72,6 @@ public class Tag {
 
     public String getName() {
         return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 
     public Set<Certificate> getCertificates() {

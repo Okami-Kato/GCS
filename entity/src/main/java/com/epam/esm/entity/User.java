@@ -11,6 +11,7 @@ import javax.persistence.NamedAttributeNode;
 import javax.persistence.NamedEntityGraph;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
@@ -28,6 +29,12 @@ public class User {
 
     @Column(name = "last_name", nullable = false, length = 25)
     private String lastName;
+
+    @Column(name = "login", nullable = false, length = 25)
+    private String login;
+
+    @Column(name = "password", nullable = false, length = 25)
+    private String password;
 
     @OneToMany(mappedBy = "user")
     private Set<UserOrder> orders;
@@ -48,17 +55,11 @@ public class User {
     protected User() {
     }
 
-    public User(String firstName, String lastName) {
+    public User(String firstName, String lastName, String login, String password) {
         this.firstName = firstName;
         this.lastName = lastName;
-    }
-
-    public String getLastName() {
-        return lastName;
-    }
-
-    public String getFirstName() {
-        return firstName;
+        this.login = login;
+        this.password = password;
     }
 
     public Integer getId() {
@@ -67,5 +68,49 @@ public class User {
 
     public void setId(Integer id) {
         this.id = id;
+    }
+
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
+
+    public String getLogin() {
+        return login;
+    }
+
+    public void setLogin(String login) {
+        this.login = login;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public Set<UserOrder> getOrders() {
+        return new HashSet<>(orders);
+    }
+
+    public void addOrder(UserOrder order){
+        if (orders.contains(order)){
+            return;
+        }
+        orders.add(order);
+        order.setUser(this);
     }
 }

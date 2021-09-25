@@ -73,12 +73,12 @@ public class Certificate {
 
     @PrePersist
     private void toCreate() {
-        setCreateDate(Instant.now());
+        this.createDate = Instant.now();
     }
 
     @PreUpdate
     private void toUpdate() {
-        setLastUpdateDate(Instant.now());
+        this.lastUpdateDate = Instant.now();
     }
 
     @Override
@@ -151,16 +151,8 @@ public class Certificate {
         return lastUpdateDate;
     }
 
-    public void setLastUpdateDate(Instant lastUpdateDate) {
-        this.lastUpdateDate = lastUpdateDate;
-    }
-
     public Instant getCreateDate() {
         return createDate;
-    }
-
-    public void setCreateDate(Instant createDate) {
-        this.createDate = createDate;
     }
 
     public Set<Tag> getTags() {
