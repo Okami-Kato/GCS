@@ -14,6 +14,8 @@ import javax.persistence.Lob;
 import javax.persistence.ManyToMany;
 import javax.persistence.NamedAttributeNode;
 import javax.persistence.NamedEntityGraph;
+import javax.persistence.PrePersist;
+import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 import java.time.Instant;
 import java.util.HashSet;
@@ -43,10 +45,10 @@ public class Certificate {
     @Column(name = "duration")
     private Integer duration;
 
-    @Column(name = "last_update_date", nullable = false)
+    @Column(name = "last_update_date", nullable = false, insertable = false)
     private Instant lastUpdateDate;
 
-    @Column(name = "create_date", nullable = false)
+    @Column(name = "create_date", nullable = false, updatable = false)
     private Instant createDate;
 
     @ManyToMany(cascade = CascadeType.MERGE)
@@ -67,6 +69,16 @@ public class Certificate {
         this.lastUpdateDate = lastUpdateDate;
         this.createDate = createDate;
         this.tags = tags;
+    }
+
+    @PrePersist
+    private void toCreate() {
+        setCreateDate(Instant.now());
+    }
+
+    @PreUpdate
+    private void toUpdate() {
+        setLastUpdateDate(Instant.now());
     }
 
     @Override

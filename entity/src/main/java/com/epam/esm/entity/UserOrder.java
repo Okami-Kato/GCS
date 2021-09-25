@@ -12,7 +12,9 @@ import javax.persistence.Id;
 import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.PrePersist;
 import javax.persistence.Table;
+import javax.persistence.criteria.CriteriaBuilder;
 import java.time.Instant;
 
 @Entity
@@ -34,10 +36,10 @@ public class UserOrder {
     @JoinColumn(name = "certificate_id", nullable = false)
     private Certificate certificate;
 
-    @Column(name = "cost", nullable = false)
+    @Column(name = "cost", nullable = false, updatable = false)
     private Integer cost;
 
-    @Column(name = "timestamp", nullable = false)
+    @Column(name = "timestamp", nullable = false, updatable = false)
     private Instant timestamp;
 
     protected UserOrder() {
@@ -50,20 +52,10 @@ public class UserOrder {
         this.timestamp = timestamp;
     }
 
-    public Instant getTimestamp() {
-        return timestamp;
-    }
-
-    public Integer getCost() {
-        return cost;
-    }
-
-    public User getUser() {
-        return user;
-    }
-
-    public Certificate getCertificate() {
-        return certificate;
+    @PrePersist
+    private void toCreate(){
+        setTimestamp(Instant.now());
+        setCost(certificate.getPrice());
     }
 
     public Integer getId() {
@@ -72,5 +64,37 @@ public class UserOrder {
 
     public void setId(Integer id) {
         this.id = id;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+    public Certificate getCertificate() {
+        return certificate;
+    }
+
+    public void setCertificate(Certificate certificate) {
+        this.certificate = certificate;
+    }
+
+    public Integer getCost() {
+        return cost;
+    }
+
+    public void setCost(Integer cost) {
+        this.cost = cost;
+    }
+
+    public Instant getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(Instant timestamp) {
+        this.timestamp = timestamp;
     }
 }
