@@ -32,25 +32,22 @@ public class CertificateDaoImpl implements CertificateDao {
     private EntityManager manager;
 
     @Override
-    public void addTag(Integer certificateId, Integer tagId) {
-        Certificate certificate = manager.getReference(Certificate.class, certificateId);
-        Tag tag = manager.find(Tag.class, tagId);
-        if (tag != null) {
-            certificate.addTag(tag);
-        } else {
-            //todo throw exception
-        }
+    public Optional<Certificate> get(Integer id) {
+        EntityGraph<?> graph = manager.getEntityGraph("graph.certificate.tags");
+        Map<String, Object> hints = new HashMap<>();
+        hints.put("javax.persistence.fetchgraph", graph);
+
+        return Optional.ofNullable(manager.find(Certificate.class, id, hints));
     }
 
     @Override
-    public void removeTag(Integer certificateId, Integer tagId) {
-        Certificate certificate = manager.getReference(Certificate.class, certificateId);
-        Tag tag = manager.find(Tag.class, tagId);
-        if (tag != null) {
-            certificate.removeTag(tag);
-        } else {
-            //todo throw exception
-        }
+    public List<Certificate> getAll(int pageNumber, int pageSize) {
+        TypedQuery<Integer> idQuery = manager.createQuery("SELECT c.id FROM Certificate c", Integer.class);
+        List<Integer> certificateIds = idQuery
+                .setFirstResult((pageNumber - 1) * pageSize)
+                .setMaxResults(pageSize)
+                .getResultList();
+        return getAllFromIds(certificateIds);
     }
 
     @Override
@@ -102,32 +99,6 @@ public class CertificateDaoImpl implements CertificateDao {
         return query.getResultList();
     }
 
-    private List<Integer> getCertificateIdsFromTagIds(List<Integer> tagIds) {
-        return manager.createQuery("SELECT c.id FROM Certificate c LEFT JOIN c.tags t WHERE t.id IN (:ids) GROUP BY c HAVING COUNT(t)=:idsCount", Integer.class)
-                .setParameter("ids", tagIds)
-                .setParameter("idsCount", (long) tagIds.size())
-                .getResultList();
-    }
-
-    @Override
-    public Optional<Certificate> get(Integer id) {
-        EntityGraph<?> graph = manager.getEntityGraph("graph.certificate.tags");
-        Map<String, Object> hints = new HashMap<>();
-        hints.put("javax.persistence.fetchgraph", graph);
-
-        return Optional.ofNullable(manager.find(Certificate.class, id, hints));
-    }
-
-    @Override
-    public List<Certificate> getAll(int pageNumber, int pageSize) {
-        TypedQuery<Integer> idQuery = manager.createQuery("SELECT c.id FROM Certificate c", Integer.class);
-        List<Integer> certificateIds = idQuery
-                .setFirstResult((pageNumber - 1) * pageSize)
-                .setMaxResults(pageSize)
-                .getResultList();
-        return getAllFromIds(certificateIds);
-    }
-
     @Override
     public long getCount() {
         return manager.createQuery("SELECT COUNT(c) FROM Certificate c", Long.class).getSingleResult();
@@ -151,6 +122,13 @@ public class CertificateDaoImpl implements CertificateDao {
         } else {
             throw new IllegalArgumentException(String.format("Entity wasn't found (%s)", "id=" + id));
         }
+    }
+
+    private List<Integer> getCertificateIdsFromTagIds(List<Integer> tagIds) {
+        return manager.createQuery("SELECT c.id FROM Certificate c LEFT JOIN c.tags t WHERE t.id IN (:ids) GROUP BY c HAVING COUNT(t)=:idsCount", Integer.class)
+                .setParameter("ids", tagIds)
+                .setParameter("idsCount", (long) tagIds.size())
+                .getResultList();
     }
 
     private List<Certificate> getAllFromIds(List<Integer> ids) {
