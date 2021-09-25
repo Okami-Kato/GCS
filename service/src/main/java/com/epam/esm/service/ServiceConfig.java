@@ -8,6 +8,5 @@ import org.springframework.context.ConfigurableApplicationContext;
 public class ServiceConfig {
     public static void main(String[] args) {
         ConfigurableApplicationContext run = SpringApplication.run(ServiceConfig.class, args);
-        System.out.println("fds");
     }
 }
