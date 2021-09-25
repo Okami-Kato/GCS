@@ -78,8 +78,10 @@ class TagDaoImplTest {
                                 .withTags(tagId)
                                 .build())
         );
+        assertEquals(persisted, tagDao.get(firstTag.getName()));
         assertFalse(tagDao.get(firstTag.getId() + 1000).isPresent());
-        assertThrows(InvalidDataAccessApiUsageException.class, () -> tagDao.get(null));
+        assertThrows(InvalidDataAccessApiUsageException.class, () -> tagDao.get((Integer) null));
+        assertThrows(InvalidDataAccessApiUsageException.class, () -> tagDao.get((String) null));
     }
 
     @Test

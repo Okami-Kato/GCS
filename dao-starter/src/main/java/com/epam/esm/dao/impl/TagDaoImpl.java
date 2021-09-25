@@ -5,14 +5,12 @@ import com.epam.esm.entity.Tag;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.EntityGraph;
 import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 @Repository
@@ -56,14 +54,49 @@ public class TagDaoImpl implements TagDao {
     private EntityManager manager;
 
     @Override
+    public Tag getTheMostUsedTagOfUserWithTheMaximumCost() {
+        Query nativeQuery = manager.createNativeQuery(GET_THE_MOST_USED_TAG_OF_USER_WITH_THE_HIGHEST_COST, Tag.class);
+        return (Tag) nativeQuery.getSingleResult();
+    }
+
+    @Override
     public Optional<Tag> get(Integer id) {
         return Optional.ofNullable(manager.find(Tag.class, id));
+    }
+
+    @Override
+    public Optional<Tag> get(String name) {
+        if (name == null){
+            throw new IllegalArgumentException("Tag name can't be null");
+        }
+        TypedQuery<Tag> query = manager.createQuery("SELECT t FROM Tag t WHERE t.name=:name", Tag.class);
+        query.setParameter("name", name);
+        try {
+            return Optional.of(query.getSingleResult());
+        } catch (NoResultException e) {
+            return Optional.empty();
+        }
     }
 
     @Override
     public List<Tag> getAll(int pageNumber, int pageSize) {
         TypedQuery<Integer> idQuery = manager.createQuery("SELECT t.id FROM Tag t ORDER BY t.id", Integer.class);
         List<Integer> tagIds = idQuery
+                .setFirstResult((pageNumber - 1) * pageSize)
+                .setMaxResults(pageSize)
+                .getResultList();
+
+        TypedQuery<Tag> tagQuery = manager.createQuery("SELECT t FROM Tag t WHERE t.id in (:ids)", Tag.class);
+        return tagQuery
+                .setParameter("ids", tagIds)
+                .getResultList();
+    }
+
+    @Override
+    public List<Tag> getAll(int pageNumber, int pageSize, Integer certificateId) {
+        TypedQuery<Integer> idQuery = manager.createQuery("SELECT t.id FROM Tag t JOIN t.certificates c WHERE c.id=:id ORDER BY t.id", Integer.class);
+        List<Integer> tagIds = idQuery
+                .setParameter("id", certificateId)
                 .setFirstResult((pageNumber - 1) * pageSize)
                 .setMaxResults(pageSize)
                 .getResultList();
@@ -97,26 +130,5 @@ public class TagDaoImpl implements TagDao {
         } else {
             throw new IllegalArgumentException(String.format("Entity wasn't found (%s)", "id=" + id));
         }
-    }
-
-    @Override
-    public Tag getTheMostUsedTagOfUserWithTheMaximumCost() {
-        Query nativeQuery = manager.createNativeQuery(GET_THE_MOST_USED_TAG_OF_USER_WITH_THE_HIGHEST_COST, Tag.class);
-        return (Tag) nativeQuery.getSingleResult();
-    }
-
-    @Override
-    public List<Tag> getAll(int pageNumber, int pageSize, Integer certificateId) {
-        TypedQuery<Integer> idQuery = manager.createQuery("SELECT t.id FROM Tag t JOIN t.certificates c WHERE c.id=:id ORDER BY t.id", Integer.class);
-        List<Integer> tagIds = idQuery
-                .setParameter("id", certificateId)
-                .setFirstResult((pageNumber - 1) * pageSize)
-                .setMaxResults(pageSize)
-                .getResultList();
-
-        TypedQuery<Tag> tagQuery = manager.createQuery("SELECT t FROM Tag t WHERE t.id in (:ids)", Tag.class);
-        return tagQuery
-                .setParameter("ids", tagIds)
-                .getResultList();
     }
 }
