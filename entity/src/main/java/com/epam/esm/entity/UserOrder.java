@@ -45,17 +45,15 @@ public class UserOrder {
     protected UserOrder() {
     }
 
-    public UserOrder(User user, Certificate certificate, Integer cost, Instant timestamp) {
-        this.user = user;
+    public UserOrder(User user, Certificate certificate, Integer cost) {
+        setUser(user);
         this.certificate = certificate;
         this.cost = cost;
-        this.timestamp = timestamp;
     }
 
     @PrePersist
     private void toCreate(){
         timestamp = Instant.now();
-        cost = certificate.getPrice();
     }
 
     public Integer getId() {

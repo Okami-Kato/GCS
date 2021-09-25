@@ -33,11 +33,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @ActiveProfiles("test")
 class TagDaoImplTest {
     private final Certificate firstCertificate = new Certificate(
-            "first certificate", "first description", 1, 3, Instant.now(), Instant.now(), new HashSet<>()
-    );
+            "first certificate", "first description", 1, 3);
     private final Certificate secondCertificate = new Certificate(
-            "second certificate", "second description", 2, 5, Instant.now(), Instant.now(), new HashSet<>()
-    );
+            "second certificate", "second description", 2, 5);
 
     private final Tag firstTag = new Tag("first tag", new HashSet<>());
     private final Tag secondTag = new Tag("second tag", new HashSet<>());
@@ -106,11 +104,9 @@ class TagDaoImplTest {
     @Sql("classpath:sql/user-test-data.sql")
     void getTheMostUsedTagOfUserWithTheMaximumCost() {
         Certificate thirdCertificate = new Certificate(
-                "third certificate", "third description", 1, 3, Instant.now(), Instant.now(), new HashSet<>()
-        );
+                "third certificate", "third description", 1, 3);
         Certificate forthCertificate = new Certificate(
-                "forth certificate", "forth description", 1, 3, Instant.now(), Instant.now(), new HashSet<>()
-        );
+                "forth certificate", "forth description", 1, 3);
         thirdCertificate.addTag(firstTag);
         thirdCertificate.addTag(thirdTag);
         forthCertificate.addTag(thirdTag);
@@ -121,16 +117,16 @@ class TagDaoImplTest {
         Optional<User> optionalUser = userDao.get(1);
         assertTrue(optionalUser.isPresent());
         User user = optionalUser.get();
-        userOrderDao.create(new UserOrder(user, firstCertificate, 10, Instant.now()));
-        userOrderDao.create(new UserOrder(user, secondCertificate, 10, Instant.now()));
-        userOrderDao.create(new UserOrder(user, thirdCertificate, 10, Instant.now()));
+        userOrderDao.create(new UserOrder(user, firstCertificate, 10));
+        userOrderDao.create(new UserOrder(user, secondCertificate, 10));
+        userOrderDao.create(new UserOrder(user, thirdCertificate, 10));
 
         optionalUser = userDao.get(2);
         assertTrue(optionalUser.isPresent());
         user = optionalUser.get();
-        userOrderDao.create(new UserOrder(user, secondCertificate, 5, Instant.now()));
-        userOrderDao.create(new UserOrder(user, thirdCertificate, 5, Instant.now()));
-        userOrderDao.create(new UserOrder(user, forthCertificate, 5, Instant.now()));
+        userOrderDao.create(new UserOrder(user, secondCertificate, 5));
+        userOrderDao.create(new UserOrder(user, thirdCertificate, 5));
+        userOrderDao.create(new UserOrder(user, forthCertificate, 5));
 
         assertEquals(firstTag, tagDao.getTheMostUsedTagOfUserWithTheMaximumCost());
     }

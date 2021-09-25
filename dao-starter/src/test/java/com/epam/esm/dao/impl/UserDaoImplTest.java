@@ -19,7 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @SpringBootTest
 @ActiveProfiles("test")
 class UserDaoImplTest {
-    private final User user = new User("Shannon", "Ramsay");
+    private final User user = new User("Shannon", "Ramsay", "login", "password");
 
     @Autowired
     UserDao userDao;

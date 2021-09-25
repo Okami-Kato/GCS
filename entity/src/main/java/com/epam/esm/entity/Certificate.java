@@ -45,7 +45,7 @@ public class Certificate {
     @Column(name = "duration")
     private Integer duration;
 
-    @Column(name = "last_update_date", nullable = false, insertable = false)
+    @Column(name = "last_update_date", insertable = false)
     private Instant lastUpdateDate;
 
     @Column(name = "create_date", nullable = false, updatable = false)
@@ -61,14 +61,23 @@ public class Certificate {
     protected Certificate() {
     }
 
-    public Certificate(String name, String description, Integer price, Integer duration, Instant lastUpdateDate, Instant createDate, Set<Tag> tags) {
+    public Certificate(String name, String description, Integer price, Integer duration) {
         this.name = name;
         this.description = description;
         this.price = price;
         this.duration = duration;
-        this.lastUpdateDate = lastUpdateDate;
-        this.createDate = createDate;
-        this.tags = tags;
+        this.tags = new HashSet<>();
+    }
+
+    public Certificate(String name, String description, Integer price, Integer duration, Set<Tag> tags) {
+        this.name = name;
+        this.description = description;
+        this.price = price;
+        this.duration = duration;
+        this.tags = new HashSet<>();
+        for (Tag tag : tags) {
+            addTag(tag);
+        }
     }
 
     @PrePersist
@@ -82,16 +91,16 @@ public class Certificate {
     }
 
     @Override
-    public int hashCode() {
-        return Objects.hash(name, description, price, duration, lastUpdateDate, createDate);
-    }
-
-    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Certificate that = (Certificate) o;
-        return name.equals(that.name) && description.equals(that.description) && price.equals(that.price) && duration.equals(that.duration) && lastUpdateDate.equals(that.lastUpdateDate) && createDate.equals(that.createDate);
+        return id.equals(that.id) && name.equals(that.name) && description.equals(that.description) && price.equals(that.price) && duration.equals(that.duration);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, name, description, price, duration);
     }
 
     @Override

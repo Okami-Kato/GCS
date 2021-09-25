@@ -30,11 +30,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @ActiveProfiles("test")
 class UserOrderDaoImplTest {
     private final Certificate firstCertificate = new Certificate(
-            "first certificate", "first description", 1, 3, Instant.now(), Instant.now(), new HashSet<>()
-    );
+            "first certificate", "first description", 1, 3);
     private final Certificate secondCertificate = new Certificate(
-            "second certificate", "second description", 2, 5, Instant.now(), Instant.now(), new HashSet<>()
-    );
+            "second certificate", "second description", 2, 5);
 
     private final Tag firstTag = new Tag("first tag", new HashSet<>());
     private final Tag secondTag = new Tag("second tag", new HashSet<>());
@@ -72,7 +70,7 @@ class UserOrderDaoImplTest {
     @Transactional
     void create() {
         user = userDao.getAll(1, 1).get(0);
-        order = new UserOrder(user, firstCertificate, firstCertificate.getPrice(), Instant.now());
+        order = new UserOrder(user, firstCertificate, firstCertificate.getPrice());
         assertDoesNotThrow(() -> userOrderDao.create(order));
         Optional<UserOrder> persisted = userOrderDao.get(order.getId());
         assertTrue(persisted.isPresent());

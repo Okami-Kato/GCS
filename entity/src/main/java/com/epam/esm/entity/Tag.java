@@ -33,6 +33,11 @@ public class Tag {
     protected Tag() {
     }
 
+    public Tag(String name) {
+        this.name = name;
+        this.certificates = new HashSet<>();
+    }
+
     public Tag(String name, Set<Certificate> certificates) {
         this.name = name;
         this.certificates = new HashSet<>();

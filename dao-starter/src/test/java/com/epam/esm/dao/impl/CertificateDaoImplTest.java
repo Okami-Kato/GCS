@@ -16,9 +16,7 @@ import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.test.context.ActiveProfiles;
 
 import javax.annotation.PostConstruct;
-import java.time.Instant;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 
@@ -32,17 +30,14 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @ActiveProfiles("test")
 class CertificateDaoImplTest {
     private final Certificate firstCertificate = new Certificate(
-            "first certificate", "first description", 1, 3, Instant.now(), Instant.now(), new HashSet<>()
-    );
+            "first certificate", "first description", 1, 3);
     private final Certificate secondCertificate = new Certificate(
-            "second certificate", "second description", 2, 5, Instant.now(), Instant.now(), new HashSet<>()
-    );
+            "second certificate", "second description", 2, 5);
     private final Certificate thirdCertificate = new Certificate(
-            "third certificate", "third description", 2, 7, Instant.now(), Instant.now(), new HashSet<>()
-    );
+            "third certificate", "third description", 2, 7);
 
-    private final Tag firstTag = new Tag("first tag", new HashSet<>());
-    private final Tag secondTag = new Tag("second tag", new HashSet<>());
+    private final Tag firstTag = new Tag("first tag");
+    private final Tag secondTag = new Tag("second tag");
 
 
     @Autowired
@@ -103,9 +98,7 @@ class CertificateDaoImplTest {
 
     @Test
     void createAndDelete() {
-        Certificate certificate = new Certificate(
-                "certificate", "description", 1, 3, Instant.now(), Instant.now(), new HashSet<>()
-        );
+        Certificate certificate = new Certificate("certificate", "description", 1, 3);
         assertDoesNotThrow(() -> certificateDao.create(certificate));
         Optional<Certificate> persisted = certificateDao.get(certificate.getId());
         assertTrue(persisted.isPresent());
