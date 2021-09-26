@@ -1,5 +1,6 @@
 package com.epam.esm.service;
 
+import com.epam.esm.service.dto.request.UpdateCertificateRequest;
 import com.epam.esm.service.dto.response.CertificateResponse;
 import com.epam.esm.service.dto.response.CertificateItem;
 import com.epam.esm.service.dto.request.CreateCertificateRequest;
@@ -19,7 +20,7 @@ public interface CertificateService {
 
     CertificateResponse create(CreateCertificateRequest certificate);
 
-    void update(CreateCertificateRequest certificate);
+    void update(UpdateCertificateRequest certificate);
 
     void delete(Integer id);
 }
