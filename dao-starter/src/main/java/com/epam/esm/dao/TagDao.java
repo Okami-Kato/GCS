@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface TagDao extends Dao<Tag, Integer> {
-    List<Tag> getAll(int pageNumber, int pageSize, Integer certificateId);
+    List<Tag> getAll(int pageNumber, int pageSize, int certificateId);
 
     Tag getTheMostUsedTagOfUserWithTheMaximumCost();
 

@@ -93,7 +93,7 @@ public class TagDaoImpl implements TagDao {
     }
 
     @Override
-    public List<Tag> getAll(int pageNumber, int pageSize, Integer certificateId) {
+    public List<Tag> getAll(int pageNumber, int pageSize, int certificateId) {
         TypedQuery<Integer> idQuery = manager.createQuery("SELECT t.id FROM Tag t JOIN t.certificates c WHERE c.id=:id ORDER BY t.id", Integer.class);
         List<Integer> tagIds = idQuery
                 .setParameter("id", certificateId)
