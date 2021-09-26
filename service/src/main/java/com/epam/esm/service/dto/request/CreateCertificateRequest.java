@@ -5,7 +5,7 @@ import java.util.Set;
 public class CreateCertificateRequest {
     private String name;
     private String description;
-    private Integer cost;
+    private Integer price;
     private Integer duration;
 
     private Set<String> tagNames;
@@ -26,12 +26,12 @@ public class CreateCertificateRequest {
         this.description = description;
     }
 
-    public Integer getCost() {
-        return cost;
+    public Integer getPrice() {
+        return price;
     }
 
-    public void setCost(Integer cost) {
-        this.cost = cost;
+    public void setPrice(Integer price) {
+        this.price = price;
     }
 
     public Integer getDuration() {
@@ -55,7 +55,7 @@ public class CreateCertificateRequest {
         return "CreateCertificateRequest{" +
                 "name='" + name + '\'' +
                 ", description='" + description + '\'' +
-                ", cost=" + cost +
+                ", cost=" + price +
                 ", duration=" + duration +
                 ", tagNames=" + tagNames +
                 '}';
