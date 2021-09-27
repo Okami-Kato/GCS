@@ -20,7 +20,7 @@ public interface CertificateService {
 
     CertificateResponse create(CreateCertificateRequest certificate);
 
-    void update(UpdateCertificateRequest certificate);
+    CertificateResponse update(UpdateCertificateRequest certificate);
 
     void delete(Integer id);
 }
