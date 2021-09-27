@@ -56,7 +56,7 @@ public class Certificate {
             name = "certificate_tag",
             joinColumns = @JoinColumn(name = "certificate_id"),
             inverseJoinColumns = @JoinColumn(name = "tag_id"))
-    private Set<Tag> tags;
+    private final Set<Tag> tags = new HashSet<>();
 
     protected Certificate() {
     }
@@ -66,7 +66,6 @@ public class Certificate {
         this.description = description;
         this.price = price;
         this.duration = duration;
-        this.tags = new HashSet<>();
     }
 
     public Certificate(String name, String description, Integer price, Integer duration, Set<Tag> tags) {
@@ -74,7 +73,6 @@ public class Certificate {
         this.description = description;
         this.price = price;
         this.duration = duration;
-        this.tags = new HashSet<>();
         for (Tag tag : tags) {
             addTag(tag);
         }
@@ -95,12 +93,12 @@ public class Certificate {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Certificate that = (Certificate) o;
-        return id.equals(that.id) && name.equals(that.name) && description.equals(that.description) && price.equals(that.price) && duration.equals(that.duration);
+        return Objects.equals(id, that.id) && name.equals(that.name) && description.equals(that.description) && price.equals(that.price) && duration.equals(that.duration) && Objects.equals(lastUpdateDate, that.lastUpdateDate) && Objects.equals(createDate, that.createDate);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, description, price, duration);
+        return Objects.hash(id, name, description, price, duration, lastUpdateDate, createDate);
     }
 
     @Override
