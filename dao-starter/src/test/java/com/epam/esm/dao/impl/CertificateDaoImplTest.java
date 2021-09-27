@@ -73,7 +73,7 @@ class CertificateDaoImplTest {
     @Test
     void create() {
         assertThrows(InvalidDataAccessApiUsageException.class, () -> certificateDao.create(firstCertificate));
-
+        assertThrows(InvalidDataAccessApiUsageException.class, () -> certificateDao.create(null));
         Optional<Certificate> persisted = certificateDao.get(firstCertificate.getId());
         assertTrue(persisted.isPresent());
         assertTrue(persisted.get().getTags().containsAll(Arrays.asList(firstTag, secondTag)));
