@@ -8,7 +8,7 @@ public class AbstractResponse {
     public AbstractResponse() {
     }
 
-    public AbstractResponse(int id) {
+    public AbstractResponse(Integer id) {
         this.id = id;
     }
 

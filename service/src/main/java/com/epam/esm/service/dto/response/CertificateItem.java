@@ -9,6 +9,16 @@ public class CertificateItem extends AbstractResponse {
 
     private Set<TagResponse> tags;
 
+    public CertificateItem() {
+    }
+
+    public CertificateItem(Integer id, String name, Integer price, Set<TagResponse> tags) {
+        super(id);
+        this.name = name;
+        this.price = price;
+        this.tags = tags;
+    }
+
     public String getName() {
         return name;
     }

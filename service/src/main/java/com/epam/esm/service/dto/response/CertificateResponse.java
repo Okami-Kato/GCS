@@ -19,6 +19,7 @@ public class CertificateResponse extends AbstractResponse {
 
     private Set<TagResponse> tags;
 
+
     public String getName() {
         return name;
     }
@@ -81,7 +82,7 @@ public class CertificateResponse extends AbstractResponse {
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
         CertificateResponse that = (CertificateResponse) o;
-        return name.equals(that.name) && description.equals(that.description) && price.equals(that.price) && duration.equals(that.duration) && createDate.equals(that.createDate) && Objects.equals(lastUpdateDate, that.lastUpdateDate) && tags.equals(that.tags);
+        return Objects.equals(name, that.name) && Objects.equals(description, that.description) && Objects.equals(price, that.price) && Objects.equals(duration, that.duration) && Objects.equals(createDate, that.createDate) && Objects.equals(lastUpdateDate, that.lastUpdateDate) && Objects.equals(tags, that.tags);
     }
 
     @Override

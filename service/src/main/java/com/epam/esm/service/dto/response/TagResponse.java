@@ -13,6 +13,14 @@ public class TagResponse extends AbstractResponse {
         this.name = name;
     }
 
+    public TagResponse() {
+    }
+
+    public TagResponse(Integer id, String name) {
+        super(id);
+        this.name = name;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
