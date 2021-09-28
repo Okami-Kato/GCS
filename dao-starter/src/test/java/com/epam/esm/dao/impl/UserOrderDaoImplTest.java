@@ -8,7 +8,10 @@ import com.epam.esm.entity.Certificate;
 import com.epam.esm.entity.Tag;
 import com.epam.esm.entity.User;
 import com.epam.esm.entity.UserOrder;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
@@ -27,6 +30,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ActiveProfiles("test")
 class UserOrderDaoImplTest {
     private final Certificate firstCertificate = new Certificate(
@@ -50,7 +54,7 @@ class UserOrderDaoImplTest {
     @Autowired
     private UserOrderDao userOrderDao;
 
-    @PostConstruct
+    @BeforeAll
     void init() {
         tagDao.create(firstTag);
         tagDao.create(secondTag);
@@ -63,6 +67,16 @@ class UserOrderDaoImplTest {
 
         certificateDao.create(firstCertificate);
         certificateDao.create(secondCertificate);
+    }
+
+    @AfterAll
+    void destroy(){
+        tagDao.delete(firstTag.getId());
+        tagDao.delete(secondTag.getId());
+        tagDao.delete(thirdTag.getId());
+
+        certificateDao.delete(firstCertificate.getId());
+        certificateDao.delete(secondCertificate.getId());
     }
 
     @Test

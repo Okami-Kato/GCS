@@ -5,7 +5,6 @@ import org.hibernate.annotations.GenericGenerator;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -14,8 +13,8 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.PrePersist;
 import javax.persistence.Table;
-import javax.persistence.criteria.CriteriaBuilder;
 import java.time.Instant;
+import java.util.Objects;
 
 @Entity
 @Table(name = "user_order", indexes = {
@@ -52,7 +51,7 @@ public class UserOrder {
     }
 
     @PrePersist
-    private void toCreate(){
+    private void toCreate() {
         timestamp = Instant.now();
     }
 
@@ -69,7 +68,7 @@ public class UserOrder {
     }
 
     public void setUser(User user) {
-        if (this.user != null){
+        if (this.user != null) {
             return;
         }
         this.user = user;
@@ -86,5 +85,18 @@ public class UserOrder {
 
     public Instant getTimestamp() {
         return timestamp;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        UserOrder userOrder = (UserOrder) o;
+        return Objects.equals(id, userOrder.id) && user.equals(userOrder.user) && certificate.equals(userOrder.certificate) && cost.equals(userOrder.cost) && Objects.equals(timestamp, userOrder.timestamp);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, user, certificate, cost, timestamp);
     }
 }

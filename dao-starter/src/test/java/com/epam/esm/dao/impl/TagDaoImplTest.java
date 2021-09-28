@@ -9,7 +9,10 @@ import com.epam.esm.entity.Tag;
 import com.epam.esm.entity.User;
 import com.epam.esm.entity.UserOrder;
 import com.epam.esm.util.CertificateFilter;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
@@ -30,6 +33,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ActiveProfiles("test")
 class TagDaoImplTest {
     private final Certificate firstCertificate = new Certificate(
@@ -50,7 +54,7 @@ class TagDaoImplTest {
     @Autowired
     private UserDao userDao;
 
-    @PostConstruct
+    @BeforeAll
     void init() {
         tagDao.create(firstTag);
         tagDao.create(secondTag);
@@ -63,6 +67,15 @@ class TagDaoImplTest {
 
         certificateDao.create(firstCertificate);
         certificateDao.create(secondCertificate);
+    }
+
+    @AfterAll
+    void destroy(){
+        tagDao.delete(firstTag.getId());
+        tagDao.delete(secondTag.getId());
+        tagDao.delete(thirdTag.getId());
+        certificateDao.delete(firstCertificate.getId());
+        certificateDao.delete(secondCertificate.getId());
     }
 
     @Test

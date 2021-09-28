@@ -3,7 +3,6 @@ package com.epam.esm.dao.impl;
 import com.epam.esm.dao.CertificateDao;
 import com.epam.esm.entity.Certificate;
 import com.epam.esm.entity.Certificate_;
-import com.epam.esm.entity.Tag;
 import com.epam.esm.util.CertificateFilter;
 import com.epam.esm.util.Sort;
 import com.epam.esm.util.SortDirection;
@@ -111,6 +110,12 @@ public class CertificateDaoImpl implements CertificateDao {
 
     @Override
     public void update(Certificate certificate) {
+        if (certificate == null){
+            throw new IllegalArgumentException("Certificate can't be null");
+        }
+        if (!get(certificate.getId()).isPresent()) {
+            throw new IllegalArgumentException(String.format("Entity doesn't exist (%s)", "id=" + certificate.getId()));
+        }
         manager.merge(certificate);
     }
 

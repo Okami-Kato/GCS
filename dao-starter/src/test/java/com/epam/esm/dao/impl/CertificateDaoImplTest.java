@@ -6,16 +6,18 @@ import com.epam.esm.entity.Certificate;
 import com.epam.esm.entity.Tag;
 import com.epam.esm.util.CertificateFilter;
 import com.epam.esm.util.Sort;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.test.context.ActiveProfiles;
 
-import javax.annotation.PostConstruct;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -23,10 +25,12 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ActiveProfiles("test")
 class CertificateDaoImplTest {
     private final Certificate firstCertificate = new Certificate(
@@ -45,7 +49,7 @@ class CertificateDaoImplTest {
     @Autowired
     private TagDao tagDao;
 
-    @PostConstruct
+    @BeforeAll
     void init() {
         tagDao.create(firstTag);
         tagDao.create(secondTag);
@@ -54,6 +58,12 @@ class CertificateDaoImplTest {
         firstCertificate.addTag(secondTag);
         secondCertificate.addTag(firstTag);
         thirdCertificate.addTag(secondTag);
+    }
+
+    @AfterAll
+    void destroy(){
+        tagDao.delete(firstTag.getId());
+        tagDao.delete(secondTag.getId());
     }
 
     @BeforeEach
@@ -68,6 +78,9 @@ class CertificateDaoImplTest {
         certificateDao.delete(firstCertificate.getId());
         certificateDao.delete(secondCertificate.getId());
         certificateDao.delete(thirdCertificate.getId());
+        firstCertificate.setId(null);
+        secondCertificate.setId(null);
+        thirdCertificate.setId(null);
     }
 
     @Test
@@ -90,10 +103,17 @@ class CertificateDaoImplTest {
         assertDoesNotThrow(() -> certificateDao.update(certificate));
         Optional<Certificate> persisted = certificateDao.get(thirdCertificate.getId());
         assertTrue(persisted.isPresent());
-        assertEquals(persisted.get(), certificate);
+        assertNotNull(persisted.get().getLastUpdateDate());
+        assertEquals(certificate.getName(), persisted.get().getName());
+        assertEquals(certificate.getDescription(), persisted.get().getDescription());
+        assertEquals(certificate.getTags(), persisted.get().getTags());
 
         certificate.setName(null);
         assertThrows(DataIntegrityViolationException.class, () -> certificateDao.update(certificate));
+        certificate.setName("name");
+        certificate.setId(thirdCertificate.getId() * (-1));
+        assertThrows(InvalidDataAccessApiUsageException.class, () -> certificateDao.update(certificate));
+        assertThrows(InvalidDataAccessApiUsageException.class, () -> certificateDao.update(null));
     }
 
     @Test
