@@ -60,10 +60,7 @@ public class CertificateServiceImpl implements CertificateService {
     }
 
     @Override
-    public Optional<CertificateResponse> get(Integer id) {
-        if (id == null) {
-            throw new IllegalArgumentException("Id can't be null");
-        }
+    public Optional<CertificateResponse> get(int id) {
         try {
             return certificateDao.get(id).map(o -> mapper.map(o, CertificateResponse.class));
         } catch (InvalidDataAccessApiUsageException e) {
@@ -105,7 +102,7 @@ public class CertificateServiceImpl implements CertificateService {
     }
 
     @Override
-    public void delete(Integer id) {
+    public void delete(int id) {
         try {
             certificateDao.delete(id);
         } catch (InvalidDataAccessApiUsageException e) {

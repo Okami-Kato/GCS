@@ -148,7 +148,6 @@ class CertificateServiceImplTest {
         assertEquals(expectedResponse, actualResponse.get());
 
         assertFalse(certificateService.get(notRealId).isPresent());
-        assertThrows(IllegalArgumentException.class, () -> certificateService.get(null));
     }
 
     @Test
@@ -196,7 +195,6 @@ class CertificateServiceImplTest {
         doThrow(InvalidDataAccessApiUsageException.class).when(certificateDao).delete(isNull());
         assertDoesNotThrow(() -> certificateService.delete(realId));
         assertThrows(ServiceException.class, () -> certificateService.delete(notRealId));
-        assertThrows(ServiceException.class, () -> certificateService.delete(null));
     }
 
     @Test

@@ -14,7 +14,7 @@ public interface CertificateService {
 
     List<CertificateItem> getAll(int pageNumber, int pageSize, CertificateFilter certificateFilter);
 
-    Optional<CertificateResponse> get(Integer id);
+    Optional<CertificateResponse> get(int id);
 
     long getCount();
 
@@ -22,5 +22,5 @@ public interface CertificateService {
 
     CertificateResponse update(UpdateCertificateRequest certificate);
 
-    void delete(Integer id);
+    void delete(int id);
 }
