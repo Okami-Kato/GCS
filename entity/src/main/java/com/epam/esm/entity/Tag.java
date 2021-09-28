@@ -25,14 +25,14 @@ public class Tag {
     @Column(name = "id", nullable = false)
     private Integer id;
 
-    @Column(name = "name", nullable = false, length = 25)
+    @Column(name = "name", nullable = false, length = 25, unique = true)
     private String name;
 
     @ManyToMany(mappedBy = "tags")
     private Set<Certificate> certificates = new HashSet<>();
 
     @PreRemove
-    void removeCertificateAssociations(){
+    private void removeCertificateAssociations(){
         for (Iterator<Certificate> iterator = certificates.iterator(); iterator.hasNext(); ) {
             Certificate certificate = iterator.next();
             iterator.remove();
