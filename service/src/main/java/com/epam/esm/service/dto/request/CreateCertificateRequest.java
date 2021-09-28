@@ -10,6 +10,24 @@ public class CreateCertificateRequest {
 
     private Set<String> tagNames;
 
+    public CreateCertificateRequest() {
+    }
+
+    public CreateCertificateRequest(String name, String description, Integer price, Integer duration) {
+        this.name = name;
+        this.description = description;
+        this.price = price;
+        this.duration = duration;
+    }
+
+    public CreateCertificateRequest(String name, String description, Integer price, Integer duration, Set<String> tagNames) {
+        this.name = name;
+        this.description = description;
+        this.price = price;
+        this.duration = duration;
+        this.tagNames = tagNames;
+    }
+
     public String getName() {
         return name;
     }
@@ -55,7 +73,7 @@ public class CreateCertificateRequest {
         return "CreateCertificateRequest{" +
                 "name='" + name + '\'' +
                 ", description='" + description + '\'' +
-                ", cost=" + price +
+                ", price=" + price +
                 ", duration=" + duration +
                 ", tagNames=" + tagNames +
                 '}';

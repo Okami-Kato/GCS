@@ -6,6 +6,7 @@ import com.epam.esm.entity.Certificate_;
 import com.epam.esm.util.CertificateFilter;
 import com.epam.esm.util.Sort;
 import com.epam.esm.util.SortDirection;
+import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -125,7 +126,7 @@ public class CertificateDaoImpl implements CertificateDao {
         if (certificate.isPresent()) {
             manager.remove(certificate.get());
         } else {
-            throw new IllegalArgumentException(String.format("Entity wasn't found (%s)", "id=" + id));
+            throw new InvalidDataAccessApiUsageException(String.format("Entity wasn't found (%s)", "id=" + id));
         }
     }
 
