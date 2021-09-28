@@ -1,5 +1,5 @@
 dependencies {
-    implementation project(':dao-starter')
+    implementation project(':dao')
     implementation 'org.springframework.boot:spring-boot-starter'
     implementation 'org.springframework:spring-dao:2.0.8'
     implementation 'com.fasterxml.jackson.core:jackson-annotations'
