@@ -93,7 +93,7 @@ public class Certificate {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Certificate that = (Certificate) o;
-        return Objects.equals(id, that.id) && name.equals(that.name) && description.equals(that.description) && price.equals(that.price) && duration.equals(that.duration) && Objects.equals(lastUpdateDate, that.lastUpdateDate) && Objects.equals(createDate, that.createDate);
+        return Objects.equals(id, that.id) && Objects.equals(name, that.name) && Objects.equals(description, that.description) && Objects.equals(price, that.price) && Objects.equals(duration, that.duration) && Objects.equals(lastUpdateDate, that.lastUpdateDate) && Objects.equals(createDate, that.createDate);
     }
 
     @Override

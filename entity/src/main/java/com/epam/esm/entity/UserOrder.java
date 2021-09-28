@@ -92,11 +92,22 @@ public class UserOrder {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         UserOrder userOrder = (UserOrder) o;
-        return Objects.equals(id, userOrder.id) && user.equals(userOrder.user) && certificate.equals(userOrder.certificate) && cost.equals(userOrder.cost) && Objects.equals(timestamp, userOrder.timestamp);
+        return Objects.equals(id, userOrder.id) && Objects.equals(user, userOrder.user) && Objects.equals(certificate, userOrder.certificate) && Objects.equals(cost, userOrder.cost) && Objects.equals(timestamp, userOrder.timestamp);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(id, user, certificate, cost, timestamp);
+    }
+
+    @Override
+    public String toString() {
+        return "UserOrder{" +
+                "id=" + id +
+                ", user=" + user +
+                ", certificate=" + certificate +
+                ", cost=" + cost +
+                ", timestamp=" + timestamp +
+                '}';
     }
 }

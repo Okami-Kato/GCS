@@ -69,14 +69,6 @@ public class Tag {
         return Objects.hash(id, name);
     }
 
-    @Override
-    public String toString() {
-        return "Tag{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                '}';
-    }
-
     public Integer getId() {
         return id;
     }
