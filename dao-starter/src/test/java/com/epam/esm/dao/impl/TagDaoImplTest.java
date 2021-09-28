@@ -15,6 +15,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
@@ -41,9 +42,9 @@ class TagDaoImplTest {
     private final Certificate secondCertificate = new Certificate(
             "second certificate", "second description", 2, 5);
 
-    private final Tag firstTag = new Tag("first tag", new HashSet<>());
-    private final Tag secondTag = new Tag("second tag", new HashSet<>());
-    private final Tag thirdTag = new Tag("third tag", new HashSet<>());
+    private final Tag firstTag = new Tag("first tag");
+    private final Tag secondTag = new Tag("second tag");
+    private final Tag thirdTag = new Tag("third tag");
 
     @Autowired
     private CertificateDao certificateDao;
@@ -81,6 +82,7 @@ class TagDaoImplTest {
     @Test
     void create() {
         assertThrows(InvalidDataAccessApiUsageException.class, () -> tagDao.create(firstTag));
+        assertThrows(DataIntegrityViolationException.class, () -> tagDao.create(new Tag(firstTag.getName())));
         Optional<Tag> persisted = tagDao.get(firstTag.getId());
         assertTrue(persisted.isPresent());
         Integer tagId = persisted.get().getId();
