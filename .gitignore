@@ -12,5 +12,5 @@ build
 gradlew.bat
 gradlew
 /dao/src/test/resources/application-test.properties
-/service/src/main/resources/application-dev.properties
-/service/src/main/resources/application-prod.properties
+/web/src/main/resources/application-dev.properties
+/web/src/main/resources/application-prod.properties
