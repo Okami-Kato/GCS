@@ -5,6 +5,13 @@ import java.util.Objects;
 public class CreateTagRequest {
     private String name;
 
+    public CreateTagRequest() {
+    }
+
+    public CreateTagRequest(String name) {
+        this.name = name;
+    }
+
     public String getName() {
         return name;
     }
