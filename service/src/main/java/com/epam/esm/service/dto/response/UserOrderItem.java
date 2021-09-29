@@ -7,6 +7,16 @@ public class UserOrderItem extends AbstractResponse {
     private Integer certificateId;
     private Integer cost;
 
+    public UserOrderItem() {
+    }
+
+    public UserOrderItem(Integer id, Integer userId, Integer certificateId, Integer cost) {
+        super(id);
+        this.userId = userId;
+        this.certificateId = certificateId;
+        this.cost = cost;
+    }
+
     public Integer getUserId() {
         return userId;
     }

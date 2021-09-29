@@ -1,10 +1,16 @@
 package com.epam.esm.service.dto.request;
 
-import java.util.Objects;
-
 public class CreateUserOrderRequest {
     private Integer userId;
     private Integer certificateId;
+
+    public CreateUserOrderRequest() {
+    }
+
+    public CreateUserOrderRequest(Integer userId, Integer certificateId) {
+        this.userId = userId;
+        this.certificateId = certificateId;
+    }
 
     public Integer getUserId() {
         return userId;

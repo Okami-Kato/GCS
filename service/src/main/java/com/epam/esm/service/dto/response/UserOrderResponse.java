@@ -13,6 +13,17 @@ public class UserOrderResponse extends AbstractResponse {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss.SSS")
     private LocalDateTime timestamp;
 
+    public UserOrderResponse() {
+    }
+
+    public UserOrderResponse(Integer id, UserResponse user, CertificateItem certificate, Integer cost, LocalDateTime timestamp) {
+        super(id);
+        this.user = user;
+        this.certificate = certificate;
+        this.cost = cost;
+        this.timestamp = timestamp;
+    }
+
     public UserResponse getUser() {
         return user;
     }
@@ -51,7 +62,7 @@ public class UserOrderResponse extends AbstractResponse {
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
         UserOrderResponse that = (UserOrderResponse) o;
-        return user.equals(that.user) && certificate.equals(that.certificate) && cost.equals(that.cost) && timestamp.equals(that.timestamp);
+        return user.equals(that.user) && certificate.equals(that.certificate) && cost.equals(that.cost) && Objects.equals(timestamp, that.timestamp);
     }
 
     @Override
