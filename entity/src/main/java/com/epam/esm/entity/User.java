@@ -37,7 +37,7 @@ public class User {
     private String password;
 
     @OneToMany(mappedBy = "user")
-    private Set<UserOrder> orders;
+    private final Set<UserOrder> orders = new HashSet<>();
 
     protected User() {
     }
@@ -122,7 +122,6 @@ public class User {
                 ", lastName='" + lastName + '\'' +
                 ", login='" + login + '\'' +
                 ", password='" + password + '\'' +
-                ", orders=" + orders +
                 '}';
     }
 }
