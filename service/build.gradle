@@ -1,7 +1,11 @@
 dependencies {
     implementation project(':dao')
+    api project(':util')
+
     implementation 'org.springframework.boot:spring-boot-starter'
-    implementation 'org.springframework:spring-dao:2.0.8'
     implementation 'com.fasterxml.jackson.core:jackson-annotations'
+    implementation 'jakarta.validation:jakarta.validation-api:3.0.0'
+
+    implementation 'org.springframework:spring-dao:2.0.8'
     implementation 'org.modelmapper:modelmapper:2.4.4'
 }

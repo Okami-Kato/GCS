@@ -1,8 +1,15 @@
 package com.epam.esm.service.dto.request;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
+
 import java.util.Objects;
 
 public class CreateTagRequest {
+    @NotBlank(message = "Tag name can't be blank")
+    @Size(min = 3, max = 25, message = "Tag name must be {min}-{max} characters long.")
+    @Pattern(regexp = "^[a-zA-Z\\s]$", message = "Tag name can contain only letters.")
     private String name;
 
     public CreateTagRequest() {
