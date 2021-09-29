@@ -2,7 +2,6 @@ package com.epam.esm.entity;
 
 import org.hibernate.annotations.GenericGenerator;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -32,7 +31,7 @@ public class Tag {
     private Set<Certificate> certificates = new HashSet<>();
 
     @PreRemove
-    private void removeCertificateAssociations(){
+    private void removeCertificateAssociations() {
         for (Iterator<Certificate> iterator = certificates.iterator(); iterator.hasNext(); ) {
             Certificate certificate = iterator.next();
             iterator.remove();
@@ -79,6 +78,10 @@ public class Tag {
 
     public String getName() {
         return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public Set<Certificate> getCertificates() {
