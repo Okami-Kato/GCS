@@ -6,6 +6,15 @@ public class UserResponse extends AbstractResponse {
     private String firstName;
     private String lastName;
 
+    public UserResponse() {
+    }
+
+    public UserResponse(Integer id, String firstName, String lastName) {
+        super(id);
+        this.firstName = firstName;
+        this.lastName = lastName;
+    }
+
     public String getFirstName() {
         return firstName;
     }
