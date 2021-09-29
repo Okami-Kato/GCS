@@ -53,11 +53,7 @@ public class TagServiceImpl implements TagService {
 
     @Override
     public Optional<TagResponse> get(int id) {
-        try {
-            return tagDao.get(id).map(tag -> mapper.map(tag, TagResponse.class));
-        } catch (InvalidDataAccessApiUsageException e) {
-            throw new ServiceException(e);
-        }
+        return tagDao.get(id).map(tag -> mapper.map(tag, TagResponse.class));
     }
 
     @Override
