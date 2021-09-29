@@ -33,14 +33,14 @@ public class UserOrderDaoImpl implements UserOrderDao {
 
     @Override
     public List<UserOrder> getAll(int pageNumber, int pageSize, int userId) {
-        TypedQuery<Integer> idQuery = manager.createQuery("SELECT uo.id FROM UserOrder uo WHERE uo.user.id=:userId ORDER BY uo.id", Integer.class);
+        TypedQuery<Integer> idQuery = manager.createQuery("SELECT uo.id FROM UserOrder uo WHERE uo.user.id=:userId", Integer.class);
         List<Integer> userOrderIds = idQuery
                 .setParameter("userId", userId)
                 .setFirstResult((pageNumber - 1) * pageSize)
                 .setMaxResults(pageSize)
                 .getResultList();
 
-        TypedQuery<UserOrder> tagQuery = manager.createQuery("SELECT uo FROM UserOrder uo WHERE uo.id in (:ids)", UserOrder.class);
+        TypedQuery<UserOrder> tagQuery = manager.createQuery("SELECT uo FROM UserOrder uo WHERE uo.id in (:ids) ORDER BY uo.id", UserOrder.class);
         return tagQuery
                 .setParameter("ids", userOrderIds)
                 .getResultList();

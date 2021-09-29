@@ -80,13 +80,13 @@ public class TagDaoImpl implements TagDao {
 
     @Override
     public List<Tag> getAll(int pageNumber, int pageSize) {
-        TypedQuery<Integer> idQuery = manager.createQuery("SELECT t.id FROM Tag t ORDER BY t.id", Integer.class);
+        TypedQuery<Integer> idQuery = manager.createQuery("SELECT t.id FROM Tag t", Integer.class);
         List<Integer> tagIds = idQuery
                 .setFirstResult((pageNumber - 1) * pageSize)
                 .setMaxResults(pageSize)
                 .getResultList();
 
-        TypedQuery<Tag> tagQuery = manager.createQuery("SELECT t FROM Tag t WHERE t.id in (:ids)", Tag.class);
+        TypedQuery<Tag> tagQuery = manager.createQuery("SELECT t FROM Tag t WHERE t.id in (:ids) ORDER BY t.id", Tag.class);
         return tagQuery
                 .setParameter("ids", tagIds)
                 .getResultList();
@@ -94,14 +94,14 @@ public class TagDaoImpl implements TagDao {
 
     @Override
     public List<Tag> getAll(int pageNumber, int pageSize, int certificateId) {
-        TypedQuery<Integer> idQuery = manager.createQuery("SELECT t.id FROM Tag t JOIN t.certificates c WHERE c.id=:id ORDER BY t.id", Integer.class);
+        TypedQuery<Integer> idQuery = manager.createQuery("SELECT t.id FROM Tag t JOIN t.certificates c WHERE c.id=:id", Integer.class);
         List<Integer> tagIds = idQuery
                 .setParameter("id", certificateId)
                 .setFirstResult((pageNumber - 1) * pageSize)
                 .setMaxResults(pageSize)
                 .getResultList();
 
-        TypedQuery<Tag> tagQuery = manager.createQuery("SELECT t FROM Tag t WHERE t.id in (:ids)", Tag.class);
+        TypedQuery<Tag> tagQuery = manager.createQuery("SELECT t FROM Tag t WHERE t.id in (:ids) ORDER BY t.id", Tag.class);
         return tagQuery
                 .setParameter("ids", tagIds)
                 .getResultList();

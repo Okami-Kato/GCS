@@ -140,7 +140,7 @@ public class CertificateDaoImpl implements CertificateDao {
     private List<Certificate> getAllFromIds(List<Integer> ids) {
         EntityGraph<?> graph = manager.getEntityGraph("graph.certificate.tags");
 
-        TypedQuery<Certificate> certificateQuery = manager.createQuery("SELECT c FROM Certificate c WHERE c.id in (:ids)", Certificate.class);
+        TypedQuery<Certificate> certificateQuery = manager.createQuery("SELECT c FROM Certificate c WHERE c.id in (:ids) ORDER BY c.id", Certificate.class);
         return certificateQuery
                 .setParameter("ids", ids)
                 .setHint("javax.persistence.fetchgraph", graph)

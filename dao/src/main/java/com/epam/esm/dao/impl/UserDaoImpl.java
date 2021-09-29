@@ -28,13 +28,13 @@ public class UserDaoImpl implements UserDao {
 
     @Override
     public List<User> getAll(int pageNumber, int pageSize) {
-        TypedQuery<Integer> idQuery = manager.createQuery("SELECT u.id FROM User u ORDER BY u.id", Integer.class);
+        TypedQuery<Integer> idQuery = manager.createQuery("SELECT u.id FROM User u", Integer.class);
         List<Integer> userIds = idQuery
                 .setFirstResult((pageNumber - 1) * pageSize)
                 .setMaxResults(pageSize)
                 .getResultList();
 
-        TypedQuery<User> userQuery = manager.createQuery("SELECT u FROM User u WHERE u.id in (:ids)", User.class);
+        TypedQuery<User> userQuery = manager.createQuery("SELECT u FROM User u WHERE u.id in (:ids) ORDER BY u.id", User.class);
         return userQuery
                 .setParameter("ids", userIds)
                 .getResultList();
