@@ -1,9 +1,12 @@
 package com.epam.esm.service.dto.response;
 
+import org.springframework.hateoas.RepresentationModel;
+
 import java.util.Objects;
 import java.util.Set;
 
-public class CertificateItem extends AbstractResponse {
+public class CertificateItem extends RepresentationModel<CertificateItem> {
+    private Integer id;
     private String name;
     private Integer price;
 
@@ -13,10 +16,18 @@ public class CertificateItem extends AbstractResponse {
     }
 
     public CertificateItem(Integer id, String name, Integer price, Set<TagResponse> tags) {
-        super(id);
+        this.id = id;
         this.name = name;
         this.price = price;
         this.tags = tags;
+    }
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
     }
 
     public String getName() {
@@ -49,12 +60,12 @@ public class CertificateItem extends AbstractResponse {
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
         CertificateItem that = (CertificateItem) o;
-        return name.equals(that.name) && price.equals(that.price) && tags.equals(that.tags);
+        return id.equals(that.id) && name.equals(that.name) && price.equals(that.price) && Objects.equals(tags, that.tags);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), name, price, tags);
+        return Objects.hash(super.hashCode(), id, name, price, tags);
     }
 
     @Override
