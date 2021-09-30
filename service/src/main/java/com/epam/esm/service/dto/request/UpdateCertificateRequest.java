@@ -1,11 +1,10 @@
 package com.epam.esm.service.dto.request;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Positive;
-import jakarta.validation.constraints.Size;
-
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.Size;
 import java.util.Set;
 
 public class UpdateCertificateRequest {
@@ -21,9 +20,11 @@ public class UpdateCertificateRequest {
     @NotBlank(message = "Certificate description can't be blank.")
     private String description;
 
+    @NotNull
     @Positive(message = "Certificate price must be positive number.")
     private Integer price;
 
+    @NotNull
     @Positive(message = "Certificate duration must be positive number.")
     private Integer duration;
 
