@@ -5,37 +5,29 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class Sort {
-    private List<Order> orders = new LinkedList<>();
+    private final List<Order> orders;
+
+    private Sort(List<Order> orders){
+        this.orders = new LinkedList<>(orders);
+    }
 
     public static Sort by(Order... orders) {
-        Sort sort = new Sort();
-        sort.orders.addAll(Arrays.asList(orders));
-        return sort;
+        return new Sort(Arrays.asList(orders));
+    }
+
+    public static Sort by(List<Order> orders) {
+        return new Sort(orders);
     }
 
     public List<Order> getOrders() {
-        return orders;
-    }
-
-    public void setOrders(List<Order> orders) {
-        this.orders = orders;
-    }
-
-    public Sort and(Sort sort) {
-        Sort newSort = new Sort();
-        newSort.orders.addAll(this.orders);
-        newSort.orders.addAll(sort.orders);
-        return newSort;
+        return new LinkedList<>(orders);
     }
 
     public static class Order {
-        private String field;
-        private SortDirection direction;
+        private final String field;
+        private final SortDirection direction;
 
-        public Order() {
-        }
-
-        private Order(String field, SortDirection sortDirection) {
+        public Order(String field, SortDirection sortDirection) {
             this.field = field;
             this.direction = sortDirection;
         }
@@ -52,16 +44,8 @@ public class Sort {
             return direction;
         }
 
-        public void setDirection(SortDirection direction) {
-            this.direction = direction;
-        }
-
         public String getField() {
             return field;
-        }
-
-        public void setField(String field) {
-            this.field = field;
         }
     }
 }
