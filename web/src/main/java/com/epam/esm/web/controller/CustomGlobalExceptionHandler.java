@@ -1,18 +1,13 @@
 package com.epam.esm.web.controller;
 
-import com.epam.esm.web.exception.BadRequestException;
-import com.epam.esm.web.exception.EntityNotFoundException;
 import com.epam.esm.web.exception.WebException;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.context.request.WebRequest;
-import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
@@ -56,23 +51,12 @@ public class CustomGlobalExceptionHandler {
         return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler(EntityNotFoundException.class)
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    protected Map<String, Object> handleConflict(EntityNotFoundException ex, WebRequest request) {
-        return handleException(ex);
-    }
-
-    @ExceptionHandler(BadRequestException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    protected Map<String, Object> handleConflict(BadRequestException ex, WebRequest request) {
-        return handleException(ex);
-    }
-
-    private Map<String, Object> handleException(WebException e){
+    @ExceptionHandler(WebException.class)
+    protected ResponseEntity<Object> handleConflict(WebException ex, WebRequest request) {
         Map<String, Object> body = new LinkedHashMap<>();
         body.put("timestamp", LocalDateTime.now());
-        body.put("code", e.getCode());
-        body.put("message", e.getMessage());
-        return body;
+        body.put("code", ex.getCode());
+        body.put("message", ex.getMessage());
+        return new ResponseEntity<>(body, ex.getStatus());
     }
 }
