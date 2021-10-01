@@ -66,8 +66,8 @@ public class TagServiceImpl implements TagService {
     }
 
     @Override
-    public TagResponse getTheMostUsedTagOfUserWithTheMaximumCost() {
-        return mapper.map(tagDao.getTheMostUsedTagOfUserWithTheMaximumCost(), TagResponse.class);
+    public Optional<TagResponse> getTheMostUsedTagOfUserWithTheMaximumCost() {
+        return tagDao.getTheMostUsedTagOfUserWithTheMaximumCost().map(tag -> mapper.map(tag, TagResponse.class));
     }
 
     @Override

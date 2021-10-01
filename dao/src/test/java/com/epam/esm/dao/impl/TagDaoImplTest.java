@@ -144,8 +144,8 @@ class TagDaoImplTest {
         userOrderDao.create(new UserOrder(user, secondCertificate, 5));
         userOrderDao.create(new UserOrder(user, thirdCertificate, 5));
         userOrderDao.create(new UserOrder(user, forthCertificate, 5));
-
-        assertEquals(firstTag, tagDao.getTheMostUsedTagOfUserWithTheMaximumCost());
+        assertTrue(tagDao.getTheMostUsedTagOfUserWithTheMaximumCost().isPresent());
+        assertEquals(firstTag, tagDao.getTheMostUsedTagOfUserWithTheMaximumCost().get());
     }
 
     @Test

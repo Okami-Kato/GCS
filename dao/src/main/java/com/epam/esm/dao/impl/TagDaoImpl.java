@@ -73,9 +73,13 @@ public class TagDaoImpl implements TagDao {
     }
 
     @Override
-    public Tag getTheMostUsedTagOfUserWithTheMaximumCost() {
+    public Optional<Tag> getTheMostUsedTagOfUserWithTheMaximumCost() {
         Query nativeQuery = manager.createNativeQuery(GET_THE_MOST_USED_TAG_OF_USER_WITH_THE_HIGHEST_COST, Tag.class);
-        return (Tag) nativeQuery.getSingleResult();
+        try {
+            return Optional.of((Tag) nativeQuery.getSingleResult());
+        } catch (NoResultException e) {
+            return Optional.empty();
+        }
     }
 
     @Override
