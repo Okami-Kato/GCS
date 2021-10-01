@@ -1,7 +1,6 @@
 package com.epam.esm.dao.impl;
 
 import com.epam.esm.dao.UserOrderDao;
-import com.epam.esm.entity.Tag;
 import com.epam.esm.entity.UserOrder;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,10 +31,25 @@ public class UserOrderDaoImpl implements UserOrderDao {
     }
 
     @Override
-    public List<UserOrder> getAll(int pageNumber, int pageSize, int userId) {
+    public List<UserOrder> getAllByUserId(int pageNumber, int pageSize, int userId) {
         TypedQuery<Integer> idQuery = manager.createQuery("SELECT uo.id FROM UserOrder uo WHERE uo.user.id=:userId", Integer.class);
         List<Integer> userOrderIds = idQuery
                 .setParameter("userId", userId)
+                .setFirstResult((pageNumber - 1) * pageSize)
+                .setMaxResults(pageSize)
+                .getResultList();
+
+        TypedQuery<UserOrder> tagQuery = manager.createQuery("SELECT uo FROM UserOrder uo WHERE uo.id in (:ids) ORDER BY uo.id", UserOrder.class);
+        return tagQuery
+                .setParameter("ids", userOrderIds)
+                .getResultList();
+    }
+
+    @Override
+    public List<UserOrder> getAllByCertificateId(int pageNumber, int pageSize, int certificateId) {
+        TypedQuery<Integer> idQuery = manager.createQuery("SELECT uo.id FROM UserOrder uo WHERE uo.certificate.id=:certificateId", Integer.class);
+        List<Integer> userOrderIds = idQuery
+                .setParameter("certificateId", certificateId)
                 .setFirstResult((pageNumber - 1) * pageSize)
                 .setMaxResults(pageSize)
                 .getResultList();

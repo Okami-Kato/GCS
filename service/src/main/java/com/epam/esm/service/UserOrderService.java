@@ -10,7 +10,9 @@ import java.util.Optional;
 public interface UserOrderService {
     List<UserOrderItem> getAll(int pageNumber, int pageSize);
 
-    List<UserOrderItem> getAll(int pageNumber, int pageSize, int userId);
+    List<UserOrderItem> getAllByUserId(int pageNumber, int pageSize, int userId);
+
+    List<UserOrderItem> getAllByCertificateId(int pageNumber, int pageSize, int certificateId);
 
     Optional<UserOrderResponse> get(int id);
 
