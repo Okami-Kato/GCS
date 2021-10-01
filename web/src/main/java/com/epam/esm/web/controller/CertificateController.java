@@ -56,16 +56,12 @@ import java.util.stream.Collectors;
 @RequestMapping(produces = MediaType.APPLICATION_JSON_VALUE)
 public class CertificateController {
     private final CertificateService certificateService;
-    private final TagService tagService;
     private final ObjectMapper objectMapper;
-    private final SmartValidator validator;
 
     @Autowired
     public CertificateController(CertificateService certificateService, TagService tagService, ObjectMapper objectMapper, SmartValidator validator) {
         this.certificateService = certificateService;
-        this.tagService = tagService;
         this.objectMapper = objectMapper;
-        this.validator = validator;
     }
 
     /**
