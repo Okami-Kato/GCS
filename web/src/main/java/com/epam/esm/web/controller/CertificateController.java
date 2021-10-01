@@ -123,10 +123,7 @@ public class CertificateController {
     @GetMapping(value = "/certificates/{id}")
     public CertificateResponse getCertificate(@PathVariable int id) {
         Optional<CertificateResponse> certificate = certificateService.get(id);
-        if (!certificate.isPresent()) {
-            throw new EntityNotFoundException(ErrorCode.CERTIFICATE_NOT_FOUND, id);
-        }
-        return certificate.get();
+        return certificate.orElseThrow(() -> new EntityNotFoundException(ErrorCode.CERTIFICATE_NOT_FOUND, id));
     }
 
     /**
