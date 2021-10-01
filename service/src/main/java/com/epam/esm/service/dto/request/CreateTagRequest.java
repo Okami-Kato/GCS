@@ -9,7 +9,7 @@ import java.util.Objects;
 public class CreateTagRequest {
     @NotBlank(message = "Tag name can't be blank")
     @Size(min = 3, max = 25, message = "Tag name must be {min}-{max} characters long.")
-    @Pattern(regexp = "^[a-zA-Z\\s]$", message = "Tag name can contain only letters.")
+    @Pattern(regexp = "^[a-zA-Z\\s]+$", message = "Tag name can contain only letters.")
     private String name;
 
     public CreateTagRequest() {
