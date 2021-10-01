@@ -17,9 +17,7 @@ import java.time.Instant;
 import java.util.Objects;
 
 @Entity
-@Table(name = "user_order", indexes = {
-        @Index(name = "user_id", columnList = "user_id, certificate_id", unique = true)
-})
+@Table(name = "user_order")
 public class UserOrder {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
