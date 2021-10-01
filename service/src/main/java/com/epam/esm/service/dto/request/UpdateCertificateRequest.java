@@ -13,11 +13,12 @@ public class UpdateCertificateRequest {
 
     @Size(min = 3, max = 50, message = "Certificate name must be {min}-{max} characters long.")
     @NotBlank(message = "Certificate name can't be blank.")
-    @Pattern(regexp = "^[a-zA-Z0-9\\s]$", message = "Certificate name must be alphanumeric.")
+    @Pattern(regexp = "^[\\w\\s]+$", message = "Certificate name must be alphanumeric.")
     private String name;
 
     @Size(min = 10, max = 3000, message = "Certificate description must be {min}-{max} characters long.")
     @NotBlank(message = "Certificate description can't be blank.")
+    @Pattern(regexp = "^[\\w\\s]+$", message = "Certificate description must be alphanumeric.")
     private String description;
 
     @NotNull
@@ -31,9 +32,21 @@ public class UpdateCertificateRequest {
     private Set<
             @NotBlank(message = "Tag name can't be blank")
             @Size(min = 3, max = 25, message = "Tag name must be {min}-{max} characters long.")
-            @Pattern(regexp = "^[a-zA-Z\\s]$", message = "Tag name can contain only letters.")
+            @Pattern(regexp = "^[\\w\\s]+$", message = "Tag name must be alphanumeric.")
                     String
             > tagNames;
+
+    public UpdateCertificateRequest() {
+    }
+
+    public UpdateCertificateRequest(Integer id, String name, String description, Integer price, Integer duration, Set<String> tagNames) {
+        this.id = id;
+        this.name = name;
+        this.description = description;
+        this.price = price;
+        this.duration = duration;
+        this.tagNames = tagNames;
+    }
 
     public Integer getId() {
         return id;

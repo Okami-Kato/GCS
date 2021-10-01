@@ -15,7 +15,7 @@ public class CreateCertificateRequest {
 
     @Size(min = 10, max = 3000, message = "Certificate description must be {min}-{max} characters long.")
     @NotBlank(message = "Certificate description can't be blank.")
-    @Pattern(regexp = "^[\\w\\s]+$", message = "Certificate name must be alphanumeric.")
+    @Pattern(regexp = "^[\\w\\s]+$", message = "Certificate description must be alphanumeric.")
     private String description;
 
     @NotNull
@@ -29,7 +29,7 @@ public class CreateCertificateRequest {
     private Set<
             @NotBlank(message = "Tag name can't be blank")
             @Size(min = 3, max = 25, message = "Tag name must be {min}-{max} characters long.")
-            @Pattern(regexp = "^[\\w\\s]+$", message = "Tag name can contain only letters.")
+            @Pattern(regexp = "^[\\w\\s]+$", message = "Tag name must be alphanumeric.")
                     String
             > tagNames;
 
