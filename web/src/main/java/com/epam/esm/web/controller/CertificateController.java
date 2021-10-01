@@ -123,7 +123,7 @@ public class CertificateController {
     @GetMapping(value = "/certificates/{id}")
     public CertificateResponse getCertificate(@PathVariable int id) {
         Optional<CertificateResponse> certificate = certificateService.get(id);
-        return certificate.orElseThrow(() -> new EntityNotFoundException(ErrorCode.CERTIFICATE_NOT_FOUND, id));
+        return certificate.orElseThrow(() -> new EntityNotFoundException(ErrorCode.CERTIFICATE_NOT_FOUND, "id=" + id));
     }
 
     /**
@@ -155,7 +155,7 @@ public class CertificateController {
         try {
             certificateService.delete(id);
         } catch (ServiceException e) {
-            throw new EntityNotFoundException(ErrorCode.CERTIFICATE_NOT_FOUND, id);
+            throw new EntityNotFoundException(ErrorCode.CERTIFICATE_NOT_FOUND, "id=" + id);
         }
     }
 
@@ -173,7 +173,7 @@ public class CertificateController {
     @PatchMapping(path = "/certificates/{id}", consumes = "application/json-patch+json")
     public CertificateResponse updateCertificate(@PathVariable int id, @RequestBody JsonPatch patch) throws JsonPatchException, JsonProcessingException {
         CertificateResponse certificate = certificateService.get(id)
-                .orElseThrow(() -> new EntityNotFoundException(ErrorCode.CERTIFICATE_NOT_FOUND, id));
+                .orElseThrow(() -> new EntityNotFoundException(ErrorCode.CERTIFICATE_NOT_FOUND, "id=" + id));
 
         UpdateCertificateRequest updateRequest = new UpdateCertificateRequest(certificate.getId(), certificate.getName(),
                 certificate.getDescription(), certificate.getDuration(), certificate.getPrice(),
