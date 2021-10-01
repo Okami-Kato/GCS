@@ -98,7 +98,7 @@ public class CertificateServiceImpl implements CertificateService {
         } catch (DataIntegrityViolationException | InvalidDataAccessApiUsageException e) {
             throw new ServiceException(e);
         }
-        return mapper.map(certificateToUpdate, CertificateResponse.class);
+        return get(certificateToUpdate.getId()).get();
     }
 
     @Override
