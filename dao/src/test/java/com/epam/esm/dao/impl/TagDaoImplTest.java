@@ -21,8 +21,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.annotation.PostConstruct;
-import java.time.Instant;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Optional;
@@ -144,8 +142,8 @@ class TagDaoImplTest {
         userOrderDao.create(new UserOrder(user, secondCertificate, 5));
         userOrderDao.create(new UserOrder(user, thirdCertificate, 5));
         userOrderDao.create(new UserOrder(user, forthCertificate, 5));
-        assertTrue(tagDao.getTheMostUsedTagOfUserWithTheMaximumCost().isPresent());
-        assertEquals(firstTag, tagDao.getTheMostUsedTagOfUserWithTheMaximumCost().get());
+        assertTrue(tagDao.getTheMostUsedTagOfUserWithTheHighestCost().isPresent());
+        assertEquals(firstTag, tagDao.getTheMostUsedTagOfUserWithTheHighestCost().get());
     }
 
     @Test

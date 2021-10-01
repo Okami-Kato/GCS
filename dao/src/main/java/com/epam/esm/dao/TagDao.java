@@ -8,7 +8,7 @@ import java.util.Optional;
 public interface TagDao extends Dao<Tag, Integer> {
     List<Tag> getAll(int pageNumber, int pageSize, int certificateId);
 
-    Optional<Tag> getTheMostUsedTagOfUserWithTheMaximumCost();
+    Optional<Tag> getTheMostUsedTagOfUserWithTheHighestCost();
 
     Optional<Tag> get(String name);
 }

@@ -15,7 +15,7 @@ public interface TagService {
 
     Optional<TagResponse> get(String name);
 
-    Optional<TagResponse> getTheMostUsedTagOfUserWithTheMaximumCost();
+    Optional<TagResponse> getTheMostUsedTagOfUserWithTheHighestCost();
 
     long getCount();
 
