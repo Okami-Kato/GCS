@@ -1,27 +1,16 @@
 package com.epam.esm.service.dto.response;
 
-import org.springframework.hateoas.RepresentationModel;
-
 import java.util.Objects;
 
-public class TagResponse extends RepresentationModel<TagResponse> {
-    private Integer id;
+public class TagResponse extends AbstractResponse {
     private String name;
 
     public TagResponse() {
     }
 
     public TagResponse(Integer id, String name) {
-        this.id = id;
+        super(id);
         this.name = name;
-    }
-
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
     }
 
     public String getName() {
@@ -36,13 +25,14 @@ public class TagResponse extends RepresentationModel<TagResponse> {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
         TagResponse that = (TagResponse) o;
-        return id.equals(that.id) && name.equals(that.name);
+        return name.equals(that.name);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name);
+        return Objects.hash(super.hashCode(), name);
     }
 
     @Override

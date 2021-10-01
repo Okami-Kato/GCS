@@ -1,13 +1,11 @@
 package com.epam.esm.service.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import org.springframework.hateoas.RepresentationModel;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
 
-public class UserOrderResponse extends RepresentationModel<UserOrderResponse> {
-    private Integer id;
+public class UserOrderResponse extends AbstractResponse {
     private UserResponse user;
     private CertificateItem certificate;
     private Integer cost;
@@ -19,19 +17,11 @@ public class UserOrderResponse extends RepresentationModel<UserOrderResponse> {
     }
 
     public UserOrderResponse(Integer id, UserResponse user, CertificateItem certificate, Integer cost, LocalDateTime timestamp) {
-        this.id = id;
+        super(id);
         this.user = user;
         this.certificate = certificate;
         this.cost = cost;
         this.timestamp = timestamp;
-    }
-
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
     }
 
     public UserResponse getUser() {
@@ -70,13 +60,14 @@ public class UserOrderResponse extends RepresentationModel<UserOrderResponse> {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
         UserOrderResponse that = (UserOrderResponse) o;
-        return id.equals(that.id) && user.equals(that.user) && certificate.equals(that.certificate) && cost.equals(that.cost) && Objects.equals(timestamp, that.timestamp);
+        return user.equals(that.user) && certificate.equals(that.certificate) && cost.equals(that.cost) && Objects.equals(timestamp, that.timestamp);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, user, certificate, cost, timestamp);
+        return Objects.hash(super.hashCode(), user, certificate, cost, timestamp);
     }
 
     @Override

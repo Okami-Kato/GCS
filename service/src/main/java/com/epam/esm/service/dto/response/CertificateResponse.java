@@ -1,33 +1,24 @@
 package com.epam.esm.service.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import org.springframework.hateoas.RepresentationModel;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.Set;
 
-public class CertificateResponse extends RepresentationModel<CertificateResponse> {
-    private Integer id;
+public class CertificateResponse extends AbstractResponse {
     private String name;
     private String description;
     private Integer price;
     private Integer duration;
 
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss.SSS")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss.SSS")
     private LocalDateTime createDate;
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss.SSS")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss.SSS")
     private LocalDateTime lastUpdateDate;
 
     private Set<TagResponse> tags;
 
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
 
     public String getName() {
         return name;
@@ -91,12 +82,12 @@ public class CertificateResponse extends RepresentationModel<CertificateResponse
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
         CertificateResponse that = (CertificateResponse) o;
-        return id.equals(that.id) && name.equals(that.name) && description.equals(that.description) && price.equals(that.price) && duration.equals(that.duration) && Objects.equals(createDate, that.createDate) && Objects.equals(lastUpdateDate, that.lastUpdateDate) && tags.equals(that.tags);
+        return Objects.equals(name, that.name) && Objects.equals(description, that.description) && Objects.equals(price, that.price) && Objects.equals(duration, that.duration) && Objects.equals(createDate, that.createDate) && Objects.equals(lastUpdateDate, that.lastUpdateDate) && Objects.equals(tags, that.tags);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), id, name, description, price, duration, createDate, lastUpdateDate, tags);
+        return Objects.hash(super.hashCode(), name, description, price, duration, createDate, lastUpdateDate, tags);
     }
 
     @Override

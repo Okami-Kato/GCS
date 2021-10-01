@@ -1,11 +1,8 @@
 package com.epam.esm.service.dto.response;
 
-import org.springframework.hateoas.RepresentationModel;
-
 import java.util.Objects;
 
-public class UserResponse extends RepresentationModel<UserResponse> {
-    private Integer id;
+public class UserResponse extends AbstractResponse {
     private String firstName;
     private String lastName;
 
@@ -13,17 +10,9 @@ public class UserResponse extends RepresentationModel<UserResponse> {
     }
 
     public UserResponse(Integer id, String firstName, String lastName) {
-        this.id = id;
+        super(id);
         this.firstName = firstName;
         this.lastName = lastName;
-    }
-
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
     }
 
     public String getFirstName() {
@@ -46,13 +35,14 @@ public class UserResponse extends RepresentationModel<UserResponse> {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
         UserResponse that = (UserResponse) o;
-        return id.equals(that.id) && firstName.equals(that.firstName) && lastName.equals(that.lastName);
+        return firstName.equals(that.firstName) && lastName.equals(that.lastName);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, firstName, lastName);
+        return Objects.hash(super.hashCode(), firstName, lastName);
     }
 
     @Override
