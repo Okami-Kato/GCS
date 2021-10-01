@@ -94,11 +94,10 @@ public class CertificateServiceImpl implements CertificateService {
             extractTags(certificateToUpdate, certificate.getTagNames());
         }
         try {
-            certificateDao.update(certificateToUpdate);
+            return mapper.map(certificateDao.update(certificateToUpdate), CertificateResponse.class);
         } catch (DataIntegrityViolationException | InvalidDataAccessApiUsageException e) {
             throw new ServiceException(e);
         }
-        return get(certificateToUpdate.getId()).get();
     }
 
     @Override

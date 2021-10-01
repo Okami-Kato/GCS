@@ -71,7 +71,7 @@ public class UserOrderDaoImpl implements UserOrderDao {
     }
 
     @Override
-    public void update(UserOrder userOrder) {
+    public UserOrder update(UserOrder userOrder) {
         throw new UnsupportedOperationException("Method update() isn't supported in UserOrderDaoImpl");
     }
 

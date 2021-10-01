@@ -176,7 +176,7 @@ public class CertificateController {
                 .orElseThrow(() -> new EntityNotFoundException(ErrorCode.CERTIFICATE_NOT_FOUND, "id=" + id));
 
         UpdateCertificateRequest updateRequest = new UpdateCertificateRequest(certificate.getId(), certificate.getName(),
-                certificate.getDescription(), certificate.getDuration(), certificate.getPrice(),
+                certificate.getDescription(), certificate.getPrice(), certificate.getDuration(),
                 certificate.getTags().stream().map(TagResponse::getName).collect(Collectors.toSet()));
         UpdateCertificateRequest certificatePatched = applyPatchToCertificate(patch, updateRequest);
         try {

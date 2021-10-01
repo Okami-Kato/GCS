@@ -12,7 +12,7 @@ public interface Dao<T, K> {
 
     void create(T t);
 
-    void update(T t);
+    T update(T t);
 
     void delete(K id);
 }

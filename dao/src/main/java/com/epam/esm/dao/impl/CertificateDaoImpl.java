@@ -110,7 +110,7 @@ public class CertificateDaoImpl implements CertificateDao {
     }
 
     @Override
-    public void update(Certificate certificate) {
+    public Certificate update(Certificate certificate) {
         if (certificate == null){
             throw new IllegalArgumentException("Certificate can't be null");
         }
@@ -118,6 +118,10 @@ public class CertificateDaoImpl implements CertificateDao {
             throw new IllegalArgumentException(String.format("Entity doesn't exist (%s)", "id=" + certificate.getId()));
         }
         manager.merge(certificate);
+        manager.flush();
+        Certificate result = manager.find(Certificate.class, certificate.getId());
+        manager.refresh(result);
+        return result;
     }
 
     @Override

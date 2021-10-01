@@ -122,7 +122,7 @@ public class TagDaoImpl implements TagDao {
     }
 
     @Override
-    public void update(Tag tag) {
+    public Tag update(Tag tag) {
         throw new UnsupportedOperationException("Method update() isn't supported in TagDaoImpl");
     }
 

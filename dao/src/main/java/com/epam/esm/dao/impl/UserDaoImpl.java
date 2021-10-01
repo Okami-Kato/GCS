@@ -51,7 +51,7 @@ public class UserDaoImpl implements UserDao {
     }
 
     @Override
-    public void update(User user) {
+    public User update(User user) {
         throw new UnsupportedOperationException("Method update() isn't supported in UserDaoImpl");
     }
 
