@@ -14,6 +14,7 @@ import javax.persistence.Lob;
 import javax.persistence.ManyToMany;
 import javax.persistence.NamedAttributeNode;
 import javax.persistence.NamedEntityGraph;
+import javax.persistence.OneToMany;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import javax.persistence.Table;
@@ -57,6 +58,9 @@ public class Certificate {
             joinColumns = @JoinColumn(name = "certificate_id"),
             inverseJoinColumns = @JoinColumn(name = "tag_id"))
     private final Set<Tag> tags = new HashSet<>();
+
+    @OneToMany(mappedBy = "certificate")
+    private final Set<UserOrder> orders = new HashSet<>();
 
     protected Certificate() {
     }
