@@ -2,7 +2,7 @@ import org.springframework.boot.gradle.plugin.SpringBootPlugin
 
 plugins {
     id 'java-library'
-    id 'org.springframework.boot' version '2.1.6.RELEASE' apply false
+    id 'org.springframework.boot' version '2.5.5' apply false
 }
 
 subprojects {
