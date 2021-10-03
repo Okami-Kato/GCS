@@ -12,8 +12,10 @@ import com.epam.esm.web.exception.EntityNotFoundException;
 import com.epam.esm.web.exception.ErrorCode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.hateoas.CollectionModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.SmartValidator;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -30,6 +32,9 @@ import javax.validation.Valid;
 import javax.validation.constraints.Positive;
 import java.util.List;
 import java.util.Optional;
+
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @RestController
 @Validated
@@ -48,6 +53,12 @@ public class TagController {
         this.validator = validator;
     }
 
+    static void processTagResponse(TagResponse tag){
+        tag.add(linkTo(methodOn(TagController.class).getTag(tag.getId())).withSelfRel());
+        tag.add(linkTo(methodOn(TagController.class).deleteTag(tag.getId())).withRel("delete"));
+        tag.add(linkTo(methodOn(TagController.class).getCertificates(null, null, tag.getId())).withRel("certificates"));
+    }
+
     /**
      * Retrieves all tags.
      *
@@ -57,12 +68,14 @@ public class TagController {
      * @throws BadRequestException if given parameters are invalid.
      */
     @GetMapping(value = "/tags")
-    public List<TagResponse> getAllTags(@RequestParam(defaultValue = "1")
-                                        @Positive(message = "Page number must be a positive number") int page,
-                                        @RequestParam(defaultValue = "5")
-                                        @Positive(message = "Size must be a positive number") int size) {
+    public CollectionModel<TagResponse> getAllTags(@RequestParam(defaultValue = "1")
+                                        @Positive(message = "Page number must be a positive number") Integer page,
+                                                   @RequestParam(defaultValue = "5")
+                                        @Positive(message = "Size must be a positive number") Integer size) {
         try {
-            return tagService.getAll(page, size);
+            List<TagResponse> tagList = tagService.getAll(page, size);
+            tagList.forEach(TagController::processTagResponse);
+            return CollectionModel.of(tagList, linkTo(methodOn(TagController.class).getAllTags(page, size)).withSelfRel());
         } catch (ServiceException e) {
             throw new BadRequestException(ErrorCode.TAG_BAD_REQUEST, e.getMessage());
         }
@@ -78,13 +91,15 @@ public class TagController {
      * @throws BadRequestException if given parameters are invalid.
      */
     @GetMapping(value = "/tags/{id}/certificates")
-    public List<CertificateItem> getCertificates(@RequestParam(defaultValue = "1")
-                                                 @Positive(message = "Page number must be a positive number") int page,
+    public CollectionModel<CertificateItem> getCertificates(@RequestParam(defaultValue = "1")
+                                                 @Positive(message = "Page number must be a positive number") Integer page,
                                                  @RequestParam(defaultValue = "5")
-                                                 @Positive(message = "Size must be a positive number") int size,
+                                                 @Positive(message = "Size must be a positive number") Integer size,
                                                  @PathVariable int id) {
         try {
-            return certificateService.getAll(page, size, CertificateFilter.newBuilder().withTags(id).build());
+            List<CertificateItem> certificateList = certificateService.getAll(page, size, CertificateFilter.newBuilder().withTags(id).build());
+            certificateList.forEach(CertificateController::processCertificateItem);
+            return CollectionModel.of(certificateList, linkTo(methodOn(TagController.class).getCertificates(page, size, id)).withSelfRel());
         } catch (ServiceException e) {
             throw new BadRequestException(ErrorCode.CERTIFICATE_BAD_REQUEST, e.getMessage());
         }
@@ -99,6 +114,7 @@ public class TagController {
     @GetMapping(value = "/tags/theMostUsedTagOfUserWithTheHighestCost")
     public TagResponse getTheMostUsedTagOfUserWithTheHighestCost() {
         Optional<TagResponse> tag = tagService.getTheMostUsedTagOfUserWithTheHighestCost();
+        tag.ifPresent(TagController::processTagResponse);
         return tag.orElseThrow(() -> new EntityNotFoundException(ErrorCode.CERTIFICATE_NOT_FOUND,
                 "The most widely used tag of a user with the highest cost of all orders"));
     }
@@ -113,6 +129,7 @@ public class TagController {
     @GetMapping(value = "/tags/{id}")
     public TagResponse getTag(@PathVariable int id) {
         Optional<TagResponse> tag = tagService.get(id);
+        tag.ifPresent(TagController::processTagResponse);
         return tag.orElseThrow(() -> new EntityNotFoundException(ErrorCode.CERTIFICATE_NOT_FOUND, "id=" + id));
     }
 
@@ -125,9 +142,11 @@ public class TagController {
      */
     @PostMapping(value = "/tags")
     @ResponseStatus(HttpStatus.CREATED)
-    public TagResponse createCertificate(@Valid @RequestBody CreateTagRequest tag) {
+    public TagResponse createTag(@Valid @RequestBody CreateTagRequest tag) {
         try {
-            return tagService.create(tag);
+            TagResponse response = tagService.create(tag);
+            processTagResponse(response);
+            return response;
         } catch (ServiceException e) {
             throw new BadRequestException(ErrorCode.TAG_BAD_REQUEST, e.getMessage());
         }
@@ -141,9 +160,10 @@ public class TagController {
      */
     @DeleteMapping(value = "/tags/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteCertificate(@PathVariable int id) {
+    public ResponseEntity<Void> deleteTag(@PathVariable int id) {
         try {
             tagService.delete(id);
+            return ResponseEntity.noContent().build();
         } catch (ServiceException e) {
             throw new EntityNotFoundException(ErrorCode.TAG_NOT_FOUND, "id=" + id);
         }
