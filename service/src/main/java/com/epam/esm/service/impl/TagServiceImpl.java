@@ -5,6 +5,8 @@ import com.epam.esm.entity.Tag;
 import com.epam.esm.service.TagService;
 import com.epam.esm.service.dto.request.CreateTagRequest;
 import com.epam.esm.service.dto.response.TagResponse;
+import com.epam.esm.service.dto.response.UserResponse;
+import com.epam.esm.service.dto.response.UserWithTags;
 import com.epam.esm.service.exception.ServiceException;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +15,7 @@ import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -66,8 +69,15 @@ public class TagServiceImpl implements TagService {
     }
 
     @Override
-    public Optional<TagResponse> getTheMostUsedTagOfUserWithTheHighestCost() {
-        return tagDao.getTheMostUsedTagOfUserWithTheHighestCost().map(tag -> mapper.map(tag, TagResponse.class));
+    public List<UserWithTags> getTheMostUsedTagsOfUsersWithTheHighestCost() {
+        List<UserWithTags> result = new LinkedList<>();
+        tagDao.getTheMostUsedTagsOfUsersWithTheHighestCost().forEach(((user, tags) ->
+                result.add(new UserWithTags(
+                        mapper.map(user, UserResponse.class),
+                        tags.stream()
+                                .map(tag -> mapper.map(tag, TagResponse.class))
+                                .collect(Collectors.toList())))));
+        return result;
     }
 
     @Override

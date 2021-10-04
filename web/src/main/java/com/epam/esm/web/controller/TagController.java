@@ -5,6 +5,7 @@ import com.epam.esm.service.TagService;
 import com.epam.esm.service.dto.request.CreateTagRequest;
 import com.epam.esm.service.dto.response.CertificateItem;
 import com.epam.esm.service.dto.response.TagResponse;
+import com.epam.esm.service.dto.response.UserWithTags;
 import com.epam.esm.service.exception.ServiceException;
 import com.epam.esm.util.CertificateFilter;
 import com.epam.esm.web.exception.BadRequestException;
@@ -53,7 +54,7 @@ public class TagController {
         this.validator = validator;
     }
 
-    static void processTagResponse(TagResponse tag){
+    static void processTagResponse(TagResponse tag) {
         tag.add(linkTo(methodOn(TagController.class).getTag(tag.getId())).withSelfRel());
         tag.add(linkTo(methodOn(TagController.class).deleteTag(tag.getId())).withRel("delete"));
         tag.add(linkTo(methodOn(TagController.class).getCertificates(null, null, tag.getId())).withRel("certificates"));
@@ -69,9 +70,9 @@ public class TagController {
      */
     @GetMapping(value = "/tags")
     public CollectionModel<TagResponse> getAllTags(@RequestParam(defaultValue = "1")
-                                        @Positive(message = "Page number must be a positive number") Integer page,
+                                                   @Positive(message = "Page number must be a positive number") Integer page,
                                                    @RequestParam(defaultValue = "5")
-                                        @Positive(message = "Size must be a positive number") Integer size) {
+                                                   @Positive(message = "Size must be a positive number") Integer size) {
         try {
             List<TagResponse> tagList = tagService.getAll(page, size);
             tagList.forEach(TagController::processTagResponse);
@@ -92,10 +93,10 @@ public class TagController {
      */
     @GetMapping(value = "/tags/{id}/certificates")
     public CollectionModel<CertificateItem> getCertificates(@RequestParam(defaultValue = "1")
-                                                 @Positive(message = "Page number must be a positive number") Integer page,
-                                                 @RequestParam(defaultValue = "5")
-                                                 @Positive(message = "Size must be a positive number") Integer size,
-                                                 @PathVariable int id) {
+                                                            @Positive(message = "Page number must be a positive number") Integer page,
+                                                            @RequestParam(defaultValue = "5")
+                                                            @Positive(message = "Size must be a positive number") Integer size,
+                                                            @PathVariable int id) {
         try {
             List<CertificateItem> certificateList = certificateService.getAll(page, size, CertificateFilter.newBuilder().withTags(id).build());
             certificateList.forEach(CertificateController::processCertificateItem);
@@ -111,12 +112,9 @@ public class TagController {
      * @return found tag.
      * @throws EntityNotFoundException if tag wasn't found.
      */
-    @GetMapping(value = "/tags/theMostUsedTagOfUserWithTheHighestCost")
-    public TagResponse getTheMostUsedTagOfUserWithTheHighestCost() {
-        Optional<TagResponse> tag = tagService.getTheMostUsedTagOfUserWithTheHighestCost();
-        tag.ifPresent(TagController::processTagResponse);
-        return tag.orElseThrow(() -> new EntityNotFoundException(ErrorCode.CERTIFICATE_NOT_FOUND,
-                "The most widely used tag of a user with the highest cost of all orders"));
+    @GetMapping(value = "/tags/theMostUsedTagsOfUsersWithTheHighestCost")
+    public CollectionModel<UserWithTags> getTheMostUsedTagsOfUsersWithTheHighestCost() {
+        return CollectionModel.of(tagService.getTheMostUsedTagsOfUsersWithTheHighestCost());
     }
 
     /**

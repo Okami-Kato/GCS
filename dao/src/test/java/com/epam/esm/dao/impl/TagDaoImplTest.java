@@ -22,7 +22,11 @@ import org.springframework.test.context.jdbc.Sql;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
@@ -131,19 +135,22 @@ class TagDaoImplTest {
 
         Optional<User> optionalUser = userDao.get(1);
         assertTrue(optionalUser.isPresent());
-        User user = optionalUser.get();
-        userOrderDao.create(new UserOrder(user, firstCertificate, 10));
-        userOrderDao.create(new UserOrder(user, secondCertificate, 10));
-        userOrderDao.create(new UserOrder(user, thirdCertificate, 10));
+        User firstUser = optionalUser.get();
+        userOrderDao.create(new UserOrder(firstUser, firstCertificate, 10));
+        userOrderDao.create(new UserOrder(firstUser, secondCertificate, 10));
+        userOrderDao.create(new UserOrder(firstUser, thirdCertificate, 10));
 
         optionalUser = userDao.get(2);
         assertTrue(optionalUser.isPresent());
-        user = optionalUser.get();
-        userOrderDao.create(new UserOrder(user, secondCertificate, 5));
-        userOrderDao.create(new UserOrder(user, thirdCertificate, 5));
-        userOrderDao.create(new UserOrder(user, forthCertificate, 5));
-        assertTrue(tagDao.getTheMostUsedTagOfUserWithTheHighestCost().isPresent());
-        assertEquals(firstTag, tagDao.getTheMostUsedTagOfUserWithTheHighestCost().get());
+        User secondUser = optionalUser.get();
+        userOrderDao.create(new UserOrder(secondUser, secondCertificate, 5));
+        userOrderDao.create(new UserOrder(secondUser, thirdCertificate, 5));
+        userOrderDao.create(new UserOrder(secondUser, forthCertificate, 5));
+        Map<User, List<Tag>> map = tagDao.getTheMostUsedTagsOfUsersWithTheHighestCost();
+        assertFalse(map.isEmpty());
+        assertEquals(1, map.size());
+        assertTrue(map.containsKey(firstUser));
+        assertEquals(Collections.singletonList(firstTag), map.get(firstUser));
     }
 
     @Test
