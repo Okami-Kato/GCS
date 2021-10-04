@@ -177,6 +177,7 @@ class CertificateServiceImplTest {
 
         when(tagDao.get(firstTag.getName())).thenReturn(Optional.of(firstTag));
         when(tagDao.get(thirdTag.getName())).thenReturn(Optional.of(thirdTag));
+        when(certificateDao.update(updated)).thenReturn(updated);
 
         CertificateResponse actualResponse = certificateService.update(updateRequest);
         assertEquals(expectedResponse, actualResponse);
