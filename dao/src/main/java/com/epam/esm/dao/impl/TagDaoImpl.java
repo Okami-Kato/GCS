@@ -53,6 +53,11 @@ public class TagDaoImpl implements TagDao {
                     "                         FROM tag_certificate_count)" +
                     ") as ti on t.id = ti.tag_id";
 
+    private final String GET_TAG_BY_NAME = "SELECT t FROM Tag t WHERE t.name=:name";
+    private final String GET_ALL_TAGS = "SELECT t FROM Tag t";
+    private final String GET_ALL_TAGS_BY_CERTIFICATE_ID = "SELECT t FROM Tag t JOIN t.certificates c WHERE c.id=:id";
+    private final String GET_COUNT = "SELECT COUNT(t) FROM Tag t";
+
     @PersistenceContext
     private EntityManager manager;
 
@@ -66,7 +71,7 @@ public class TagDaoImpl implements TagDao {
         if (name == null) {
             throw new IllegalArgumentException("Tag name can't be null");
         }
-        TypedQuery<Tag> query = manager.createQuery("SELECT t FROM Tag t WHERE t.name=:name", Tag.class);
+        TypedQuery<Tag> query = manager.createQuery(GET_TAG_BY_NAME, Tag.class);
         query.setParameter("name", name);
         try {
             return Optional.of(query.getSingleResult());
@@ -90,36 +95,24 @@ public class TagDaoImpl implements TagDao {
 
     @Override
     public List<Tag> getAll(int pageNumber, int pageSize) {
-        TypedQuery<Integer> idQuery = manager.createQuery("SELECT t.id FROM Tag t", Integer.class);
-        List<Integer> tagIds = idQuery
-                .setFirstResult((pageNumber - 1) * pageSize)
+        TypedQuery<Tag> query = manager.createQuery(GET_ALL_TAGS, Tag.class);
+        return query.setFirstResult((pageNumber - 1) * pageSize)
                 .setMaxResults(pageSize)
-                .getResultList();
-
-        TypedQuery<Tag> tagQuery = manager.createQuery("SELECT t FROM Tag t WHERE t.id in (:ids) ORDER BY t.id", Tag.class);
-        return tagQuery
-                .setParameter("ids", tagIds)
                 .getResultList();
     }
 
     @Override
     public List<Tag> getAll(int pageNumber, int pageSize, int certificateId) {
-        TypedQuery<Integer> idQuery = manager.createQuery("SELECT t.id FROM Tag t JOIN t.certificates c WHERE c.id=:id", Integer.class);
-        List<Integer> tagIds = idQuery
-                .setParameter("id", certificateId)
+        TypedQuery<Tag> query = manager.createQuery(GET_ALL_TAGS_BY_CERTIFICATE_ID, Tag.class);
+        return query.setParameter("id", certificateId)
                 .setFirstResult((pageNumber - 1) * pageSize)
                 .setMaxResults(pageSize)
-                .getResultList();
-
-        TypedQuery<Tag> tagQuery = manager.createQuery("SELECT t FROM Tag t WHERE t.id in (:ids) ORDER BY t.id", Tag.class);
-        return tagQuery
-                .setParameter("ids", tagIds)
                 .getResultList();
     }
 
     @Override
     public long getCount() {
-        return manager.createQuery("SELECT COUNT(t) FROM Tag t", Long.class).getSingleResult();
+        return manager.createQuery(GET_COUNT, Long.class).getSingleResult();
     }
 
     @Override

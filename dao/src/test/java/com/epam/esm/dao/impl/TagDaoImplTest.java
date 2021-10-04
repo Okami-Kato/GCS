@@ -155,12 +155,13 @@ class TagDaoImplTest {
 
     @Test
     void getAll() {
+        int count = (int) tagDao.getCount();
         assertEquals(3, tagDao.getAll(1, 3).size());
+        assertEquals(count, tagDao.getAll(1, count + 1).size());
         assertEquals(2, tagDao.getAll(1, 2).size());
         assertThrows(InvalidDataAccessApiUsageException.class, () -> tagDao.getAll(-1, 10));
         assertThrows(InvalidDataAccessApiUsageException.class, () -> tagDao.getAll(1, -10));
 
-        int count = (int) tagDao.getCount();
         assertEquals(Arrays.asList(firstTag, secondTag), tagDao.getAll(1, count, firstCertificate.getId()));
         assertEquals(Arrays.asList(firstTag, thirdTag), tagDao.getAll(1, count, secondCertificate.getId()));
     }

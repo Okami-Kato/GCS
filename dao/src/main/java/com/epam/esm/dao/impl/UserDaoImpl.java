@@ -1,23 +1,22 @@
 package com.epam.esm.dao.impl;
 
 import com.epam.esm.dao.UserDao;
-import com.epam.esm.entity.Tag;
 import com.epam.esm.entity.User;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.EntityGraph;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 @Repository
 @Transactional
 public class UserDaoImpl implements UserDao {
+    private final String GET_ALL_USERS = "SELECT u FROM User u";
+    private final String GET_COUNT = "SELECT COUNT(u) FROM User u";
+
     @PersistenceContext
     private EntityManager manager;
 
@@ -28,21 +27,15 @@ public class UserDaoImpl implements UserDao {
 
     @Override
     public List<User> getAll(int pageNumber, int pageSize) {
-        TypedQuery<Integer> idQuery = manager.createQuery("SELECT u.id FROM User u", Integer.class);
-        List<Integer> userIds = idQuery
-                .setFirstResult((pageNumber - 1) * pageSize)
+        TypedQuery<User> query = manager.createQuery(GET_ALL_USERS, User.class);
+        return query.setFirstResult((pageNumber - 1) * pageSize)
                 .setMaxResults(pageSize)
-                .getResultList();
-
-        TypedQuery<User> userQuery = manager.createQuery("SELECT u FROM User u WHERE u.id in (:ids) ORDER BY u.id", User.class);
-        return userQuery
-                .setParameter("ids", userIds)
                 .getResultList();
     }
 
     @Override
     public long getCount() {
-        return manager.createQuery("SELECT COUNT(u) FROM User u", Long.class).getSingleResult();
+        return manager.createQuery(GET_COUNT, Long.class).getSingleResult();
     }
 
     @Override

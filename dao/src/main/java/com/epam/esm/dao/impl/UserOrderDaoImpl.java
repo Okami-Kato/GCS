@@ -14,6 +14,11 @@ import java.util.Optional;
 @Repository
 @Transactional
 public class UserOrderDaoImpl implements UserOrderDao {
+    private final String GET_ALL_USER_ORDERS = "SELECT o FROM UserOrder o";
+    private final String GET_ALL_BY_USER_ID = "SELECT uo FROM UserOrder uo WHERE uo.user.id=:userId";
+    private final String GET_ALL_BY_CERTIFICATE_ID = "SELECT uo FROM UserOrder uo WHERE uo.certificate.id=:certificateId";
+    private final String GET_COUNT = "SELECT COUNT(o) FROM UserOrder o";
+
     @PersistenceContext
     private EntityManager manager;
 
@@ -24,45 +29,33 @@ public class UserOrderDaoImpl implements UserOrderDao {
 
     @Override
     public List<UserOrder> getAll(int pageNumber, int pageSize) {
-        TypedQuery<UserOrder> idQuery = manager.createQuery("SELECT o FROM UserOrder o", UserOrder.class);
-        return idQuery.setFirstResult((pageNumber - 1) * pageSize)
+        TypedQuery<UserOrder> query = manager.createQuery(GET_ALL_USER_ORDERS, UserOrder.class);
+        return query.setFirstResult((pageNumber - 1) * pageSize)
                 .setMaxResults(pageSize)
                 .getResultList();
     }
 
     @Override
     public List<UserOrder> getAllByUserId(int pageNumber, int pageSize, int userId) {
-        TypedQuery<Integer> idQuery = manager.createQuery("SELECT uo.id FROM UserOrder uo WHERE uo.user.id=:userId", Integer.class);
-        List<Integer> userOrderIds = idQuery
-                .setParameter("userId", userId)
+        TypedQuery<UserOrder> query = manager.createQuery(GET_ALL_BY_USER_ID, UserOrder.class);
+        return query.setParameter("userId", userId)
                 .setFirstResult((pageNumber - 1) * pageSize)
                 .setMaxResults(pageSize)
-                .getResultList();
-
-        TypedQuery<UserOrder> tagQuery = manager.createQuery("SELECT uo FROM UserOrder uo WHERE uo.id in (:ids) ORDER BY uo.id", UserOrder.class);
-        return tagQuery
-                .setParameter("ids", userOrderIds)
                 .getResultList();
     }
 
     @Override
     public List<UserOrder> getAllByCertificateId(int pageNumber, int pageSize, int certificateId) {
-        TypedQuery<Integer> idQuery = manager.createQuery("SELECT uo.id FROM UserOrder uo WHERE uo.certificate.id=:certificateId", Integer.class);
-        List<Integer> userOrderIds = idQuery
-                .setParameter("certificateId", certificateId)
+        TypedQuery<UserOrder> query = manager.createQuery(GET_ALL_BY_CERTIFICATE_ID, UserOrder.class);
+        return query.setParameter("certificateId", certificateId)
                 .setFirstResult((pageNumber - 1) * pageSize)
                 .setMaxResults(pageSize)
-                .getResultList();
-
-        TypedQuery<UserOrder> tagQuery = manager.createQuery("SELECT uo FROM UserOrder uo WHERE uo.id in (:ids) ORDER BY uo.id", UserOrder.class);
-        return tagQuery
-                .setParameter("ids", userOrderIds)
                 .getResultList();
     }
 
     @Override
     public long getCount() {
-        return manager.createQuery("SELECT COUNT(o) FROM UserOrder o", Long.class).getSingleResult();
+        return manager.createQuery(GET_COUNT, Long.class).getSingleResult();
     }
 
     @Override

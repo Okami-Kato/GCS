@@ -3,6 +3,7 @@ package com.epam.esm.dao.impl;
 import com.epam.esm.dao.CertificateDao;
 import com.epam.esm.entity.Certificate;
 import com.epam.esm.entity.Certificate_;
+import com.epam.esm.entity.Tag;
 import com.epam.esm.util.CertificateFilter;
 import com.epam.esm.util.Sort;
 import com.epam.esm.util.SortDirection;
@@ -18,6 +19,7 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Order;
 import javax.persistence.criteria.Root;
+import javax.persistence.criteria.SetJoin;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -28,6 +30,10 @@ import java.util.Optional;
 @Repository
 @Transactional
 public class CertificateDaoImpl implements CertificateDao {
+    private final String GET_ALL_CERTIFICATES_IDS = "SELECT c.id FROM Certificate c";
+    private final String GET_ALL_CERTIFICATES_FROM_IDS = "SELECT c FROM Certificate c WHERE c.id in (:ids)";
+    private final String GET_COUNT = "SELECT COUNT(c) FROM Certificate c";
+
     @PersistenceContext
     private EntityManager manager;
 
@@ -42,12 +48,19 @@ public class CertificateDaoImpl implements CertificateDao {
 
     @Override
     public List<Certificate> getAll(int pageNumber, int pageSize) {
-        TypedQuery<Integer> idQuery = manager.createQuery("SELECT c.id FROM Certificate c", Integer.class);
+        TypedQuery<Integer> idQuery = manager.createQuery(GET_ALL_CERTIFICATES_IDS, Integer.class);
         List<Integer> certificateIds = idQuery
                 .setFirstResult((pageNumber - 1) * pageSize)
                 .setMaxResults(pageSize)
                 .getResultList();
-        return getAllFromIds(certificateIds);
+
+        EntityGraph<?> graph = manager.getEntityGraph("graph.certificate.tags");
+
+        TypedQuery<Certificate> certificateQuery = manager.createQuery(GET_ALL_CERTIFICATES_FROM_IDS, Certificate.class);
+        return certificateQuery
+                .setParameter("ids", certificateIds)
+                .setHint("javax.persistence.fetchgraph", graph)
+                .getResultList();
     }
 
     @Override
@@ -59,7 +72,10 @@ public class CertificateDaoImpl implements CertificateDao {
         idQuery.select(root.get(Certificate_.id));
 
         if (filter.getTagIds() != null) {
-            idQuery.where(root.get(Certificate_.id).in(getCertificateIdsFromTagIds(Arrays.asList(filter.getTagIds()))));
+            SetJoin<Certificate, Tag> tags = root.join(Certificate_.tags);
+            idQuery.where(tags.get("id").in((Object[]) filter.getTagIds()));
+            idQuery.having(criteriaBuilder.equal(criteriaBuilder.count(tags.get("id")), filter.getTagIds().length));
+            idQuery.groupBy(root.get(Certificate_.id));
         }
         if (filter.getNamePart() != null) {
             idQuery.where(criteriaBuilder.like(
@@ -101,7 +117,7 @@ public class CertificateDaoImpl implements CertificateDao {
 
     @Override
     public long getCount() {
-        return manager.createQuery("SELECT COUNT(c) FROM Certificate c", Long.class).getSingleResult();
+        return manager.createQuery(GET_COUNT, Long.class).getSingleResult();
     }
 
     @Override
@@ -111,7 +127,7 @@ public class CertificateDaoImpl implements CertificateDao {
 
     @Override
     public Certificate update(Certificate certificate) {
-        if (certificate == null){
+        if (certificate == null) {
             throw new IllegalArgumentException("Certificate can't be null");
         }
         if (!get(certificate.getId()).isPresent()) {
@@ -132,22 +148,5 @@ public class CertificateDaoImpl implements CertificateDao {
         } else {
             throw new InvalidDataAccessApiUsageException(String.format("Entity wasn't found (%s)", "id=" + id));
         }
-    }
-
-    private List<Integer> getCertificateIdsFromTagIds(List<Integer> tagIds) {
-        return manager.createQuery("SELECT c.id FROM Certificate c LEFT JOIN c.tags t WHERE t.id IN (:ids) GROUP BY c HAVING COUNT(t)=:idsCount", Integer.class)
-                .setParameter("ids", tagIds)
-                .setParameter("idsCount", (long) tagIds.size())
-                .getResultList();
-    }
-
-    private List<Certificate> getAllFromIds(List<Integer> ids) {
-        EntityGraph<?> graph = manager.getEntityGraph("graph.certificate.tags");
-
-        TypedQuery<Certificate> certificateQuery = manager.createQuery("SELECT c FROM Certificate c WHERE c.id in (:ids) ORDER BY c.id", Certificate.class);
-        return certificateQuery
-                .setParameter("ids", ids)
-                .setHint("javax.persistence.fetchgraph", graph)
-                .getResultList();
     }
 }
