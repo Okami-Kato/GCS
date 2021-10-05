@@ -1,16 +1,14 @@
 package com.epam.esm.web.controller;
 
 import com.epam.esm.service.UserService;
-import com.epam.esm.service.dto.response.CertificateResponse;
 import com.epam.esm.service.dto.response.UserResponse;
 import com.epam.esm.service.exception.ServiceException;
-import com.epam.esm.util.CertificateFilter;
-import com.epam.esm.util.Sort;
-import com.epam.esm.util.SortDirection;
 import com.epam.esm.web.exception.BadRequestException;
 import com.epam.esm.web.exception.EntityNotFoundException;
 import com.epam.esm.web.exception.ErrorCode;
+import com.epam.esm.web.processor.UserPostProcessor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.hateoas.CollectionModel;
 import org.springframework.http.MediaType;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,9 +18,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.constraints.Positive;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
+
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @RestController
 @Validated
@@ -30,9 +30,12 @@ import java.util.Optional;
 public class UserController {
     private final UserService userService;
 
+    private final UserPostProcessor userPostProcessor;
+
     @Autowired
-    public UserController(UserService userService) {
+    public UserController(UserService userService, UserPostProcessor userPostProcessor) {
         this.userService = userService;
+        this.userPostProcessor = userPostProcessor;
     }
 
     /**
@@ -44,12 +47,13 @@ public class UserController {
      * @throws BadRequestException if given parameters are invalid.
      */
     @GetMapping(value = "/users")
-    public List<UserResponse> getAllUsers(@RequestParam(defaultValue = "1")
-                                          @Positive(message = "Page number must be a positive number") int page,
-                                          @RequestParam(defaultValue = "5")
-                                          @Positive(message = "Size must be a positive number") int size) {
+    public CollectionModel<? extends UserResponse> getAllUsers(@RequestParam(defaultValue = "1")
+                                          @Positive(message = "Page number must be a positive number") Integer page,
+                                                     @RequestParam(defaultValue = "5")
+                                          @Positive(message = "Size must be a positive number") Integer size) {
         try {
-            return userService.getAll(page, size);
+            CollectionModel<? extends UserResponse> response = userPostProcessor.processCollection(userService.getAll(page, size));
+            return response.add(linkTo(methodOn(UserController.class).getAllUsers(page, size)).withSelfRel());
         } catch (ServiceException e) {
             throw new BadRequestException(ErrorCode.USER_BAD_REQUEST, e.getMessage());
         }
@@ -64,7 +68,8 @@ public class UserController {
      */
     @GetMapping(value = "/users/{id}")
     public UserResponse getUser(@PathVariable int id) {
-        Optional<UserResponse> user = userService.get(id);
-        return user.orElseThrow(() -> new EntityNotFoundException(ErrorCode.USER_NOT_FOUND, "id=" + id));
+        Optional<UserResponse> response = userService.get(id);
+        response.ifPresent(userPostProcessor::processEntity);
+        return response.orElseThrow(() -> new EntityNotFoundException(ErrorCode.USER_NOT_FOUND, "id=" + id));
     }
 }

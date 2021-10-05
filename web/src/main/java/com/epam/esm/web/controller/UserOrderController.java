@@ -1,16 +1,17 @@
 package com.epam.esm.web.controller;
 
 import com.epam.esm.service.UserOrderService;
-import com.epam.esm.service.dto.request.CreateCertificateRequest;
 import com.epam.esm.service.dto.request.CreateUserOrderRequest;
-import com.epam.esm.service.dto.response.CertificateResponse;
 import com.epam.esm.service.dto.response.UserOrderItem;
 import com.epam.esm.service.dto.response.UserOrderResponse;
 import com.epam.esm.service.exception.ServiceException;
 import com.epam.esm.web.exception.BadRequestException;
 import com.epam.esm.web.exception.EntityNotFoundException;
 import com.epam.esm.web.exception.ErrorCode;
+import com.epam.esm.web.processor.UserOrderItemPostProcessor;
+import com.epam.esm.web.processor.UserOrderResponsePostProcessor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.hateoas.CollectionModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.validation.annotation.Validated;
@@ -23,10 +24,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.validation.Valid;
 import javax.validation.constraints.Positive;
-import java.util.List;
 import java.util.Optional;
+
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @RestController
 @Validated
@@ -34,9 +36,14 @@ import java.util.Optional;
 public class UserOrderController {
     private final UserOrderService orderService;
 
+    private final UserOrderItemPostProcessor userOrderItemPostProcessor;
+    private final UserOrderResponsePostProcessor userOrderResponsePostProcessor;
+
     @Autowired
-    public UserOrderController(UserOrderService orderService) {
+    public UserOrderController(UserOrderService orderService, UserOrderItemPostProcessor userOrderItemPostProcessor, UserOrderResponsePostProcessor userOrderResponsePostProcessor) {
         this.orderService = orderService;
+        this.userOrderItemPostProcessor = userOrderItemPostProcessor;
+        this.userOrderResponsePostProcessor = userOrderResponsePostProcessor;
     }
 
     /**
@@ -49,13 +56,17 @@ public class UserOrderController {
      * @throws BadRequestException if given parameters are invalid.
      */
     @GetMapping(value = "/users/{userId}/orders")
-    public List<UserOrderItem> getAllOrdersByUserId(@RequestParam(defaultValue = "1")
-                                                    @Positive(message = "Page number must be a positive number") int page,
-                                                    @RequestParam(defaultValue = "5")
-                                                    @Positive(message = "Size must be a positive number") int size,
-                                                    @PathVariable int userId) {
+    public CollectionModel<? extends UserOrderItem> getAllOrdersByUserId(@RequestParam(defaultValue = "1")
+                                                                         @Positive(message = "Page number must be a positive number") Integer page,
+                                                                         @RequestParam(defaultValue = "5")
+                                                                         @Positive(message = "Size must be a positive number") Integer size,
+                                                                         @PathVariable Integer userId) {
         try {
-            return orderService.getAllByUserId(page, size, userId);
+            CollectionModel<? extends UserOrderItem> response = userOrderItemPostProcessor.processCollection(
+                    orderService.getAllByUserId(page, size, userId));
+            return response.add(linkTo(methodOn(UserOrderController.class)
+                    .getAllOrdersByUserId(page, size, userId))
+                    .withSelfRel());
         } catch (ServiceException e) {
             throw new BadRequestException(ErrorCode.USER_ORDER_BAD_REQUEST, e.getMessage());
         }
@@ -71,13 +82,17 @@ public class UserOrderController {
      * @throws BadRequestException if given parameters are invalid.
      */
     @GetMapping(value = "/certificates/{certificateId}/orders")
-    public List<UserOrderItem> getAllOrdersByCertificateId(@RequestParam(defaultValue = "1")
-                                                           @Positive(message = "Page number must be a positive number") int page,
-                                                           @RequestParam(defaultValue = "5")
-                                                           @Positive(message = "Size must be a positive number") int size,
-                                                           @PathVariable int certificateId) {
+    public CollectionModel<? extends UserOrderItem> getAllOrdersByCertificateId(@RequestParam(defaultValue = "1")
+                                                                                @Positive(message = "Page number must be a positive number") Integer page,
+                                                                                @RequestParam(defaultValue = "5")
+                                                                                @Positive(message = "Size must be a positive number") Integer size,
+                                                                                @PathVariable Integer certificateId) {
         try {
-            return orderService.getAllByCertificateId(page, size, certificateId);
+            CollectionModel<? extends UserOrderItem> response = userOrderItemPostProcessor.processCollection(
+                    orderService.getAllByCertificateId(page, size, certificateId));
+            return response.add(linkTo(methodOn(UserOrderController.class)
+                    .getAllOrdersByCertificateId(page, size, certificateId))
+                    .withSelfRel());
         } catch (ServiceException e) {
             throw new BadRequestException(ErrorCode.USER_ORDER_BAD_REQUEST, e.getMessage());
         }
@@ -92,8 +107,9 @@ public class UserOrderController {
      */
     @GetMapping(value = "/orders/{id}")
     public UserOrderResponse getOrder(@PathVariable int id) {
-        Optional<UserOrderResponse> order = orderService.get(id);
-        return order.orElseThrow(() -> new EntityNotFoundException(ErrorCode.USER_ORDER_NOT_FOUND, "id=" + id));
+        Optional<UserOrderResponse> response = orderService.get(id);
+        response.ifPresent(userOrderResponsePostProcessor::processEntity);
+        return response.orElseThrow(() -> new EntityNotFoundException(ErrorCode.USER_ORDER_NOT_FOUND, "id=" + id));
     }
 
     /**
@@ -105,9 +121,11 @@ public class UserOrderController {
      */
     @PostMapping(value = "/orders")
     @ResponseStatus(HttpStatus.CREATED)
-    public UserOrderResponse createCertificate(@RequestBody CreateUserOrderRequest order) {
+    public UserOrderResponse createUserOrder(@RequestBody CreateUserOrderRequest order) {
         try {
-            return orderService.create(order);
+            UserOrderResponse response = orderService.create(order);
+            userOrderResponsePostProcessor.processEntity(response);
+            return response;
         } catch (ServiceException e) {
             throw new BadRequestException(ErrorCode.USER_ORDER_BAD_REQUEST, e.getMessage());
         }

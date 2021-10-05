@@ -15,6 +15,7 @@ import com.epam.esm.util.SortDirection;
 import com.epam.esm.web.exception.BadRequestException;
 import com.epam.esm.web.exception.EntityNotFoundException;
 import com.epam.esm.web.exception.ErrorCode;
+import com.epam.esm.web.processor.CertificatePostProcessor;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -59,26 +60,16 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 @RequestMapping(produces = MediaType.APPLICATION_JSON_VALUE)
 public class CertificateController {
     private final CertificateService certificateService;
+
+    private final CertificatePostProcessor certificatePostProcessor;
+
     private final ObjectMapper objectMapper;
 
     @Autowired
-    public CertificateController(CertificateService certificateService, ObjectMapper objectMapper) {
+    public CertificateController(CertificatePostProcessor certificatePostProcessor, CertificateService certificateService, ObjectMapper objectMapper) {
+        this.certificatePostProcessor = certificatePostProcessor;
         this.certificateService = certificateService;
         this.objectMapper = objectMapper;
-    }
-
-    static void processCertificateItem(CertificateItem certificateItem) {
-        certificateItem.add(linkTo(methodOn(CertificateController.class).getCertificate(certificateItem.getId())).withSelfRel());
-        certificateItem.add(linkTo(methodOn(CertificateController.class).updateCertificate(certificateItem.getId(), null)).withRel("update"));
-        certificateItem.add(linkTo(methodOn(CertificateController.class).deleteCertificate(certificateItem.getId())).withRel("delete"));
-        certificateItem.getTags().forEach(TagController::processTagResponse);
-    }
-
-    static void processCertificateResponse(CertificateResponse certificateResponse) {
-        certificateResponse.add(linkTo(methodOn(CertificateController.class).getCertificate(certificateResponse.getId())).withSelfRel());
-        certificateResponse.add(linkTo(methodOn(CertificateController.class).updateCertificate(certificateResponse.getId(), null)).withRel("update"));
-        certificateResponse.add(linkTo(methodOn(CertificateController.class).deleteCertificate(certificateResponse.getId())).withRel("delete"));
-        certificateResponse.getTags().forEach(TagController::processTagResponse);
     }
 
     /**
@@ -94,7 +85,7 @@ public class CertificateController {
      * @throws BadRequestException if given parameters are invalid.
      */
     @GetMapping(value = "/certificates")
-    public CollectionModel<CertificateItem> getAllCertificates(@RequestParam(defaultValue = "1")
+    public CollectionModel<? extends CertificateItem> getAllCertificates(@RequestParam(defaultValue = "1")
                                                                @Positive(message = "Page number must be a positive number") Integer page,
                                                                @RequestParam(defaultValue = "5")
                                                                @Positive(message = "Size must be a positive number") Integer size,
@@ -121,11 +112,10 @@ public class CertificateController {
                 filterBuilder.withSort(Sort.by(orders));
             }
             List<CertificateItem> certificateList = certificateService.getAll(page, size, filterBuilder.build());
-            certificateList.forEach(CertificateController::processCertificateItem);
-            return CollectionModel.of(certificateList,
-                    linkTo(methodOn(CertificateController.class)
-                            .getAllCertificates(page, size, namePart, descriptionPart, tagIds, sort))
-                            .withSelfRel());
+            CollectionModel<? extends CertificateItem> response = certificatePostProcessor.processCollection(certificateList);
+            return response.add(linkTo(methodOn(CertificateController.class)
+                    .getAllCertificates(page, size, namePart, descriptionPart, tagIds, sort))
+                    .withSelfRel());
         } catch (ServiceException e) {
             throw new BadRequestException(ErrorCode.CERTIFICATE_BAD_REQUEST, e.getMessage());
         }
@@ -140,9 +130,9 @@ public class CertificateController {
      */
     @GetMapping(value = "/certificates/{id}")
     public CertificateResponse getCertificate(@PathVariable int id) {
-        Optional<CertificateResponse> certificate = certificateService.get(id);
-        certificate.ifPresent(CertificateController::processCertificateResponse);
-        return certificate.orElseThrow(() -> new EntityNotFoundException(ErrorCode.CERTIFICATE_NOT_FOUND, "id=" + id));
+        Optional<CertificateResponse> response = certificateService.get(id);
+        response.ifPresent(certificatePostProcessor::processEntity);
+        return response.orElseThrow(() -> new EntityNotFoundException(ErrorCode.CERTIFICATE_NOT_FOUND, "id=" + id));
     }
 
     /**
@@ -157,7 +147,7 @@ public class CertificateController {
     public CertificateResponse createCertificate(@Valid @RequestBody CreateCertificateRequest certificate) {
         try {
             CertificateResponse response = certificateService.create(certificate);
-            processCertificateResponse(response);
+            certificatePostProcessor.processEntity(response);
             return response;
         } catch (ServiceException e) {
             throw new BadRequestException(ErrorCode.CERTIFICATE_BAD_REQUEST, e.getMessage());
@@ -201,7 +191,7 @@ public class CertificateController {
         try {
             UpdateCertificateRequest certificatePatched = applyPatchToCertificate(patch, updateRequest);
             CertificateResponse response = updateCertificate(certificatePatched);
-            processCertificateResponse(response);
+            certificatePostProcessor.processEntity(response);
             return response;
         } catch (ServiceException | JsonPatchException | JsonProcessingException e) {
             throw new BadRequestException(ErrorCode.CERTIFICATE_BAD_REQUEST, e.getMessage());
