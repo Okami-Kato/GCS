@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.constraints.Positive;
-import java.util.List;
 import java.util.Optional;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
@@ -41,16 +40,16 @@ public class UserController {
     /**
      * Retrieves all gift users, that match given properties.
      *
-     * @param page            number of page.
-     * @param size            size of page.
+     * @param page number of page.
+     * @param size size of page.
      * @return list of found users.
      * @throws BadRequestException if given parameters are invalid.
      */
     @GetMapping(value = "/users")
     public CollectionModel<? extends UserResponse> getAllUsers(@RequestParam(defaultValue = "1")
-                                          @Positive(message = "Page number must be a positive number") Integer page,
-                                                     @RequestParam(defaultValue = "5")
-                                          @Positive(message = "Size must be a positive number") Integer size) {
+                                                               @Positive(message = "Page number must be a positive number") Integer page,
+                                                               @RequestParam(defaultValue = "5")
+                                                               @Positive(message = "Size must be a positive number") Integer size) {
         try {
             CollectionModel<? extends UserResponse> response = userPostProcessor.processCollection(userService.getAll(page, size));
             return response.add(linkTo(methodOn(UserController.class).getAllUsers(page, size)).withSelfRel());

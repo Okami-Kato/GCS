@@ -86,18 +86,18 @@ public class CertificateController {
      */
     @GetMapping(value = "/certificates")
     public CollectionModel<? extends CertificateItem> getAllCertificates(@RequestParam(defaultValue = "1")
-                                                               @Positive(message = "Page number must be a positive number") Integer page,
-                                                               @RequestParam(defaultValue = "5")
-                                                               @Positive(message = "Size must be a positive number") Integer size,
-                                                               @RequestParam Optional<String> namePart,
-                                                               @RequestParam Optional<String> descriptionPart,
-                                                               @RequestParam Optional<Integer[]> tagIds,
-                                                               @RequestParam Optional<List<
-                                                                       @NotBlank
-                                                                       @Pattern(regexp = "^[\\w]+[.](asc|desc)$",
-                                                                               message = "Sort property must be of pattern " +
-                                                                                       "property.sortDirection (name.asc, price.desc)")
-                                                                               String>> sort) {
+                                                                         @Positive(message = "Page number must be a positive number") Integer page,
+                                                                         @RequestParam(defaultValue = "5")
+                                                                         @Positive(message = "Size must be a positive number") Integer size,
+                                                                         @RequestParam Optional<String> namePart,
+                                                                         @RequestParam Optional<String> descriptionPart,
+                                                                         @RequestParam Optional<Integer[]> tagIds,
+                                                                         @RequestParam Optional<List<
+                                                                                 @NotBlank
+                                                                                 @Pattern(regexp = "^[\\w]+[.](asc|desc)$",
+                                                                                         message = "Sort property must be of pattern " +
+                                                                                                 "property.sortDirection (name.asc, price.desc)")
+                                                                                         String>> sort) {
         try {
             CertificateFilterBuilder filterBuilder = CertificateFilter.newBuilder();
             namePart.ifPresent(filterBuilder::withPartInName);

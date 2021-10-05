@@ -2,7 +2,7 @@ package com.epam.esm.web.exception;
 
 import org.springframework.http.HttpStatus;
 
-public class WebException extends RuntimeException{
+public class WebException extends RuntimeException {
     private final ErrorCode code;
     private final HttpStatus status;
 

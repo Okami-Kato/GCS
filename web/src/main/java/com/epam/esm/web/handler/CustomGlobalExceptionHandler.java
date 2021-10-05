@@ -1,10 +1,7 @@
 package com.epam.esm.web.handler;
 
-import com.epam.esm.web.exception.ErrorCode;
 import com.epam.esm.web.exception.ErrorResponse;
 import com.epam.esm.web.exception.WebException;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.github.fge.jsonpatch.JsonPatchException;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
