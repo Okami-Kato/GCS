@@ -36,9 +36,6 @@ public class User {
     @Column(name = "password", nullable = false, length = 25)
     private String password;
 
-    @OneToMany(mappedBy = "user")
-    private final Set<UserOrder> orders = new HashSet<>();
-
     protected User() {
     }
 
@@ -87,18 +84,6 @@ public class User {
 
     public void setPassword(String password) {
         this.password = password;
-    }
-
-    public Set<UserOrder> getOrders() {
-        return new HashSet<>(orders);
-    }
-
-    public void addOrder(UserOrder order){
-        if (orders.contains(order)){
-            return;
-        }
-        orders.add(order);
-        order.setUser(this);
     }
 
     @Override

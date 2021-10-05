@@ -43,7 +43,7 @@ public class UserOrder {
     }
 
     public UserOrder(User user, Certificate certificate, Integer cost) {
-        setUser(user);
+        this.user = user;
         this.certificate = certificate;
         this.cost = cost;
     }
@@ -63,14 +63,6 @@ public class UserOrder {
 
     public User getUser() {
         return user;
-    }
-
-    public void setUser(User user) {
-        if (this.user != null) {
-            return;
-        }
-        this.user = user;
-        user.addOrder(this);
     }
 
     public Certificate getCertificate() {
