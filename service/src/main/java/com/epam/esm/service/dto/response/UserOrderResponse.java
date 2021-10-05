@@ -3,11 +3,15 @@ package com.epam.esm.service.dto.response;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
+import org.springframework.hateoas.RepresentationModel;
+import org.springframework.hateoas.server.core.Relation;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
 
-public class UserOrderResponse extends AbstractResponse {
+@Relation(collectionRelation = "orders")
+public class UserOrderResponse extends RepresentationModel<UserOrderResponse> {
+    private Integer id;
     private UserResponse user;
     private CertificateItem certificate;
     private Integer cost;
@@ -20,11 +24,19 @@ public class UserOrderResponse extends AbstractResponse {
     }
 
     public UserOrderResponse(Integer id, UserResponse user, CertificateItem certificate, Integer cost, LocalDateTime timestamp) {
-        super(id);
+        this.id = id;
         this.user = user;
         this.certificate = certificate;
         this.cost = cost;
         this.timestamp = timestamp;
+    }
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
     }
 
     public UserResponse getUser() {
@@ -63,14 +75,13 @@ public class UserOrderResponse extends AbstractResponse {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
         UserOrderResponse that = (UserOrderResponse) o;
-        return user.equals(that.user) && certificate.equals(that.certificate) && cost.equals(that.cost) && Objects.equals(timestamp, that.timestamp);
+        return id.equals(that.id) && user.equals(that.user) && certificate.equals(that.certificate) && cost.equals(that.cost) && Objects.equals(timestamp, that.timestamp);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), user, certificate, cost, timestamp);
+        return Objects.hash(id, user, certificate, cost, timestamp);
     }
 
     @Override

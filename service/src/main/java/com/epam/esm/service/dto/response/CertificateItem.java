@@ -1,16 +1,18 @@
 package com.epam.esm.service.dto.response;
 
 import org.springframework.hateoas.RepresentationModel;
+import org.springframework.hateoas.server.core.Relation;
 
 import java.util.Objects;
 import java.util.Set;
 
+@Relation(collectionRelation = "certificates")
 public class CertificateItem extends RepresentationModel<CertificateItem> {
-    private Integer id;
-    private String name;
-    private Integer price;
+    protected Integer id;
+    protected String name;
+    protected Integer price;
 
-    private Set<TagResponse> tags;
+    protected Set<TagResponse> tags;
 
     public CertificateItem() {
     }
