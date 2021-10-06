@@ -3,16 +3,13 @@ package com.epam.esm.generator.impl;
 import com.epam.esm.generator.Generator;
 import com.epam.esm.service.dto.request.CreateCertificateRequest;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeMap;
 
 public class RandomCertificate implements Generator<CreateCertificateRequest> {
-    private final List<String> availableTagsNames;
     private String name;
     private String description;
     private Integer price;
@@ -20,8 +17,7 @@ public class RandomCertificate implements Generator<CreateCertificateRequest> {
     private Set<String> tagNames;
 
 
-    public RandomCertificate(List<String> availableTagsNames) {
-        this.availableTagsNames = new ArrayList<>(availableTagsNames);
+    public RandomCertificate() {
     }
 
     public RandomCertificate withName(int minSize, int maxSize, Map<Integer, List<String>> dictionary) {
@@ -48,7 +44,7 @@ public class RandomCertificate implements Generator<CreateCertificateRequest> {
         return this;
     }
 
-    public RandomCertificate withTagAmount(int minAmount, int maxAmount) {
+    public RandomCertificate withTagAmount(int minAmount, int maxAmount, List<String> availableTagsNames) {
         if (minAmount < 0)
             throw new IllegalArgumentException("minAmount must be positive");
         if (minAmount > maxAmount)
@@ -70,8 +66,6 @@ public class RandomCertificate implements Generator<CreateCertificateRequest> {
             throw new IllegalStateException("price can't be null");
         if (duration == null)
             throw new IllegalStateException("duration can't be null");
-        if (tagNames == null)
-            throw new IllegalStateException("tagNames can't be null");
 
         return new CreateCertificateRequest(name, description, price, duration, tagNames);
     }
