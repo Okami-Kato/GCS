@@ -1,10 +1,9 @@
 package com.epam.esm.service.impl;
 
-import com.epam.esm.dao.TagDao;
 import com.epam.esm.dao.UserDao;
 import com.epam.esm.entity.User;
 import com.epam.esm.service.UserService;
-import com.epam.esm.service.dto.response.TagResponse;
+import com.epam.esm.service.dto.request.CreateUserRequest;
 import com.epam.esm.service.dto.response.UserResponse;
 import com.epam.esm.service.exception.ServiceException;
 import org.junit.jupiter.api.BeforeAll;
@@ -13,6 +12,7 @@ import org.junit.jupiter.api.TestInstance;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 
 import java.util.Arrays;
@@ -25,7 +25,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.intThat;
-import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -50,6 +51,24 @@ class UserServiceImplTest {
         firstUser.setId(1);
         secondUser.setId(2);
         thirdUser.setId(3);
+    }
+
+    @Test
+    void create() {
+        doThrow(DataIntegrityViolationException.class).when(userDao).create(
+                new User(thirdUser.getFirstName(), thirdUser.getLastName(), thirdUser.getLogin(), thirdUser.getPassword()));
+        doAnswer(invocation -> {
+            Object[] args = invocation.getArguments();
+            ((User) args[0]).setId(firstUser.getId());
+            return null;
+        }).when(userDao).create(new User(firstUser.getFirstName(), firstUser.getLastName(), firstUser.getLogin(), firstUser.getPassword()));
+        UserResponse actualResponse = userService.create(
+                new CreateUserRequest(firstUser.getFirstName(), firstUser.getLastName(), firstUser.getLogin(), firstUser.getPassword()));
+        UserResponse expectedResponse = new UserResponse(firstUser.getId(), firstUser.getFirstName(), firstUser.getLastName());
+        assertEquals(expectedResponse, actualResponse);
+        assertThrows(ServiceException.class, () -> userService.create(
+                new CreateUserRequest(thirdUser.getFirstName(), thirdUser.getLastName(), thirdUser.getLogin(), thirdUser.getPassword())));
+        assertThrows(IllegalArgumentException.class, () -> userService.create(null));
     }
 
     @Test
