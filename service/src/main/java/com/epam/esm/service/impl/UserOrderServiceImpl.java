@@ -77,6 +77,11 @@ public class UserOrderServiceImpl implements UserOrderService {
     }
 
     @Override
+    public long getCount() {
+        return userOrderDao.getCount();
+    }
+
+    @Override
     public UserOrderResponse create(CreateUserOrderRequest userOrder) {
         if (userOrder == null){
             throw new IllegalArgumentException("Passed UserOrder can't be null");

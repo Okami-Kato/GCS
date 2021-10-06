@@ -16,5 +16,7 @@ public interface UserOrderService {
 
     Optional<UserOrderResponse> get(int id);
 
+    long getCount();
+
     UserOrderResponse create(CreateUserOrderRequest userOrder);
 }
