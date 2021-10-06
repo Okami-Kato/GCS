@@ -48,6 +48,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public long getCount() {
+        return userDao.getCount();
+    }
+
+    @Override
     public UserResponse create(CreateUserRequest user) {
         User userToCreate = mapper.map(user, User.class);
         try {

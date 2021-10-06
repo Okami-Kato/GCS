@@ -13,5 +13,7 @@ public interface UserService {
 
     Optional<UserResponse> get(int id);
 
+    long getCount();
+
     UserResponse create(CreateUserRequest user);
 }
