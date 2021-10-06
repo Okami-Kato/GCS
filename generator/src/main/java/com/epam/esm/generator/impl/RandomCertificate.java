@@ -1,8 +1,7 @@
 package com.epam.esm.generator.impl;
 
-import com.epam.esm.entity.Certificate;
-import com.epam.esm.entity.Tag;
 import com.epam.esm.generator.Generator;
+import com.epam.esm.service.dto.request.CreateCertificateRequest;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -11,17 +10,17 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeMap;
 
-public class RandomCertificate implements Generator<Certificate> {
-    private final List<Tag> availableTags;
+public class RandomCertificate implements Generator<CreateCertificateRequest> {
+    private final List<String> availableTagsNames;
     private String name;
     private String description;
     private Integer price;
     private Integer duration;
-    private Set<Tag> tags;
+    private Set<String> tagNames;
 
 
-    public RandomCertificate(List<Tag> availableTags) {
-        this.availableTags = new ArrayList<>(availableTags);
+    public RandomCertificate(List<String> availableTagsNames) {
+        this.availableTagsNames = new ArrayList<>(availableTagsNames);
     }
 
     public RandomCertificate withName(int minSize, int maxSize, TreeMap<Integer, List<String>> dictionary) {
@@ -53,15 +52,15 @@ public class RandomCertificate implements Generator<Certificate> {
             throw new IllegalArgumentException("minAmount must be positive");
         if (minAmount > maxAmount)
             throw new IllegalArgumentException("minAmount must be less or equal to maxAmount");
-        Collections.shuffle(availableTags);
-        this.tags = new HashSet<>(
-                availableTags.subList(0, new RandomInteger().max(minAmount).min(maxAmount).generate())
+        Collections.shuffle(availableTagsNames);
+        this.tagNames = new HashSet<>(
+                availableTagsNames.subList(0, new RandomInteger().max(minAmount).min(maxAmount).generate())
         );
         return this;
     }
 
     @Override
-    public Certificate generate() {
+    public CreateCertificateRequest generate() {
         if (name == null)
             throw new IllegalStateException("name can't be null");
         if (description == null)
@@ -70,9 +69,9 @@ public class RandomCertificate implements Generator<Certificate> {
             throw new IllegalStateException("price can't be null");
         if (duration == null)
             throw new IllegalStateException("duration can't be null");
-        if (tags == null)
+        if (tagNames == null)
             throw new IllegalStateException("tagNames can't be null");
 
-        return new Certificate(name, description, price, duration, tags);
+        return new CreateCertificateRequest(name, description, price, duration, tagNames);
     }
 }

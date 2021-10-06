@@ -1,25 +1,23 @@
 package com.epam.esm.generator.impl;
 
-import com.epam.esm.entity.Certificate;
-import com.epam.esm.entity.User;
-import com.epam.esm.entity.UserOrder;
 import com.epam.esm.generator.Generator;
+import com.epam.esm.service.dto.request.CreateUserOrderRequest;
 
 import java.util.List;
 
-public class RandomUserOrder implements Generator<UserOrder> {
-    private final List<Certificate> availableCertificates;
-    private final List<User> availableUsers;
+public class RandomUserOrder implements Generator<CreateUserOrderRequest> {
+    private final List<Integer> availableCertificatesIds;
+    private final List<Integer> availableUsersIds;
 
-    public RandomUserOrder(List<Certificate> availableCertificates, List<User> availableUsers) {
-        this.availableCertificates = availableCertificates;
-        this.availableUsers = availableUsers;
+    public RandomUserOrder(List<Integer> availableCertificatesIds, List<Integer> availableUsersIds) {
+        this.availableCertificatesIds = availableCertificatesIds;
+        this.availableUsersIds = availableUsersIds;
     }
 
     @Override
-    public UserOrder generate() {
-        Certificate certificate = availableCertificates.get(new RandomInteger().min(0).max(availableCertificates.size()).generate());
-        User user = availableUsers.get(new RandomInteger().min(0).max(availableUsers.size()).generate());
-        return new UserOrder(user, certificate, certificate.getPrice());
+    public CreateUserOrderRequest generate() {
+        Integer certificateId = availableCertificatesIds.get(new RandomInteger().min(0).max(availableCertificatesIds.size()).generate());
+        Integer userId = availableUsersIds.get(new RandomInteger().min(0).max(availableUsersIds.size()).generate());
+        return new CreateUserOrderRequest(userId, certificateId);
     }
 }

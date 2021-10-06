@@ -1,12 +1,12 @@
 package com.epam.esm.generator.impl;
 
-import com.epam.esm.entity.Tag;
 import com.epam.esm.generator.Generator;
+import com.epam.esm.service.dto.request.CreateTagRequest;
 
 import java.util.List;
 import java.util.TreeMap;
 
-public class RandomTag implements Generator<Tag> {
+public class RandomTag implements Generator<CreateTagRequest> {
     private String name;
 
     public RandomTag withName(int minSize, int maxSize, TreeMap<Integer, List<String>> dictionary) {
@@ -15,9 +15,9 @@ public class RandomTag implements Generator<Tag> {
     }
 
     @Override
-    public Tag generate() {
+    public CreateTagRequest generate() {
         if (name == null)
             throw new IllegalStateException("name can't be null - set it first");
-        return new Tag(name);
+        return new CreateTagRequest(name);
     }
 }
