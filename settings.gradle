@@ -4,4 +4,5 @@ include 'dao'
 include 'util'
 include 'service'
 include 'web'
+include 'generator'
 
