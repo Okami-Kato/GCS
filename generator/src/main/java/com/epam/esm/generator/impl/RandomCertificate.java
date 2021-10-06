@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
@@ -23,12 +24,12 @@ public class RandomCertificate implements Generator<CreateCertificateRequest> {
         this.availableTagsNames = new ArrayList<>(availableTagsNames);
     }
 
-    public RandomCertificate withName(int minSize, int maxSize, TreeMap<Integer, List<String>> dictionary) {
+    public RandomCertificate withName(int minSize, int maxSize, Map<Integer, List<String>> dictionary) {
         this.name = new RandomSentence(dictionary).withMinSize(minSize).withMaxSize(maxSize).generate();
         return this;
     }
 
-    public RandomCertificate withDescription(int minSize, int maxSize, TreeMap<Integer, List<String>> dictionary) {
+    public RandomCertificate withDescription(int minSize, int maxSize, Map<Integer, List<String>> dictionary) {
         this.description = new RandomSentence(dictionary).withMinSize(minSize).withMaxSize(maxSize).generate();
         return this;
     }

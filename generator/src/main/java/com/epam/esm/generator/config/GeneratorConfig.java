@@ -11,6 +11,7 @@ import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
 import java.util.TreeMap;
 
@@ -20,7 +21,7 @@ public class GeneratorConfig {
     @Bean
     @ConditionalOnMissingBean
     @ConditionalOnProperty("generator.dictionary-file")
-    public TreeMap<Integer, List<String>> dictionary(GeneratorProperties generatorProperties) throws FileNotFoundException {
+    public Map<Integer, List<String>> dictionary(GeneratorProperties generatorProperties) throws FileNotFoundException {
         TreeMap<Integer, List<String>> result = new TreeMap<>();
         Scanner scanner = new Scanner(new File(generatorProperties.getDictionaryFile()));
         while (scanner.hasNext()) {

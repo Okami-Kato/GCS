@@ -1,10 +1,10 @@
 package com.epam.esm.generator.impl;
 
 import java.util.List;
-import java.util.TreeMap;
+import java.util.Map;
 
 public class RandomSentence extends RandomWord {
-    public RandomSentence(TreeMap<Integer, List<String>> dictionary) {
+    public RandomSentence(Map<Integer, List<String>> dictionary) {
         super(dictionary);
     }
 

@@ -4,17 +4,17 @@ import com.epam.esm.generator.Generator;
 import com.epam.esm.generator.exception.GeneratorException;
 
 import java.util.List;
-import java.util.TreeMap;
+import java.util.Map;
 import java.util.TreeSet;
 
 import static com.epam.esm.generator.util.CollectionUtils.getRandomElementFromSet;
 
 public class RandomWord implements Generator<String> {
-    protected final TreeMap<Integer, List<String>> dictionary;
+    protected final Map<Integer, List<String>> dictionary;
     protected Integer minSize;
     protected Integer maxSize;
 
-    public RandomWord(TreeMap<Integer, List<String>> dictionary) {
+    public RandomWord(Map<Integer, List<String>> dictionary) {
         this.dictionary = dictionary;
     }
 
@@ -61,6 +61,6 @@ public class RandomWord implements Generator<String> {
         }
         Integer wordLength = getRandomElementFromSet(wordsSizes.subSet(actualMaxWordLength, true, actualMaxWordLength, true));
         List<String> words = dictionary.get(wordLength);
-        return dictionary.get(wordLength).get(new RandomInteger().min(0).max(words.size()).generate());
+        return words.get(new RandomInteger().min(0).max(words.size()).generate());
     }
 }
