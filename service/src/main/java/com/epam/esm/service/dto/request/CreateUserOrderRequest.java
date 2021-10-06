@@ -1,7 +1,12 @@
 package com.epam.esm.service.dto.request;
 
+import javax.validation.constraints.NotNull;
+
 public class CreateUserOrderRequest {
+    @NotNull(message = "User id can't be null.")
     private Integer userId;
+
+    @NotNull(message = "Certificate id can't be null.")
     private Integer certificateId;
 
     public CreateUserOrderRequest() {
