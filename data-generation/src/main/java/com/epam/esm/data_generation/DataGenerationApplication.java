@@ -26,41 +26,39 @@ import java.util.stream.Collectors;
 @EnableConfigurationProperties({CertificateProperties.class, TagProperties.class, UserProperties.class, UserOrderProperties.class})
 public class DataGenerationApplication {
     public static void main(String[] args) {
-        ConfigurableApplicationContext context = SpringApplication.run(DataGenerationApplication.class, args);
+        try (ConfigurableApplicationContext context = SpringApplication.run(DataGenerationApplication.class, args)){
+            TagProperties tagProperties = context.getBean(TagProperties.class);
+            TagCreator tagCreator = context.getBean(TagCreator.class);
+            tagCreator.create(tagProperties);
 
-        TagProperties tagProperties = context.getBean(TagProperties.class);
-        TagCreator tagCreator = context.getBean(TagCreator.class);
-        tagCreator.create(tagProperties);
+            TagService tagService = context.getBean(TagService.class);
+            List<String> tagNames = tagService.getAll(1, Math.toIntExact(tagService.getCount()))
+                    .stream()
+                    .map(TagResponse::getName)
+                    .collect(Collectors.toList());
 
-        TagService tagService = context.getBean(TagService.class);
-        List<String> tagNames = tagService.getAll(1, Math.toIntExact(tagService.getCount()))
-                .stream()
-                .map(TagResponse::getName)
-                .collect(Collectors.toList());
+            CertificateProperties certificateProperties = context.getBean(CertificateProperties.class);
+            CertificateCreator certificateCreator = context.getBean(CertificateCreator.class);
+            certificateCreator.create(certificateProperties, tagNames);
 
-        CertificateProperties certificateProperties = context.getBean(CertificateProperties.class);
-        CertificateCreator certificateCreator = context.getBean(CertificateCreator.class);
-        certificateCreator.create(certificateProperties, tagNames);
+            UserProperties userProperties = context.getBean(UserProperties.class);
+            UserCreator userCreator = context.getBean(UserCreator.class);
+            userCreator.create(userProperties);
 
-        UserProperties userProperties = context.getBean(UserProperties.class);
-        UserCreator userCreator = context.getBean(UserCreator.class);
-        userCreator.create(userProperties);
+            CertificateService certificateService = context.getBean(CertificateService.class);
+            UserService userService = context.getBean(UserService.class);
+            List<Integer> certificateIds = certificateService.getAll(1, Math.toIntExact(certificateService.getCount()))
+                    .stream()
+                    .map(CertificateItem::getId)
+                    .collect(Collectors.toList());
+            List<Integer> userIds = userService.getAll(1, Math.toIntExact(userService.getCount()))
+                    .stream()
+                    .map(UserResponse::getId)
+                    .collect(Collectors.toList());
 
-        CertificateService certificateService = context.getBean(CertificateService.class);
-        UserService userService = context.getBean(UserService.class);
-        List<Integer> certificateIds = certificateService.getAll(1, Math.toIntExact(certificateService.getCount()))
-                .stream()
-                .map(CertificateItem::getId)
-                .collect(Collectors.toList());
-        List<Integer> userIds = userService.getAll(1, Math.toIntExact(userService.getCount()))
-                .stream()
-                .map(UserResponse::getId)
-                .collect(Collectors.toList());
-
-        UserOrderProperties userOrderProperties = context.getBean(UserOrderProperties.class);
-        UserOrderCreator userOrderCreator = context.getBean(UserOrderCreator.class);
-        userOrderCreator.create(userOrderProperties, certificateIds, userIds);
-
-        context.close();
+            UserOrderProperties userOrderProperties = context.getBean(UserOrderProperties.class);
+            UserOrderCreator userOrderCreator = context.getBean(UserOrderCreator.class);
+            userOrderCreator.create(userOrderProperties, certificateIds, userIds);
+        }
     }
 }
