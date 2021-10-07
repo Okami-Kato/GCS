@@ -118,6 +118,7 @@ public class TagDaoImpl implements TagDao {
     @Override
     public void create(Tag tag) {
         manager.persist(tag);
+        manager.flush();
     }
 
     @Override

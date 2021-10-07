@@ -91,7 +91,7 @@ public class TagServiceImpl implements TagService {
         try {
             tagDao.create(tagToCreate);
         } catch (DataIntegrityViolationException e) {
-            throw new ServiceException(e);
+            throw new ServiceException(String.format("Tag with name (%s) already exists", tagToCreate.getName()));
         }
         return mapper.map(tagToCreate, TagResponse.class);
     }
