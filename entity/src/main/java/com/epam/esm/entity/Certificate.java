@@ -1,6 +1,7 @@
 package com.epam.esm.entity;
 
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.Type;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -16,10 +17,12 @@ import javax.persistence.NamedAttributeNode;
 import javax.persistence.NamedEntityGraph;
 import javax.persistence.OneToMany;
 import javax.persistence.PrePersist;
+import javax.persistence.PreRemove;
 import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 import java.time.Instant;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Objects;
 import java.util.Set;
 
@@ -29,7 +32,7 @@ import java.util.Set;
 public class Certificate {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    @GenericGenerator(name = "native", strategy = "native")
+//    @GenericGenerator(name = "native", strategy = "native")
     @Column(name = "id", nullable = false)
     private Integer id;
 
@@ -38,6 +41,7 @@ public class Certificate {
 
     @Lob
     @Column(name = "description", nullable = false)
+    @Type(type = "text")
     private String description;
 
     @Column(name = "price")
@@ -90,6 +94,14 @@ public class Certificate {
     @PreUpdate
     private void toUpdate() {
         this.lastUpdateDate = Instant.now();
+    }
+
+    @PreRemove
+    private void toRemove(){
+        HashSet<UserOrder> ordersCopy = new HashSet<>(orders);
+        for (UserOrder order : ordersCopy) {
+            removeOrder(order);
+        }
     }
 
     @Override
@@ -182,5 +194,23 @@ public class Certificate {
             return;
         tags.remove(tag);
         tag.removeCertificate(this);
+    }
+
+    public Set<UserOrder> getOrders() {
+        return new HashSet<>(orders);
+    }
+
+    public void addOrder(UserOrder order) {
+        if (orders.contains(order))
+            return;
+        orders.add(order);
+        order.setCertificate(this);
+    }
+
+    public void removeOrder(UserOrder order) {
+        if (!orders.contains(order))
+            return;
+        orders.remove(order);
+        order.removeCertificate();
     }
 }

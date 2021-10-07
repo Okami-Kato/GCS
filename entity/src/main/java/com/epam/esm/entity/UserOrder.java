@@ -1,14 +1,11 @@
 package com.epam.esm.entity;
 
-import org.hibernate.annotations.GenericGenerator;
-
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.PrePersist;
@@ -21,7 +18,6 @@ import java.util.Objects;
 public class UserOrder {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    @GenericGenerator(name = "native", strategy = "native")
     @Column(name = "id", nullable = false)
     private Integer id;
 
@@ -43,8 +39,8 @@ public class UserOrder {
     }
 
     public UserOrder(User user, Certificate certificate, Integer cost) {
-        this.user = user;
-        this.certificate = certificate;
+        setUser(user);
+        setCertificate(certificate);
         this.cost = cost;
     }
 
@@ -65,8 +61,29 @@ public class UserOrder {
         return user;
     }
 
+    void setUser(User user) {
+        if (this.user == null)
+            return;
+        this.user = user;
+        user.addOrder(this);
+    }
+
     public Certificate getCertificate() {
         return certificate;
+    }
+
+    void setCertificate(Certificate certificate) {
+        if (this.certificate == null)
+            return;
+        this.certificate = certificate;
+        certificate.addOrder(this);
+    }
+
+    void removeCertificate() {
+        if (this.certificate == null)
+            return;
+        certificate.removeOrder(this);
+        this.certificate = null;
     }
 
     public Integer getCost() {

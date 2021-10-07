@@ -1,14 +1,10 @@
 package com.epam.esm.entity;
 
-import org.hibernate.annotations.GenericGenerator;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.NamedAttributeNode;
-import javax.persistence.NamedEntityGraph;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import java.util.HashSet;
@@ -20,7 +16,6 @@ import java.util.Set;
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    @GenericGenerator(name = "native", strategy = "native")
     @Column(name = "id", nullable = false)
     private Integer id;
 
@@ -30,11 +25,14 @@ public class User {
     @Column(name = "last_name", nullable = false, length = 25)
     private String lastName;
 
-    @Column(name = "login", nullable = false, length = 25)
+    @Column(name = "login", nullable = false, unique = true, length = 25)
     private String login;
 
     @Column(name = "password", nullable = false, length = 25)
     private String password;
+
+    @OneToMany(mappedBy = "user")
+    private final Set<UserOrder> orders = new HashSet<>();
 
     protected User() {
     }
@@ -84,6 +82,17 @@ public class User {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public Set<UserOrder> getOrders() {
+        return new HashSet<>(orders);
+    }
+
+    void addOrder(UserOrder order) {
+        if (orders.contains(order))
+            return;
+        orders.add(order);
+        order.setUser(this);
     }
 
     @Override
