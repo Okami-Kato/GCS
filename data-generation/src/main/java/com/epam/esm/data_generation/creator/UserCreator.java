@@ -43,7 +43,8 @@ public class UserCreator {
             try {
                 userService.create(user);
             } catch (ServiceException e) {
-                logger.error(e.getMessage());
+                i--;
+//                logger.error(e.getMessage());
             }
         }
         long after = userService.getCount();

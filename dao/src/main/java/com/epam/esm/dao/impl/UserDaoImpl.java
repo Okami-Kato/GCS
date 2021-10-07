@@ -41,6 +41,7 @@ public class UserDaoImpl implements UserDao {
     @Override
     public void create(User user) {
         manager.persist(user);
+        manager.flush();
     }
 
     @Override

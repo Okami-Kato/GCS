@@ -42,11 +42,6 @@ class UserDaoImplTest {
     }
 
     @Test
-    void create() {
-        assertThrows(UnsupportedOperationException.class, () -> userDao.create(user));
-    }
-
-    @Test
     void update() {
         assertThrows(UnsupportedOperationException.class, () -> userDao.update(user));
     }

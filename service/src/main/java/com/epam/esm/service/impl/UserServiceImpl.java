@@ -58,7 +58,7 @@ public class UserServiceImpl implements UserService {
         try {
             userDao.create(userToCreate);
         } catch (DataIntegrityViolationException e) {
-            throw new ServiceException(e);
+            throw new ServiceException(String.format("User with login (%s) already exists", user.getLogin()));
         }
         return mapper.map(userToCreate, UserResponse.class);
     }
