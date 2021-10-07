@@ -11,6 +11,8 @@ gradle
 build
 gradlew.bat
 gradlew
-/dao/src/test/resources/application-test.properties
-/web/src/main/resources/application-dev.properties
-/web/src/main/resources/application-prod.properties
+
+/dao/src/test/resources/application-test.yml
+/data-generation/src/main/resources/application.yml
+/web/src/main/resources/application-dev.yml
+/web/src/main/resources/application-prod.yml
