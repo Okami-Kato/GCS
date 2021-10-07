@@ -43,7 +43,8 @@ public class TagCreator {
             try {
                 tagService.create(tag);
             } catch (ServiceException e) {
-                logger.error(e.getMessage());
+                i--;
+//                logger.error(e.getMessage());
             }
         }
         long after = tagService.getCount();
