@@ -60,5 +60,7 @@ public class DataGenerationApplication {
         UserOrderProperties userOrderProperties = context.getBean(UserOrderProperties.class);
         UserOrderCreator userOrderCreator = context.getBean(UserOrderCreator.class);
         userOrderCreator.create(userOrderProperties, certificateIds, userIds);
+
+        context.close();
     }
 }
