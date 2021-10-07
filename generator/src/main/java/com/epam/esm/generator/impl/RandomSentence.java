@@ -20,7 +20,7 @@ public class RandomSentence extends RandomWord {
 
         while (!(result.length() >= minSize && result.length() <= maxSize)) {
             result.append(new RandomWord(dictionary).withMinSize(0).withMaxSize(maxSize).generate());
-            if (result.length() < maxSize) {
+            if (result.length() + 1 < maxSize) {
                 result.append(" ");
             }
         }

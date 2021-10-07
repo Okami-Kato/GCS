@@ -19,17 +19,17 @@ public class RandomUser implements Generator<CreateUserRequest> {
     }
 
     public RandomUser withLastName(int minSize, int maxSize, Map<Integer, List<String>> dictionary) {
-        this.firstName = new RandomSentence(dictionary).withMinSize(minSize).withMaxSize(maxSize).generate();
+        this.lastName = new RandomSentence(dictionary).withMinSize(minSize).withMaxSize(maxSize).generate();
         return this;
     }
 
     public RandomUser withLogin(int minSize, int maxSize, Map<Integer, List<String>> dictionary) {
-        this.firstName = new RandomSentence(dictionary).withMinSize(minSize).withMaxSize(maxSize).generate();
+        this.login = new RandomSentence(dictionary).withMinSize(minSize).withMaxSize(maxSize).generate();
         return this;
     }
 
     public RandomUser withPassword(int minSize, int maxSize, Map<Integer, List<String>> dictionary) {
-        this.firstName = new RandomSentence(dictionary).withMinSize(minSize).withMaxSize(maxSize).generate();
+        this.password = new RandomSentence(dictionary).withMinSize(minSize).withMaxSize(maxSize).generate();
         return this;
     }
 

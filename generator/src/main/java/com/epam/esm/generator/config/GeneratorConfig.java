@@ -1,6 +1,6 @@
 package com.epam.esm.generator.config;
 
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -19,7 +19,7 @@ import java.util.TreeMap;
 @EnableConfigurationProperties(GeneratorProperties.class)
 public class GeneratorConfig {
     @Bean
-    @ConditionalOnMissingBean
+    @Qualifier("dictionary")
     @ConditionalOnProperty("generator.dictionary-file")
     public Map<Integer, List<String>> dictionary(GeneratorProperties generatorProperties) throws FileNotFoundException {
         TreeMap<Integer, List<String>> result = new TreeMap<>();

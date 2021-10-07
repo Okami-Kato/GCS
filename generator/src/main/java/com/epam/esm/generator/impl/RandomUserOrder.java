@@ -16,8 +16,8 @@ public class RandomUserOrder implements Generator<CreateUserOrderRequest> {
 
     @Override
     public CreateUserOrderRequest generate() {
-        Integer certificateId = availableCertificatesIds.get(new RandomInteger().min(0).max(availableCertificatesIds.size()).generate());
-        Integer userId = availableUsersIds.get(new RandomInteger().min(0).max(availableUsersIds.size()).generate());
+        Integer certificateId = availableCertificatesIds.get(new RandomInteger().min(0).max(availableCertificatesIds.size() - 1).generate());
+        Integer userId = availableUsersIds.get(new RandomInteger().min(0).max(availableUsersIds.size() - 1).generate());
         return new CreateUserOrderRequest(userId, certificateId);
     }
 }

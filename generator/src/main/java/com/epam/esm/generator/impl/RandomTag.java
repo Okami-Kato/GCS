@@ -5,7 +5,6 @@ import com.epam.esm.service.dto.request.CreateTagRequest;
 
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 
 public class RandomTag implements Generator<CreateTagRequest> {
     private String name;

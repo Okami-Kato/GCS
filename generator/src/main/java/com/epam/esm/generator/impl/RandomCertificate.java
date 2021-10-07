@@ -51,7 +51,7 @@ public class RandomCertificate implements Generator<CreateCertificateRequest> {
             throw new IllegalArgumentException("minAmount must be less or equal to maxAmount");
         Collections.shuffle(availableTagsNames);
         this.tagNames = new HashSet<>(
-                availableTagsNames.subList(0, new RandomInteger().max(minAmount).min(maxAmount).generate())
+                availableTagsNames.subList(0, new RandomInteger().min(minAmount).max(maxAmount).generate())
         );
         return this;
     }

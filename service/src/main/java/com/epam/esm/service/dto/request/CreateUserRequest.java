@@ -1,26 +1,26 @@
 package com.epam.esm.service.dto.request;
 
-import javax.validation.constraints.NotNull;
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
 public class CreateUserRequest {
     @Size(min = 2, max = 25, message = "User first name must be {min}-{max} characters long.")
-    @NotNull(message = "User first name can't be null.")
+    @NotBlank(message = "User first name can't be blank.")
     @Pattern(regexp = "^[A-Z][a-z]+$", message = "User first name can contain letters, must start with an uppercase letter.")
     private String firstName;
 
     @Size(min = 2, max = 25, message = "User first name must be {min}-{max} characters long.")
-    @NotNull(message = "User first name can't be null.")
+    @NotBlank(message = "User first name can't be blank.")
     @Pattern(regexp = "^([A-Z][a-z ,.'-]+)+$", message = "User last name can contain letters and special characters \"., '-\", must start with an uppercase letter.")
     private String lastName;
 
     @Size(min = 2, max = 25, message = "User login must be {min}-{max} characters long.")
-    @NotNull(message = "User login can't be null.")
+    @NotBlank(message = "User login can't be blank.")
     private String login;
 
     @Size(min = 2, max = 25, message = "User password must be {min}-{max} characters long.")
-    @NotNull(message = "User password can't be null.")
+    @NotBlank(message = "User password can't be blank.")
     private String password;
 
     public CreateUserRequest() {

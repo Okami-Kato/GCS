@@ -30,7 +30,6 @@ public class UserOrderCreator {
                 userOrderService.create(order);
             } catch (ServiceException e) {
                 logger.error(e.getMessage());
-                i--;
             }
         }
         long after = userOrderService.getCount();

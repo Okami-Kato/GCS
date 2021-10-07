@@ -59,8 +59,8 @@ public class RandomWord implements Generator<String> {
         if (actualMaxWordLength == null || actualMinWordLength == null) {
             throw new GeneratorException(String.format("Dictionary doesn't contain words, consisting of %s-%s", minSize, maxSize));
         }
-        Integer wordLength = getRandomElementFromSet(wordsSizes.subSet(actualMaxWordLength, true, actualMaxWordLength, true));
+        Integer wordLength = getRandomElementFromSet(wordsSizes.subSet(actualMinWordLength, true, actualMaxWordLength, true));
         List<String> words = dictionary.get(wordLength);
-        return words.get(new RandomInteger().min(0).max(words.size()).generate());
+        return words.get(new RandomInteger().min(0).max(words.size() - 1).generate());
     }
 }
