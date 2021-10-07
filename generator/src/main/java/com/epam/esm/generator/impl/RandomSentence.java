@@ -19,8 +19,9 @@ public class RandomSentence extends RandomWord {
         StringBuilder result = new StringBuilder();
 
         while (!(result.length() >= minSize && result.length() <= maxSize)) {
-            result.append(new RandomWord(dictionary).withMinSize(0).withMaxSize(maxSize).generate());
-            if (result.length() + 1 < maxSize) {
+            String generatedWord = new RandomWord(dictionary).withMinSize(0).withMaxSize(maxSize - result.length()).generate();
+            result.append(generatedWord);
+            if (result.length() + 1 < minSize) {
                 result.append(" ");
             }
         }
