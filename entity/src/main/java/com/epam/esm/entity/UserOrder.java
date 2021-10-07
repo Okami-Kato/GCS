@@ -62,7 +62,7 @@ public class UserOrder {
     }
 
     void setUser(User user) {
-        if (this.user == null)
+        if (this.user != null)
             return;
         this.user = user;
         user.addOrder(this);
@@ -73,7 +73,7 @@ public class UserOrder {
     }
 
     void setCertificate(Certificate certificate) {
-        if (this.certificate == null)
+        if (this.certificate != null)
             return;
         this.certificate = certificate;
         certificate.addOrder(this);
