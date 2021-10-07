@@ -6,6 +6,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
 import java.util.List;
@@ -14,17 +15,23 @@ import java.util.Optional;
 @Repository
 @Transactional
 public class UserOrderDaoImpl implements UserOrderDao {
-    private final String GET_ALL_USER_ORDERS = "SELECT o FROM UserOrder o";
+    private final String GET_USER_ORDER_BY_ID = "SELECT uo FROM UserOrder uo LEFT JOIN FETCH uo.certificate LEFT JOIN FETCH uo.user WHERE uo.id=:id";
+    private final String GET_ALL_USER_ORDERS = "SELECT uo FROM UserOrder uo";
     private final String GET_ALL_BY_USER_ID = "SELECT uo FROM UserOrder uo WHERE uo.user.id=:userId";
     private final String GET_ALL_BY_CERTIFICATE_ID = "SELECT uo FROM UserOrder uo WHERE uo.certificate.id=:certificateId";
-    private final String GET_COUNT = "SELECT COUNT(o) FROM UserOrder o";
+    private final String GET_COUNT = "SELECT COUNT(uo) FROM UserOrder uo";
 
     @PersistenceContext
     private EntityManager manager;
 
     @Override
     public Optional<UserOrder> get(Integer id) {
-        return Optional.ofNullable(manager.find(UserOrder.class, id));
+        TypedQuery<UserOrder> query = manager.createQuery(GET_USER_ORDER_BY_ID, UserOrder.class);
+        try {
+            return Optional.of(query.setParameter("id", id).getSingleResult());
+        } catch (NoResultException e) {
+            return Optional.empty();
+        }
     }
 
     @Override

@@ -25,10 +25,12 @@ public class UserOrderResponsePostProcessor implements RepresentationModelPostPr
         entity.add(linkTo(methodOn(UserOrderController.class)
                 .getAllOrdersByUserId(null, null, entity.getUser().getId()))
                 .withRel("ordersOfUser"));
-        entity.add(linkTo(methodOn(UserOrderController.class)
-                .getAllOrdersByCertificateId(null, null, entity.getCertificate().getId()))
-                .withRel("ordersOnCertificate"));
-        certificatePostProcessor.processEntity(entity.getCertificate());
         userPostProcessor.processEntity(entity.getUser());
+        if (entity.getCertificate() != null) {
+            entity.add(linkTo(methodOn(UserOrderController.class)
+                    .getAllOrdersByCertificateId(null, null, entity.getCertificate().getId()))
+                    .withRel("ordersOnCertificate"));
+            certificatePostProcessor.processEntity(entity.getCertificate());
+        }
     }
 }
