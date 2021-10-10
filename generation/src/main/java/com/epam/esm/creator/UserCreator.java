@@ -17,14 +17,20 @@ public abstract class UserCreator implements Creator {
     protected abstract CreateUserRequest getUser();
 
     @Override
-    public void create(int amount) {
+    public int create(int amount) {
+        int counter = 0;
         for (int i = 0; i < amount; i++) {
             try {
-                userService.create(getUser());
+                CreateUserRequest user;
+                do
+                    user = getUser();
+                while (userService.get(user.getLogin()).isPresent());
+                userService.create(user);
+                counter++;
             } catch (ServiceException e) {
                 logger.error(e.getMessage());
-                i--;
             }
         }
+        return counter;
     }
 }

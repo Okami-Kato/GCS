@@ -17,14 +17,20 @@ public abstract class TagCreator implements Creator {
     protected abstract CreateTagRequest getTag();
 
     @Override
-    public void create(int amount) {
+    public int create(int amount) {
+        int counter = 0;
         for (int i = 0; i < amount; i++) {
             try {
-                tagService.create(getTag());
+                CreateTagRequest tag;
+                do
+                    tag = getTag();
+                while (tagService.get(tag.getName()).isPresent());
+                tagService.create(tag);
+                counter++;
             } catch (ServiceException e) {
                 logger.error(e.getMessage());
-                i--;
             }
         }
+        return counter;
     }
 }

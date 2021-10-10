@@ -17,14 +17,16 @@ public abstract class CertificateCreator implements Creator {
     protected abstract CreateCertificateRequest getCertificate();
 
     @Override
-    public void create(int amount) {
+    public int create(int amount) {
+        int counter = 0;
         for (int i = 0; i < amount; i++) {
             try {
                 certificateService.create(getCertificate());
+                counter++;
             } catch (ServiceException e) {
                 logger.error(e.getMessage());
-                i--;
             }
         }
+        return counter;
     }
 }
