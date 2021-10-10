@@ -16,3 +16,4 @@ gradlew
 /data-generation/src/main/resources/application.yml
 /web/src/main/resources/application-dev.yml
 /web/src/main/resources/application-prod.yml
+/generation/src/main/resources/application.yml

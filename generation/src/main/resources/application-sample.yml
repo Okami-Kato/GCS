@@ -1,0 +1,65 @@
+spring:
+  #jpa properties
+  jpa:
+    database-platform: org.hibernate.dialect.MySQL5Dialect
+
+  #datasource properties
+  datasource:
+    driverClassName: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/databaseName
+    username: username
+    password: password
+    type: org.apache.tomcat.jdbc.pool.DataSource
+
+    #connection pool properties
+    tomcat:
+      initial-size: 1
+      max-active: 5
+      max-idle: 2
+      min-idle: 1
+
+#generation properties
+generation:
+  dictionary-file: generation/src/main/resources/dictionary.txt
+
+  certificate:
+    amount: 10
+    name:
+      minSize: 3
+      maxSize: 50
+    description:
+      minSize: 150
+      maxSize: 3000
+    price:
+      min: 100
+      max: 1000
+    duration:
+      min: 3
+      max: 31
+    tag-amount:
+      min: 3
+      max: 10
+
+  tag:
+    amount: 15
+    name:
+      minSize: 5
+      maxSize: 25
+
+  user:
+    amount: 10
+    first-name:
+      minSize: 3
+      maxSize: 25
+    last-name:
+      minSize: 3
+      maxSize: 25
+    login:
+      minSize: 10
+      maxSize: 25
+    password:
+      minSize: 3
+      maxSize: 25
+
+  user-order:
+    amount: 10
