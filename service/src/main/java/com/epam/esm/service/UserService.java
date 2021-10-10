@@ -1,8 +1,6 @@
 package com.epam.esm.service;
 
-import com.epam.esm.service.dto.request.CreateCertificateRequest;
 import com.epam.esm.service.dto.request.CreateUserRequest;
-import com.epam.esm.service.dto.response.CertificateResponse;
 import com.epam.esm.service.dto.response.UserResponse;
 
 import java.util.List;
