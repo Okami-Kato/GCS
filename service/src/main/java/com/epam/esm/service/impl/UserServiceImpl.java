@@ -48,6 +48,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public Optional<UserResponse> get(String login) {
+        return userDao.get(login).map(user -> mapper.map(user, UserResponse.class));
+    }
+
+    @Override
     public long getCount() {
         return userDao.getCount();
     }

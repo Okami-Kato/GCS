@@ -6,6 +6,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
 import java.util.List;
@@ -14,6 +15,7 @@ import java.util.Optional;
 @Repository
 @Transactional
 public class UserDaoImpl implements UserDao {
+    private final String GET_USER_BY_LOGIN = "SELECT u FROM User u WHERE u.login=:login";
     private final String GET_ALL_USERS = "SELECT u FROM User u";
     private final String GET_COUNT = "SELECT COUNT(u) FROM User u";
 
@@ -23,6 +25,16 @@ public class UserDaoImpl implements UserDao {
     @Override
     public Optional<User> get(Integer id) {
         return Optional.ofNullable(manager.find(User.class, id));
+    }
+
+    @Override
+    public Optional<User> get(String login) {
+        TypedQuery<User> query = manager.createQuery(GET_USER_BY_LOGIN, User.class);
+        try {
+            return Optional.of(query.setParameter("login", login).getSingleResult());
+        } catch (NoResultException e) {
+            return Optional.empty();
+        }
     }
 
     @Override

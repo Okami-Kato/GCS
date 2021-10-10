@@ -11,6 +11,8 @@ public interface UserService {
 
     Optional<UserResponse> get(int id);
 
+    Optional<UserResponse> get(String login);
+
     long getCount();
 
     UserResponse create(CreateUserRequest user);
