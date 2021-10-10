@@ -1,9 +1,0 @@
-apply plugin: 'org.springframework.boot'
-
-dependencies {
-    implementation project(':service')
-    implementation project(':generator')
-    implementation 'org.springframework.boot:spring-boot-starter'
-    implementation 'javax.validation:validation-api'
-    annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
-}

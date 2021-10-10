@@ -15,5 +15,5 @@ compileJava {
 
 dependencies {
     implementation 'org.hibernate:hibernate-core'
-    annotationProcessor('org.hibernate:hibernate-jpamodelgen')
+    annotationProcessor 'org.hibernate:hibernate-jpamodelgen'
 }

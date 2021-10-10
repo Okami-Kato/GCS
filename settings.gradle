@@ -4,6 +4,6 @@ include 'dao'
 include 'util'
 include 'service'
 include 'web'
-include 'generator'
-include 'data-generation'
+include 'random'
+include 'generation'
 
