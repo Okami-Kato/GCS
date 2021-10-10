@@ -21,7 +21,7 @@ public class UserOrderConfig {
     @Bean
     @Scope("prototype")
     public CreateUserOrderRequest userOrder(@Qualifier("userIds") Set<Integer> usersIds,
-                                            @Qualifier("certificatesIds") Set<Integer> certificatesIds) {
+                                            @Qualifier("certificateIds") Set<Integer> certificatesIds) {
         return new CreateUserOrderRequest(
                 new RandomElementFromCollection<>(usersIds).getValue(),
                 new RandomElementFromCollection<>(certificatesIds).getValue()
@@ -29,11 +29,13 @@ public class UserOrderConfig {
     }
 
     @Bean
-    public UserOrderCreator userOrderCreator(UserOrderService userOrderService, UserService userService, CertificateService certificateService) {
+    public UserOrderCreator userOrderCreator(UserOrderService userOrderService,
+                                             @Qualifier("certificateIds") Set<Integer> certificateIds,
+                                             @Qualifier("userIds") Set<Integer> userIds) {
         return new UserOrderCreator(userOrderService) {
             @Override
             protected CreateUserOrderRequest getUserOrder() {
-                return userOrder(availableUsersIds(userService), availableCertificatesIds(certificateService));
+                return userOrder(userIds, certificateIds);
             }
         };
     }
@@ -49,7 +51,7 @@ public class UserOrderConfig {
 
     @Bean
     @Scope("prototype")
-    @Qualifier("certificatesIds")
+    @Qualifier("certificateIds")
     public Set<Integer> availableCertificatesIds(CertificateService certificateService) {
         return certificateService.getAll(1, Math.toIntExact(certificateService.getCount()))
                 .stream()
