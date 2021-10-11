@@ -40,7 +40,8 @@ public class UserOrderController {
     private final UserOrderResponsePostProcessor userOrderResponsePostProcessor;
 
     @Autowired
-    public UserOrderController(UserOrderService orderService, UserOrderItemPostProcessor userOrderItemPostProcessor, UserOrderResponsePostProcessor userOrderResponsePostProcessor) {
+    public UserOrderController(UserOrderService orderService, UserOrderItemPostProcessor userOrderItemPostProcessor,
+                               UserOrderResponsePostProcessor userOrderResponsePostProcessor) {
         this.orderService = orderService;
         this.userOrderItemPostProcessor = userOrderItemPostProcessor;
         this.userOrderResponsePostProcessor = userOrderResponsePostProcessor;
@@ -56,11 +57,12 @@ public class UserOrderController {
      * @throws BadRequestException if given parameters are invalid.
      */
     @GetMapping(value = "/users/{userId}/orders")
-    public CollectionModel<? extends UserOrderItem> getAllOrdersByUserId(@RequestParam(defaultValue = "1")
-                                                                         @Positive(message = "Page number must be a positive number") Integer page,
-                                                                         @RequestParam(defaultValue = "5")
-                                                                         @Positive(message = "Size must be a positive number") Integer size,
-                                                                         @PathVariable Integer userId) {
+    public CollectionModel<? extends UserOrderItem> getAllOrdersByUserId(
+            @RequestParam(defaultValue = "1")
+            @Positive(message = "Page number must be a positive number") Integer page,
+            @RequestParam(defaultValue = "5")
+            @Positive(message = "Size must be a positive number") Integer size,
+            @PathVariable Integer userId) {
         try {
             CollectionModel<? extends UserOrderItem> response = userOrderItemPostProcessor.processCollection(
                     orderService.getAllByUserId(page, size, userId));
@@ -82,11 +84,12 @@ public class UserOrderController {
      * @throws BadRequestException if given parameters are invalid.
      */
     @GetMapping(value = "/certificates/{certificateId}/orders")
-    public CollectionModel<? extends UserOrderItem> getAllOrdersByCertificateId(@RequestParam(defaultValue = "1")
-                                                                                @Positive(message = "Page number must be a positive number") Integer page,
-                                                                                @RequestParam(defaultValue = "5")
-                                                                                @Positive(message = "Size must be a positive number") Integer size,
-                                                                                @PathVariable Integer certificateId) {
+    public CollectionModel<? extends UserOrderItem> getAllOrdersByCertificateId(
+            @RequestParam(defaultValue = "1")
+            @Positive(message = "Page number must be a positive number") Integer page,
+            @RequestParam(defaultValue = "5")
+            @Positive(message = "Size must be a positive number") Integer size,
+            @PathVariable Integer certificateId) {
         try {
             CollectionModel<? extends UserOrderItem> response = userOrderItemPostProcessor.processCollection(
                     orderService.getAllByCertificateId(page, size, certificateId));

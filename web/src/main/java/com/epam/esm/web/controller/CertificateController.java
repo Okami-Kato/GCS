@@ -66,7 +66,8 @@ public class CertificateController {
     private final ObjectMapper objectMapper;
 
     @Autowired
-    public CertificateController(CertificatePostProcessor certificatePostProcessor, CertificateService certificateService, ObjectMapper objectMapper) {
+    public CertificateController(CertificatePostProcessor certificatePostProcessor, CertificateService certificateService,
+                                 ObjectMapper objectMapper) {
         this.certificatePostProcessor = certificatePostProcessor;
         this.certificateService = certificateService;
         this.objectMapper = objectMapper;
@@ -85,19 +86,20 @@ public class CertificateController {
      * @throws BadRequestException if given parameters are invalid.
      */
     @GetMapping(value = "/certificates")
-    public CollectionModel<? extends CertificateItem> getAllCertificates(@RequestParam(defaultValue = "1")
-                                                                         @Positive(message = "Page number must be a positive number") Integer page,
-                                                                         @RequestParam(defaultValue = "5")
-                                                                         @Positive(message = "Size must be a positive number") Integer size,
-                                                                         @RequestParam Optional<String> namePart,
-                                                                         @RequestParam Optional<String> descriptionPart,
-                                                                         @RequestParam Optional<Integer[]> tagIds,
-                                                                         @RequestParam Optional<List<
-                                                                                 @NotBlank
-                                                                                 @Pattern(regexp = "^[\\w]+[.](asc|desc)$",
-                                                                                         message = "Sort property must be of pattern " +
-                                                                                                 "property.sortDirection (name.asc, price.desc)")
-                                                                                         String>> sort) {
+    public CollectionModel<? extends CertificateItem> getAllCertificates(
+            @RequestParam(defaultValue = "1")
+            @Positive(message = "Page number must be a positive number") Integer page,
+            @RequestParam(defaultValue = "5")
+            @Positive(message = "Size must be a positive number") Integer size,
+            @RequestParam Optional<String> namePart,
+            @RequestParam Optional<String> descriptionPart,
+            @RequestParam Optional<Integer[]> tagIds,
+            @RequestParam Optional<List<
+                    @NotBlank
+                    @Pattern(regexp = "^[\\w]+[.](asc|desc)$",
+                            message = "Sort property must be of pattern property.sortDirection (name.asc, price.desc)")
+                            String>> sort
+    ) {
         try {
             CertificateFilterBuilder filterBuilder = CertificateFilter.newBuilder();
             namePart.ifPresent(filterBuilder::withPartInName);

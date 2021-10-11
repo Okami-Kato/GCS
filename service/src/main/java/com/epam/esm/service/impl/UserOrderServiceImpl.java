@@ -83,7 +83,7 @@ public class UserOrderServiceImpl implements UserOrderService {
 
     @Override
     public UserOrderResponse create(CreateUserOrderRequest userOrder) {
-        if (userOrder == null){
+        if (userOrder == null) {
             throw new IllegalArgumentException("Passed UserOrder can't be null");
         }
         if (userOrder.getUserId() == null) {

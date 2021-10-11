@@ -46,10 +46,11 @@ public class UserController {
      * @throws BadRequestException if given parameters are invalid.
      */
     @GetMapping(value = "/users")
-    public CollectionModel<? extends UserResponse> getAllUsers(@RequestParam(defaultValue = "1")
-                                                               @Positive(message = "Page number must be a positive number") Integer page,
-                                                               @RequestParam(defaultValue = "5")
-                                                               @Positive(message = "Size must be a positive number") Integer size) {
+    public CollectionModel<? extends UserResponse> getAllUsers(
+            @RequestParam(defaultValue = "1")
+            @Positive(message = "Page number must be a positive number") Integer page,
+            @RequestParam(defaultValue = "5")
+            @Positive(message = "Size must be a positive number") Integer size) {
         try {
             CollectionModel<? extends UserResponse> response = userPostProcessor.processCollection(userService.getAll(page, size));
             return response.add(linkTo(methodOn(UserController.class).getAllUsers(page, size)).withSelfRel());

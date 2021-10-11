@@ -52,7 +52,10 @@ public class TagController {
     private final CertificatePostProcessor certificatePostProcessor;
 
     @Autowired
-    public TagController(CertificateService certificateService, TagService tagService, TagPostProcessor tagPostProcessor, UserPostProcessor userPostProcessor, UserWithTagsPostProcessor userWithTagsPostProcessor, CertificatePostProcessor certificatePostProcessor) {
+    public TagController(CertificateService certificateService, TagService tagService,
+                         TagPostProcessor tagPostProcessor, UserPostProcessor userPostProcessor,
+                         UserWithTagsPostProcessor userWithTagsPostProcessor,
+                         CertificatePostProcessor certificatePostProcessor) {
         this.certificateService = certificateService;
         this.tagService = tagService;
         this.tagPostProcessor = tagPostProcessor;
@@ -70,10 +73,11 @@ public class TagController {
      * @throws BadRequestException if given parameters are invalid.
      */
     @GetMapping(value = "/tags")
-    public CollectionModel<? extends TagResponse> getAllTags(@RequestParam(defaultValue = "1")
-                                                             @Positive(message = "Page number must be a positive number") Integer page,
-                                                             @RequestParam(defaultValue = "5")
-                                                             @Positive(message = "Size must be a positive number") Integer size) {
+    public CollectionModel<? extends TagResponse> getAllTags(
+            @RequestParam(defaultValue = "1")
+            @Positive(message = "Page number must be a positive number") Integer page,
+            @RequestParam(defaultValue = "5")
+            @Positive(message = "Size must be a positive number") Integer size) {
         try {
             List<TagResponse> response = tagService.getAll(page, size);
             CollectionModel<? extends TagResponse> result = tagPostProcessor.processCollection(response);
@@ -93,11 +97,12 @@ public class TagController {
      * @throws BadRequestException if given parameters are invalid.
      */
     @GetMapping(value = "/tags/{id}/certificates")
-    public CollectionModel<? extends CertificateItem> getCertificates(@RequestParam(defaultValue = "1")
-                                                                      @Positive(message = "Page number must be a positive number") Integer page,
-                                                                      @RequestParam(defaultValue = "5")
-                                                                      @Positive(message = "Size must be a positive number") Integer size,
-                                                                      @PathVariable int id) {
+    public CollectionModel<? extends CertificateItem> getCertificates(
+            @RequestParam(defaultValue = "1")
+            @Positive(message = "Page number must be a positive number") Integer page,
+            @RequestParam(defaultValue = "5")
+            @Positive(message = "Size must be a positive number") Integer size,
+            @PathVariable int id) {
         try {
             List<CertificateItem> response = certificateService.getAll(page, size, CertificateFilter.newBuilder().withTags(id).build());
             CollectionModel<? extends CertificateItem> certificates = certificatePostProcessor.processCollection(response);
