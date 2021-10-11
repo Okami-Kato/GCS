@@ -1,6 +1,7 @@
 package com.epam.esm.dao.impl;
 
 import com.epam.esm.dao.UserDao;
+import com.epam.esm.entity.Tag;
 import com.epam.esm.entity.User;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,6 +30,9 @@ public class UserDaoImpl implements UserDao {
 
     @Override
     public Optional<User> get(String login) {
+        if (login == null) {
+            throw new IllegalArgumentException("User login can't be null");
+        }
         TypedQuery<User> query = manager.createQuery(GET_USER_BY_LOGIN, User.class);
         try {
             return Optional.of(query.setParameter("login", login).getSingleResult());
@@ -63,6 +67,11 @@ public class UserDaoImpl implements UserDao {
 
     @Override
     public void delete(Integer id) {
-        throw new UnsupportedOperationException("Method delete() isn't supported in UserDaoImpl");
+        Optional<User> user = get(id);
+        if (user.isPresent()) {
+            manager.remove(user.get());
+        } else {
+            throw new IllegalArgumentException(String.format("User wasn't found (%s)", "id=" + id));
+        }
     }
 }
