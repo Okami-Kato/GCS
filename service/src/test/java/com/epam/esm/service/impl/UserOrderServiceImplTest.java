@@ -140,6 +140,16 @@ class UserOrderServiceImplTest {
         when(userOrderDao.getAll(intThat(i -> i < 0), anyInt())).thenThrow(InvalidDataAccessApiUsageException.class);
         when(userOrderDao.getAll(anyInt(), intThat(i -> i < 0))).thenThrow(InvalidDataAccessApiUsageException.class);
 
+        when(userOrderDao.getAllByUserId(1, 2, firstUser.getId())).thenReturn(Arrays.asList(firstOrder, secondOrder));
+        when(userOrderDao.getAllByUserId(1, 2, secondUser.getId())).thenReturn(Arrays.asList(thirdOrder, forthOrder));
+        when(userOrderDao.getAllByUserId(intThat(i -> i < 0), anyInt(), anyInt())).thenThrow(InvalidDataAccessApiUsageException.class);
+        when(userOrderDao.getAllByUserId(anyInt(), intThat(i -> i < 0), anyInt())).thenThrow(InvalidDataAccessApiUsageException.class);
+
+        when(userOrderDao.getAllByCertificateId(1, 2, firstCertificate.getId())).thenReturn(Collections.singletonList(firstOrder));
+        when(userOrderDao.getAllByCertificateId(1, 2, thirdCertificate.getId())).thenReturn(Arrays.asList(secondOrder, forthOrder));
+        when(userOrderDao.getAllByCertificateId(intThat(i -> i < 0), anyInt(), anyInt())).thenThrow(InvalidDataAccessApiUsageException.class);
+        when(userOrderDao.getAllByCertificateId(anyInt(), intThat(i -> i < 0), anyInt())).thenThrow(InvalidDataAccessApiUsageException.class);
+
         UserOrderItem firstItem = new UserOrderItem(
                 firstOrder.getId(), firstOrder.getUser().getId(), firstOrder.getCertificate().getId(), firstOrder.getCost());
         UserOrderItem secondItem = new UserOrderItem(
@@ -155,5 +165,14 @@ class UserOrderServiceImplTest {
         assertThrows(ServiceException.class, () -> userOrderService.getAll(-1, 2));
         assertThrows(ServiceException.class, () -> userOrderService.getAll(1, -1));
 
+        assertEquals(Arrays.asList(firstItem, secondItem), userOrderService.getAllByUserId(1, 2, firstUser.getId()));
+        assertEquals(Arrays.asList(thirdItem, forthItem), userOrderService.getAllByUserId(1, 2, secondUser.getId()));
+        assertThrows(ServiceException.class, () -> userOrderService.getAllByUserId(-1, 2, firstUser.getId()));
+        assertThrows(ServiceException.class, () -> userOrderService.getAllByUserId(1, -1, firstUser.getId()));
+
+        assertEquals(Collections.singletonList(firstItem), userOrderService.getAllByCertificateId(1, 2, firstCertificate.getId()));
+        assertEquals(Arrays.asList(secondItem, forthItem), userOrderService.getAllByCertificateId(1, 2, thirdCertificate.getId()));
+        assertThrows(ServiceException.class, () -> userOrderService.getAllByCertificateId(-1, 2, firstCertificate.getId()));
+        assertThrows(ServiceException.class, () -> userOrderService.getAllByCertificateId(1, -1, firstCertificate.getId()));
     }
 }

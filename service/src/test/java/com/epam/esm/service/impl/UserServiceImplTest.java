@@ -76,16 +76,26 @@ class UserServiceImplTest {
         int realId = firstUser.getId();
         int notRealId = 2;
 
+        String realLogin = firstUser.getLogin();
+        String notRealLogin = "notRealLogin";
+
         UserResponse expectedResponse = new UserResponse(realId, firstUser.getFirstName(), firstUser.getLastName());
 
         when(userDao.get(realId)).thenReturn(Optional.of(firstUser));
         when(userDao.get(notRealId)).thenReturn(Optional.empty());
+        when(userDao.get(realLogin)).thenReturn(Optional.of(firstUser));
+        when(userDao.get(notRealLogin)).thenReturn(Optional.empty());
 
         Optional<UserResponse> actualResponse = userService.get(realId);
         assertTrue(actualResponse.isPresent());
         assertEquals(expectedResponse, actualResponse.get());
-
         assertFalse(userService.get(notRealId).isPresent());
+
+        actualResponse = userService.get(realLogin);
+        assertTrue(actualResponse.isPresent());
+        assertEquals(expectedResponse, actualResponse.get());
+
+        assertFalse(userService.get(notRealLogin).isPresent());
     }
 
     @Test
