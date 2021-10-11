@@ -1,6 +1,7 @@
 package com.epam.esm.dao.impl;
 
 import com.epam.esm.dao.UserOrderDao;
+import com.epam.esm.entity.User;
 import com.epam.esm.entity.UserOrder;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,9 +17,9 @@ import java.util.Optional;
 @Transactional
 public class UserOrderDaoImpl implements UserOrderDao {
     private final String GET_USER_ORDER_BY_ID = "SELECT uo FROM UserOrder uo LEFT JOIN FETCH uo.certificate LEFT JOIN FETCH uo.user WHERE uo.id=:id";
-    private final String GET_ALL_USER_ORDERS = "SELECT uo FROM UserOrder uo";
-    private final String GET_ALL_BY_USER_ID = "SELECT uo FROM UserOrder uo WHERE uo.user.id=:userId";
-    private final String GET_ALL_BY_CERTIFICATE_ID = "SELECT uo FROM UserOrder uo WHERE uo.certificate.id=:certificateId";
+    private final String GET_ALL_USER_ORDERS = "SELECT uo FROM UserOrder uo LEFT JOIN FETCH uo.certificate LEFT JOIN FETCH uo.user";
+    private final String GET_ALL_BY_USER_ID = "SELECT uo FROM UserOrder uo LEFT JOIN FETCH uo.certificate LEFT JOIN FETCH uo.user WHERE uo.user.id=:userId";
+    private final String GET_ALL_BY_CERTIFICATE_ID = "SELECT uo FROM UserOrder uo LEFT JOIN FETCH uo.certificate LEFT JOIN FETCH uo.user WHERE uo.certificate.id=:certificateId";
     private final String GET_COUNT = "SELECT COUNT(uo) FROM UserOrder uo";
 
     @PersistenceContext
@@ -26,6 +27,9 @@ public class UserOrderDaoImpl implements UserOrderDao {
 
     @Override
     public Optional<UserOrder> get(Integer id) {
+        if (id == null) {
+            throw new IllegalArgumentException("UserOrder id can't be null");
+        }
         TypedQuery<UserOrder> query = manager.createQuery(GET_USER_ORDER_BY_ID, UserOrder.class);
         try {
             return Optional.of(query.setParameter("id", id).getSingleResult());
@@ -77,6 +81,11 @@ public class UserOrderDaoImpl implements UserOrderDao {
 
     @Override
     public void delete(Integer id) {
-        throw new UnsupportedOperationException("Method delete() isn't supported in UserDaoImpl");
+        Optional<UserOrder> order = get(id);
+        if (order.isPresent()) {
+            manager.remove(order.get());
+        } else {
+            throw new IllegalArgumentException(String.format("UserOrder wasn't found (%s)", "id=" + id));
+        }
     }
 }
