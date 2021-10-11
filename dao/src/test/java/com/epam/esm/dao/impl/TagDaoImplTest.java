@@ -120,7 +120,6 @@ class TagDaoImplTest {
 
     @Test
     @Transactional
-    @Sql("classpath:sql/user-test-data.sql")
     void getTheMostUsedTagOfUserWithTheMaximumCost() {
         Certificate thirdCertificate = new Certificate(
                 "third certificate", "third description", 1, 3);
@@ -133,16 +132,16 @@ class TagDaoImplTest {
         certificateDao.create(thirdCertificate);
         certificateDao.create(forthCertificate);
 
-        Optional<User> optionalUser = userDao.get(1);
-        assertTrue(optionalUser.isPresent());
-        User firstUser = optionalUser.get();
+        User firstUser = new User("first", "user", "login1", "password");
+        User secondUser = new User("second", "user", "login2", "password");
+
+        userDao.create(firstUser);
+        userDao.create(secondUser);
+
         userOrderDao.create(new UserOrder(firstUser, firstCertificate, 10));
         userOrderDao.create(new UserOrder(firstUser, secondCertificate, 10));
         userOrderDao.create(new UserOrder(firstUser, thirdCertificate, 10));
 
-        optionalUser = userDao.get(2);
-        assertTrue(optionalUser.isPresent());
-        User secondUser = optionalUser.get();
         userOrderDao.create(new UserOrder(secondUser, secondCertificate, 5));
         userOrderDao.create(new UserOrder(secondUser, thirdCertificate, 5));
         userOrderDao.create(new UserOrder(secondUser, forthCertificate, 5));
