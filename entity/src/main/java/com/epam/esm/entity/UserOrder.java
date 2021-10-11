@@ -9,6 +9,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.PrePersist;
+import javax.persistence.PreRemove;
 import javax.persistence.Table;
 import java.time.Instant;
 import java.util.Objects;
@@ -22,11 +23,11 @@ public class UserOrder {
     private Integer id;
 
     @ManyToOne(cascade = CascadeType.MERGE)
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(name = "user_id")
     private User user;
 
     @ManyToOne(cascade = CascadeType.MERGE)
-    @JoinColumn(name = "certificate_id", nullable = false)
+    @JoinColumn(name = "certificate_id")
     private Certificate certificate;
 
     @Column(name = "cost", nullable = false, updatable = false)
@@ -66,6 +67,13 @@ public class UserOrder {
             return;
         this.user = user;
         user.addOrder(this);
+    }
+
+    void removeUser() {
+        if (this.user == null)
+            return;
+        user.removeOrder(this);
+        this.user = null;
     }
 
     public Certificate getCertificate() {

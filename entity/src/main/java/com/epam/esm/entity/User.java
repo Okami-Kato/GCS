@@ -6,6 +6,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
+import javax.persistence.PreRemove;
 import javax.persistence.Table;
 import java.util.HashSet;
 import java.util.Objects;
@@ -42,6 +43,14 @@ public class User {
         this.lastName = lastName;
         this.login = login;
         this.password = password;
+    }
+
+    @PreRemove
+    private void toRemove() {
+        HashSet<UserOrder> ordersCopy = new HashSet<>(orders);
+        for (UserOrder order : ordersCopy) {
+            removeOrder(order);
+        }
     }
 
     public Integer getId() {
@@ -93,6 +102,13 @@ public class User {
             return;
         orders.add(order);
         order.setUser(this);
+    }
+
+    public void removeOrder(UserOrder order) {
+        if (!orders.contains(order))
+            return;
+        orders.remove(order);
+        order.removeUser();
     }
 
     @Override

@@ -1,6 +1,5 @@
 package com.epam.esm.entity;
 
-import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Type;
 
 import javax.persistence.CascadeType;
@@ -22,7 +21,6 @@ import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 import java.time.Instant;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Objects;
 import java.util.Set;
 
@@ -32,16 +30,13 @@ import java.util.Set;
 public class Certificate {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-//    @GenericGenerator(name = "native", strategy = "native")
     @Column(name = "id", nullable = false)
     private Integer id;
 
     @Column(name = "name", nullable = false, length = 50)
     private String name;
 
-    @Lob
-    @Column(name = "description", nullable = false)
-    @Type(type = "text")
+    @Column(name = "description", nullable = false, length = 3000)
     private String description;
 
     @Column(name = "price")
@@ -97,7 +92,7 @@ public class Certificate {
     }
 
     @PreRemove
-    private void toRemove(){
+    private void toRemove() {
         HashSet<UserOrder> ordersCopy = new HashSet<>(orders);
         for (UserOrder order : ordersCopy) {
             removeOrder(order);
