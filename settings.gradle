@@ -1,1 +1,9 @@
 rootProject.name = 'GFS'
+include 'entity'
+include 'dao'
+include 'util'
+include 'service'
+include 'web'
+include 'random'
+include 'generation'
+

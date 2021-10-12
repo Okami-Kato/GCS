@@ -1,0 +1,19 @@
+ext {
+    generatedMainJava = "${buildDir}/generated/main/java"
+}
+
+sourceSets {
+    // Add generated sources directory.
+    main.java.srcDir generatedMainJava
+}
+
+compileJava {
+    options.compilerArgs += ['-AaddGenerationDate=true']
+    // Specific to Hibernate JPA meta model generation processor.
+    options.annotationProcessorGeneratedSourcesDirectory = file(generatedMainJava)
+}
+
+dependencies {
+    implementation 'org.hibernate:hibernate-core'
+    annotationProcessor 'org.hibernate:hibernate-jpamodelgen'
+}
