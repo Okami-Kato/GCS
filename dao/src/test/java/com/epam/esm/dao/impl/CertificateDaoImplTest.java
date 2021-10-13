@@ -151,17 +151,17 @@ class CertificateDaoImplTest {
                 CertificateFilter.newBuilder().withPartInDescription("descriptionn").build()).size());
 
         List<Certificate> all = certificateDao.findAllWithFilter(1, count,
-                CertificateFilter.newBuilder().withTags(firstTag.getId()).build());
+                CertificateFilter.newBuilder().withTags(firstTag.getName()).build());
         assertEquals(2, all.size());
         assertTrue(all.containsAll(Arrays.asList(firstCertificate, secondCertificate)));
 
         all = certificateDao.findAllWithFilter(1, count,
-                CertificateFilter.newBuilder().withTags(secondTag.getId()).build());
+                CertificateFilter.newBuilder().withTags(secondTag.getName()).build());
         assertEquals(2, all.size());
         assertTrue(all.containsAll(Arrays.asList(firstCertificate, thirdCertificate)));
 
         all = certificateDao.findAllWithFilter(1, count,
-                CertificateFilter.newBuilder().withTags(firstTag.getId(), secondTag.getId()).build());
+                CertificateFilter.newBuilder().withTags(firstTag.getName(), secondTag.getName()).build());
         assertEquals(1, all.size());
         assertTrue(all.contains(firstCertificate));
 
