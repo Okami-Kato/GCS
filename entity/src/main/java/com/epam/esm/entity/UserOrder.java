@@ -41,7 +41,7 @@ public class UserOrder {
 
     public UserOrder(User user, Certificate certificate, Integer cost) {
         setUser(user);
-        setCertificate(certificate);
+        this.certificate = certificate;
         this.cost = cost;
     }
 
@@ -78,20 +78,6 @@ public class UserOrder {
 
     public Certificate getCertificate() {
         return certificate;
-    }
-
-    void setCertificate(Certificate certificate) {
-        if (this.certificate != null)
-            return;
-        this.certificate = certificate;
-        certificate.addOrder(this);
-    }
-
-    void removeCertificate() {
-        if (this.certificate == null)
-            return;
-        certificate.removeOrder(this);
-        this.certificate = null;
     }
 
     public Integer getCost() {

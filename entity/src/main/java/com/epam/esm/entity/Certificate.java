@@ -58,9 +58,6 @@ public class Certificate {
             inverseJoinColumns = @JoinColumn(name = "tag_id"))
     private final Set<Tag> tags = new HashSet<>();
 
-    @OneToMany(mappedBy = "certificate")
-    private final Set<UserOrder> orders = new HashSet<>();
-
     protected Certificate() {
     }
 
@@ -89,14 +86,6 @@ public class Certificate {
     @PreUpdate
     private void toUpdate() {
         this.lastUpdateDate = Instant.now();
-    }
-
-    @PreRemove
-    private void toRemove() {
-        HashSet<UserOrder> ordersCopy = new HashSet<>(orders);
-        for (UserOrder order : ordersCopy) {
-            removeOrder(order);
-        }
     }
 
     @Override
@@ -189,23 +178,5 @@ public class Certificate {
             return;
         tags.remove(tag);
         tag.removeCertificate(this);
-    }
-
-    public Set<UserOrder> getOrders() {
-        return new HashSet<>(orders);
-    }
-
-    public void addOrder(UserOrder order) {
-        if (orders.contains(order))
-            return;
-        orders.add(order);
-        order.setCertificate(this);
-    }
-
-    public void removeOrder(UserOrder order) {
-        if (!orders.contains(order))
-            return;
-        orders.remove(order);
-        order.removeCertificate();
     }
 }

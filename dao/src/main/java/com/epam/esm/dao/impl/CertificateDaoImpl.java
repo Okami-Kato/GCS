@@ -33,6 +33,7 @@ public class CertificateDaoImpl implements CertificateDao {
     private final String GET_ALL_CERTIFICATES_IDS = "SELECT c.id FROM Certificate c";
     private final String GET_ALL_CERTIFICATES_FROM_IDS = "SELECT c FROM Certificate c WHERE c.id in (:ids)";
     private final String GET_COUNT = "SELECT COUNT(c) FROM Certificate c";
+    private final String SET_CERTIFICATE_NULL_IN_ORDERS_BY_CERTIFICATE_ID = "UPDATE UserOrder uo SET uo.certificate = NULL WHERE uo.certificate.id=:id";
 
     @PersistenceContext
     private EntityManager manager;
@@ -144,9 +145,16 @@ public class CertificateDaoImpl implements CertificateDao {
     public void delete(Integer id) {
         Optional<Certificate> certificate = get(id);
         if (certificate.isPresent()) {
+            setCertificateIdNullInOrders(id);
             manager.remove(certificate.get());
         } else {
             throw new InvalidDataAccessApiUsageException(String.format("Entity wasn't found (%s)", "id=" + id));
         }
+    }
+
+    private void setCertificateIdNullInOrders(Integer certificateId) {
+        manager.createQuery(SET_CERTIFICATE_NULL_IN_ORDERS_BY_CERTIFICATE_ID)
+                .setParameter("id", certificateId)
+                .executeUpdate();
     }
 }
