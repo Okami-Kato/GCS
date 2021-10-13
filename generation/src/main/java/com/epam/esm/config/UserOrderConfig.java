@@ -10,13 +10,14 @@ import com.epam.esm.service.dto.response.CertificateItem;
 import com.epam.esm.service.dto.response.UserResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 
 import java.util.Set;
 import java.util.stream.Collectors;
 
 @Configuration
 public class UserOrderConfig {
-    private CreateUserOrderRequest userOrder(Set<Integer> usersIds, Set<Integer> certificatesIds) {
+    private CreateUserOrderRequest getRandomUserOrder(Set<Integer> usersIds, Set<Integer> certificatesIds) {
         return new CreateUserOrderRequest(
                 new RandomElementFromCollection<>(usersIds).getValue(),
                 new RandomElementFromCollection<>(certificatesIds).getValue()
@@ -37,6 +38,7 @@ public class UserOrderConfig {
     }
 
     @Bean
+    @Lazy
     public UserOrderCreator userOrderCreator(UserOrderService userOrderService, UserService userService,
                                              CertificateService certificateService) {
         Set<Integer> userIds = getAvailableUsersIds(userService);
@@ -44,7 +46,7 @@ public class UserOrderConfig {
         return new UserOrderCreator(userOrderService) {
             @Override
             protected CreateUserOrderRequest getUserOrder() {
-                return userOrder(userIds, certificateIds);
+                return getRandomUserOrder(userIds, certificateIds);
             }
         };
     }

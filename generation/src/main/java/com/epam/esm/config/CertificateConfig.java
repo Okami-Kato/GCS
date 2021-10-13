@@ -12,6 +12,7 @@ import com.epam.esm.service.dto.request.CreateCertificateRequest;
 import com.epam.esm.service.dto.response.TagResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 
 import java.util.HashSet;
 import java.util.List;
@@ -66,12 +67,14 @@ public class CertificateConfig {
     }
 
     @Bean
+    @Lazy
     public CertificateCreator certificateCreator(CertificateService certificateService, TagService tagService,
                                                  GenerationProperties properties, Map<Integer, List<String>> dictionary) {
+        Set<String> availableTagNames = getAvailableTagNames(tagService);
         return new CertificateCreator(certificateService) {
             @Override
             protected CreateCertificateRequest getCertificate() {
-                return generateRandomCertificate(properties, dictionary, getAvailableTagNames(tagService));
+                return generateRandomCertificate(properties, dictionary, availableTagNames);
             }
         };
     }
