@@ -8,7 +8,7 @@ import java.util.Map;
 import java.util.Optional;
 
 public interface TagDao extends Dao<Tag, Integer> {
-    List<Tag> getAll(int pageNumber, int pageSize, int certificateId);
+    List<Tag> findAllByCertificateId(int pageNumber, int pageSize, int certificateId);
 
     Map<User, List<Tag>> getTheMostUsedTagsOfUsersWithTheHighestCost();
 

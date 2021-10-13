@@ -44,9 +44,9 @@ public class TagServiceImpl implements TagService {
     }
 
     @Override
-    public List<TagResponse> getAll(int pageNumber, int pageSize, int certificateId) {
+    public List<TagResponse> findAllByCertificateId(int pageNumber, int pageSize, int certificateId) {
         try {
-            return tagDao.getAll(pageNumber, pageSize, certificateId).stream()
+            return tagDao.findAllByCertificateId(pageNumber, pageSize, certificateId).stream()
                     .map(tag -> mapper.map(tag, TagResponse.class))
                     .collect(Collectors.toList());
         } catch (InvalidDataAccessApiUsageException e) {

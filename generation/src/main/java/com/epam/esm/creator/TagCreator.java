@@ -22,8 +22,9 @@ public abstract class TagCreator implements Creator {
         for (int i = 0; i < amount; i++) {
             try {
                 CreateTagRequest tag;
-                do
+                do {
                     tag = getTag();
+                }
                 while (tagService.get(tag.getName()).isPresent());
                 tagService.create(tag);
                 counter++;

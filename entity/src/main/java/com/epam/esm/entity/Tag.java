@@ -1,7 +1,5 @@
 package com.epam.esm.entity;
 
-import org.hibernate.annotations.GenericGenerator;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -20,7 +18,6 @@ import java.util.Set;
 public class Tag {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-//    @GenericGenerator(name = "native", strategy = "native")
     @Column(name = "id", nullable = false)
     private Integer id;
 

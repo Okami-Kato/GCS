@@ -62,7 +62,7 @@ class UserDaoImplTest {
     }
 
     @Test
-    void getAll() {
+    void read() {
         int count = (int) userDao.getCount();
         assertDoesNotThrow(() -> userDao.getAll(1, count));
         assertEquals(count, userDao.getAll(1, count + 1).size());

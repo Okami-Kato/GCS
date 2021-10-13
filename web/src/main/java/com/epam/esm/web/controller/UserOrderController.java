@@ -65,7 +65,7 @@ public class UserOrderController {
             @PathVariable Integer userId) {
         try {
             CollectionModel<? extends UserOrderItem> response = userOrderItemPostProcessor.processCollection(
-                    orderService.getAllByUserId(page, size, userId));
+                    orderService.findAllByUserId(page, size, userId));
             return response.add(linkTo(methodOn(UserOrderController.class)
                     .getAllOrdersByUserId(page, size, userId))
                     .withSelfRel());
@@ -92,7 +92,7 @@ public class UserOrderController {
             @PathVariable Integer certificateId) {
         try {
             CollectionModel<? extends UserOrderItem> response = userOrderItemPostProcessor.processCollection(
-                    orderService.getAllByCertificateId(page, size, certificateId));
+                    orderService.findAllByCertificateId(page, size, certificateId));
             return response.add(linkTo(methodOn(UserOrderController.class)
                     .getAllOrdersByCertificateId(page, size, certificateId))
                     .withSelfRel());

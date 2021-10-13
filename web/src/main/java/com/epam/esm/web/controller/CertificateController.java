@@ -113,7 +113,7 @@ public class CertificateController {
                 }
                 filterBuilder.withSort(Sort.by(orders));
             }
-            List<CertificateItem> certificateList = certificateService.getAll(page, size, filterBuilder.build());
+            List<CertificateItem> certificateList = certificateService.findAllWithFilter(page, size, filterBuilder.build());
             CollectionModel<? extends CertificateItem> response = certificatePostProcessor.processCollection(certificateList);
             return response.add(linkTo(methodOn(CertificateController.class)
                     .getAllCertificates(page, size, namePart, descriptionPart, tagIds, sort))

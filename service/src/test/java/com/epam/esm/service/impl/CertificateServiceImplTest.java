@@ -199,7 +199,7 @@ class CertificateServiceImplTest {
     }
 
     @Test
-    void getAll() {
+    void read() {
         Certificate firstCertificate = new Certificate("first", "first", 5, 10,
                 new HashSet<>(Arrays.asList(firstTag, thirdTag)));
         Certificate secondCertificate = new Certificate("second", "second", 5, 10,

@@ -47,7 +47,7 @@ public class UserOrderDaoImpl implements UserOrderDao {
     }
 
     @Override
-    public List<UserOrder> getAllByUserId(int pageNumber, int pageSize, int userId) {
+    public List<UserOrder> findAllByUserId(int pageNumber, int pageSize, int userId) {
         TypedQuery<UserOrder> query = manager.createQuery(GET_ALL_BY_USER_ID, UserOrder.class);
         return query.setParameter("userId", userId)
                 .setFirstResult((pageNumber - 1) * pageSize)
@@ -56,7 +56,7 @@ public class UserOrderDaoImpl implements UserOrderDao {
     }
 
     @Override
-    public List<UserOrder> getAllByCertificateId(int pageNumber, int pageSize, int certificateId) {
+    public List<UserOrder> findAllByCertificateId(int pageNumber, int pageSize, int certificateId) {
         TypedQuery<UserOrder> query = manager.createQuery(GET_ALL_BY_CERTIFICATE_ID, UserOrder.class);
         return query.setParameter("certificateId", certificateId)
                 .setFirstResult((pageNumber - 1) * pageSize)

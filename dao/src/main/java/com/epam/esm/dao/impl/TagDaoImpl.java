@@ -102,7 +102,7 @@ public class TagDaoImpl implements TagDao {
     }
 
     @Override
-    public List<Tag> getAll(int pageNumber, int pageSize, int certificateId) {
+    public List<Tag> findAllByCertificateId(int pageNumber, int pageSize, int certificateId) {
         TypedQuery<Tag> query = manager.createQuery(GET_ALL_TAGS_BY_CERTIFICATE_ID, Tag.class);
         return query.setParameter("id", certificateId)
                 .setFirstResult((pageNumber - 1) * pageSize)

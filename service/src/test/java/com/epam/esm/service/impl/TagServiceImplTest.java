@@ -108,16 +108,16 @@ class TagServiceImplTest {
     }
 
     @Test
-    void getAll() {
+    void read() {
         int certificateId = 1;
         when(tagDao.getAll(1, 2)).thenReturn(Arrays.asList(firstTag, secondTag));
         when(tagDao.getAll(2, 2)).thenReturn(Collections.singletonList(thirdTag));
         when(tagDao.getAll(1, 3)).thenReturn(Arrays.asList(firstTag, secondTag, thirdTag));
-        when(tagDao.getAll(1, 2, certificateId)).thenReturn(Arrays.asList(firstTag, thirdTag));
+        when(tagDao.findAllByCertificateId(1, 2, certificateId)).thenReturn(Arrays.asList(firstTag, thirdTag));
         when(tagDao.getAll(intThat(i -> i < 0), anyInt())).thenThrow(InvalidDataAccessApiUsageException.class);
         when(tagDao.getAll(anyInt(), intThat(i -> i < 0))).thenThrow(InvalidDataAccessApiUsageException.class);
-        when(tagDao.getAll(intThat(i -> i < 0), anyInt(), anyInt())).thenThrow(InvalidDataAccessApiUsageException.class);
-        when(tagDao.getAll(anyInt(), intThat(i -> i < 0), anyInt())).thenThrow(InvalidDataAccessApiUsageException.class);
+        when(tagDao.findAllByCertificateId(intThat(i -> i < 0), anyInt(), anyInt())).thenThrow(InvalidDataAccessApiUsageException.class);
+        when(tagDao.findAllByCertificateId(anyInt(), intThat(i -> i < 0), anyInt())).thenThrow(InvalidDataAccessApiUsageException.class);
 
         TagResponse firstResponse = new TagResponse(firstTag.getId(), firstTag.getName());
         TagResponse secondResponse = new TagResponse(secondTag.getId(), secondTag.getName());
@@ -127,11 +127,11 @@ class TagServiceImplTest {
         assertEquals(Collections.singletonList(thirdResponse), tagService.getAll(2, 2));
         assertEquals(Arrays.asList(firstResponse, secondResponse, thirdResponse), tagService.getAll(1, 3));
 
-        assertEquals(Arrays.asList(firstResponse, thirdResponse), tagService.getAll(1, 2, certificateId));
+        assertEquals(Arrays.asList(firstResponse, thirdResponse), tagService.findAllByCertificateId(1, 2, certificateId));
 
         assertThrows(ServiceException.class, () -> tagService.getAll(-1, 2));
         assertThrows(ServiceException.class, () -> tagService.getAll(1, -1));
-        assertThrows(ServiceException.class, () -> tagService.getAll(-1, 2, certificateId));
-        assertThrows(ServiceException.class, () -> tagService.getAll(1, -1, certificateId));
+        assertThrows(ServiceException.class, () -> tagService.findAllByCertificateId(-1, 2, certificateId));
+        assertThrows(ServiceException.class, () -> tagService.findAllByCertificateId(1, -1, certificateId));
     }
 }

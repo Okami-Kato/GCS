@@ -11,7 +11,7 @@ import java.util.Optional;
 public interface TagService {
     List<TagResponse> getAll(int pageNumber, int pageSize);
 
-    List<TagResponse> getAll(int pageNumber, int pageSize, int certificateId);
+    List<TagResponse> findAllByCertificateId(int pageNumber, int pageSize, int certificateId);
 
     Optional<TagResponse> get(int id);
 

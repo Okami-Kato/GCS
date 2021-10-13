@@ -49,9 +49,9 @@ public class CertificateServiceImpl implements CertificateService {
     }
 
     @Override
-    public List<CertificateItem> getAll(int pageNumber, int pageSize, CertificateFilter certificateFilter) {
+    public List<CertificateItem> findAllWithFilter(int pageNumber, int pageSize, CertificateFilter certificateFilter) {
         try {
-            return certificateDao.getAll(pageNumber, pageSize, certificateFilter).stream()
+            return certificateDao.findAllWithFilter(pageNumber, pageSize, certificateFilter).stream()
                     .map(c -> mapper.map(c, CertificateItem.class))
                     .collect(Collectors.toList());
         } catch (InvalidDataAccessApiUsageException e) {

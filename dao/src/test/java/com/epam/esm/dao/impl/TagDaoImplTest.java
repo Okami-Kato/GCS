@@ -18,12 +18,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.jdbc.Sql;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -90,7 +88,7 @@ class TagDaoImplTest {
         Integer tagId = persisted.get().getId();
         int certificateDaoCount = (int) certificateDao.getCount();
         assertEquals(Arrays.asList(firstCertificate, secondCertificate),
-                certificateDao.getAll(1, certificateDaoCount,
+                certificateDao.findAllWithFilter(1, certificateDaoCount,
                         CertificateFilter.newBuilder()
                                 .withTags(tagId)
                                 .build())
@@ -153,7 +151,7 @@ class TagDaoImplTest {
     }
 
     @Test
-    void getAll() {
+    void read() {
         int count = (int) tagDao.getCount();
         assertEquals(3, tagDao.getAll(1, 3).size());
         assertEquals(count, tagDao.getAll(1, count + 1).size());
@@ -161,7 +159,7 @@ class TagDaoImplTest {
         assertThrows(InvalidDataAccessApiUsageException.class, () -> tagDao.getAll(-1, 10));
         assertThrows(InvalidDataAccessApiUsageException.class, () -> tagDao.getAll(1, -10));
 
-        assertEquals(Arrays.asList(firstTag, secondTag), tagDao.getAll(1, count, firstCertificate.getId()));
-        assertEquals(Arrays.asList(firstTag, thirdTag), tagDao.getAll(1, count, secondCertificate.getId()));
+        assertEquals(Arrays.asList(firstTag, secondTag), tagDao.findAllByCertificateId(1, count, firstCertificate.getId()));
+        assertEquals(Arrays.asList(firstTag, thirdTag), tagDao.findAllByCertificateId(1, count, secondCertificate.getId()));
     }
 }

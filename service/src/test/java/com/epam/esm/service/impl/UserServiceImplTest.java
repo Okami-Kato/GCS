@@ -99,7 +99,7 @@ class UserServiceImplTest {
     }
 
     @Test
-    void getAll() {
+    void read() {
         when(userDao.getAll(1, 2)).thenReturn(Arrays.asList(firstUser, secondUser));
         when(userDao.getAll(2, 2)).thenReturn(Collections.singletonList(thirdUser));
         when(userDao.getAll(1, 3)).thenReturn(Arrays.asList(firstUser, secondUser, thirdUser));

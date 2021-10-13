@@ -12,7 +12,7 @@ import java.util.Optional;
 public interface CertificateService {
     List<CertificateItem> getAll(int pageNumber, int pageSize);
 
-    List<CertificateItem> getAll(int pageNumber, int pageSize, CertificateFilter certificateFilter);
+    List<CertificateItem> findAllWithFilter(int pageNumber, int pageSize, CertificateFilter certificateFilter);
 
     Optional<CertificateResponse> get(int id);
 

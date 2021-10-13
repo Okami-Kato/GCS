@@ -20,7 +20,6 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Order;
 import javax.persistence.criteria.Root;
 import javax.persistence.criteria.SetJoin;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -65,7 +64,7 @@ public class CertificateDaoImpl implements CertificateDao {
     }
 
     @Override
-    public List<Certificate> getAll(int pageNumber, int pageSize, CertificateFilter filter) {
+    public List<Certificate> findAllWithFilter(int pageNumber, int pageSize, CertificateFilter filter) {
         CriteriaBuilder criteriaBuilder = manager.getCriteriaBuilder();
         CriteriaQuery<Integer> idQuery = criteriaBuilder.createQuery(Integer.class);
         Root<Certificate> root = idQuery.from(Certificate.class);

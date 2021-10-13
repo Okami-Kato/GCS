@@ -6,5 +6,5 @@ import com.epam.esm.util.CertificateFilter;
 import java.util.List;
 
 public interface CertificateDao extends Dao<Certificate, Integer> {
-    List<Certificate> getAll(int pageNumber, int pageSize, CertificateFilter filter);
+    List<Certificate> findAllWithFilter(int pageNumber, int pageSize, CertificateFilter filter);
 }

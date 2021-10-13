@@ -129,48 +129,48 @@ class CertificateDaoImplTest {
     }
 
     @Test
-    void getAll() {
+    void read() {
         assertEquals(3, certificateDao.getAll(1, 3).size());
         assertEquals(2, certificateDao.getAll(1, 2).size());
         assertThrows(InvalidDataAccessApiUsageException.class, () -> certificateDao.getAll(-1, 10));
         assertThrows(InvalidDataAccessApiUsageException.class, () -> certificateDao.getAll(1, -10));
 
         int count = (int) certificateDao.getCount();
-        assertEquals(3, certificateDao.getAll(1, count,
+        assertEquals(3, certificateDao.findAllWithFilter(1, count,
                 CertificateFilter.newBuilder().withPartInName("certificate").build()).size());
-        assertEquals(1, certificateDao.getAll(1, count,
+        assertEquals(1, certificateDao.findAllWithFilter(1, count,
                 CertificateFilter.newBuilder().withPartInName("first").build()).size());
-        assertEquals(0, certificateDao.getAll(1, count,
+        assertEquals(0, certificateDao.findAllWithFilter(1, count,
                 CertificateFilter.newBuilder().withPartInName("certificatee").build()).size());
 
-        assertEquals(3, certificateDao.getAll(1, count,
+        assertEquals(3, certificateDao.findAllWithFilter(1, count,
                 CertificateFilter.newBuilder().withPartInDescription("description").build()).size());
-        assertEquals(1, certificateDao.getAll(1, count,
+        assertEquals(1, certificateDao.findAllWithFilter(1, count,
                 CertificateFilter.newBuilder().withPartInDescription("first").build()).size());
-        assertEquals(0, certificateDao.getAll(1, count,
+        assertEquals(0, certificateDao.findAllWithFilter(1, count,
                 CertificateFilter.newBuilder().withPartInDescription("descriptionn").build()).size());
 
-        List<Certificate> all = certificateDao.getAll(1, count,
+        List<Certificate> all = certificateDao.findAllWithFilter(1, count,
                 CertificateFilter.newBuilder().withTags(firstTag.getId()).build());
         assertEquals(2, all.size());
         assertTrue(all.containsAll(Arrays.asList(firstCertificate, secondCertificate)));
 
-        all = certificateDao.getAll(1, count,
+        all = certificateDao.findAllWithFilter(1, count,
                 CertificateFilter.newBuilder().withTags(secondTag.getId()).build());
         assertEquals(2, all.size());
         assertTrue(all.containsAll(Arrays.asList(firstCertificate, thirdCertificate)));
 
-        all = certificateDao.getAll(1, count,
+        all = certificateDao.findAllWithFilter(1, count,
                 CertificateFilter.newBuilder().withTags(firstTag.getId(), secondTag.getId()).build());
         assertEquals(1, all.size());
         assertTrue(all.contains(firstCertificate));
 
-        assertThrows(InvalidDataAccessApiUsageException.class, () -> certificateDao.getAll(1, count,
+        assertThrows(InvalidDataAccessApiUsageException.class, () -> certificateDao.findAllWithFilter(1, count,
                 CertificateFilter.newBuilder()
                         .withSort(Sort.by(Sort.Order.desc(null)))
                         .build())
         );
-        assertThrows(InvalidDataAccessApiUsageException.class, () -> certificateDao.getAll(1, count,
+        assertThrows(InvalidDataAccessApiUsageException.class, () -> certificateDao.findAllWithFilter(1, count,
                 CertificateFilter.newBuilder()
                         .withSort(Sort.by(Sort.Order.desc("")))
                         .build())

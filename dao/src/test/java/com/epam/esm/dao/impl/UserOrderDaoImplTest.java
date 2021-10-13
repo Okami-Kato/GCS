@@ -16,11 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.jdbc.Sql;
-import org.springframework.transaction.annotation.Transactional;
 
-import javax.annotation.PostConstruct;
-import java.time.Instant;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Optional;
@@ -121,7 +117,7 @@ class UserOrderDaoImplTest {
     }
 
     @Test
-    void getAll(){
+    void read(){
         int count = (int) userOrderDao.getCount();
         assertDoesNotThrow(() -> userOrderDao.getAll(1, count));
         assertEquals(count, userOrderDao.getAll(1, count + 1).size());
@@ -133,11 +129,11 @@ class UserOrderDaoImplTest {
         assertFalse(userOrderDao.get(firstOrder.getId() * (-1)).isPresent());
         assertThrows(InvalidDataAccessApiUsageException.class, () -> userOrderDao.get(null));
 
-        assertEquals(Arrays.asList(firstOrder, secondOrder), userOrderDao.getAllByUserId(1, count, firstUser.getId()));
-        assertEquals(Arrays.asList(thirdOrder, forthOrder), userOrderDao.getAllByUserId(1, count, secondUser.getId()));
+        assertEquals(Arrays.asList(firstOrder, secondOrder), userOrderDao.findAllByUserId(1, count, firstUser.getId()));
+        assertEquals(Arrays.asList(thirdOrder, forthOrder), userOrderDao.findAllByUserId(1, count, secondUser.getId()));
 
-        assertEquals(Arrays.asList(firstOrder, thirdOrder), userOrderDao.getAllByCertificateId(1, count, firstCertificate.getId()));
-        assertEquals(Arrays.asList(secondOrder, forthOrder), userOrderDao.getAllByCertificateId(1, count, secondCertificate.getId()));
+        assertEquals(Arrays.asList(firstOrder, thirdOrder), userOrderDao.findAllByCertificateId(1, count, firstCertificate.getId()));
+        assertEquals(Arrays.asList(secondOrder, forthOrder), userOrderDao.findAllByCertificateId(1, count, secondCertificate.getId()));
     }
 
     @Test

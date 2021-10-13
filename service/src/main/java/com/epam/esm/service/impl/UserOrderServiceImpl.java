@@ -50,9 +50,9 @@ public class UserOrderServiceImpl implements UserOrderService {
     }
 
     @Override
-    public List<UserOrderItem> getAllByUserId(int pageNumber, int pageSize, int userId) {
+    public List<UserOrderItem> findAllByUserId(int pageNumber, int pageSize, int userId) {
         try {
-            return userOrderDao.getAllByUserId(pageNumber, pageSize, userId).stream()
+            return userOrderDao.findAllByUserId(pageNumber, pageSize, userId).stream()
                     .map(order -> mapper.map(order, UserOrderItem.class))
                     .collect(Collectors.toList());
         } catch (InvalidDataAccessApiUsageException e) {
@@ -61,9 +61,9 @@ public class UserOrderServiceImpl implements UserOrderService {
     }
 
     @Override
-    public List<UserOrderItem> getAllByCertificateId(int pageNumber, int pageSize, int certificateId) {
+    public List<UserOrderItem> findAllByCertificateId(int pageNumber, int pageSize, int certificateId) {
         try {
-            return userOrderDao.getAllByCertificateId(pageNumber, pageSize, certificateId).stream()
+            return userOrderDao.findAllByCertificateId(pageNumber, pageSize, certificateId).stream()
                     .map(order -> mapper.map(order, UserOrderItem.class))
                     .collect(Collectors.toList());
         } catch (InvalidDataAccessApiUsageException e) {
