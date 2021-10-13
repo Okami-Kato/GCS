@@ -1,5 +1,6 @@
 package com.epam.esm.service.dto.request;
 
+import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
@@ -26,12 +27,7 @@ public class CreateCertificateRequest {
     @Positive(message = "Certificate duration must be positive number.")
     private Integer duration;
 
-    private Set<
-            @NotBlank(message = "Tag name can't be blank")
-            @Size(min = 3, max = 25, message = "Tag name must be {min}-{max} characters long.")
-            @Pattern(regexp = "^[\\w\\s]+$", message = "Tag name must be alphanumeric.")
-                    String
-            > tagNames;
+    private Set<@Valid CreateTagRequest> tags;
 
     public CreateCertificateRequest() {
     }
@@ -43,12 +39,12 @@ public class CreateCertificateRequest {
         this.duration = duration;
     }
 
-    public CreateCertificateRequest(String name, String description, Integer price, Integer duration, Set<String> tagNames) {
+    public CreateCertificateRequest(String name, String description, Integer price, Integer duration, Set<CreateTagRequest> tags) {
         this.name = name;
         this.description = description;
         this.price = price;
         this.duration = duration;
-        this.tagNames = tagNames;
+        this.tags = tags;
     }
 
     public String getName() {
@@ -83,12 +79,12 @@ public class CreateCertificateRequest {
         this.duration = duration;
     }
 
-    public Set<String> getTagNames() {
-        return tagNames;
+    public Set<CreateTagRequest> getTags() {
+        return tags;
     }
 
-    public void setTagNames(Set<String> tagNames) {
-        this.tagNames = tagNames;
+    public void setTags(Set<CreateTagRequest> tags) {
+        this.tags = tags;
     }
 
     @Override
@@ -98,7 +94,7 @@ public class CreateCertificateRequest {
                 ", description='" + description + '\'' +
                 ", price=" + price +
                 ", duration=" + duration +
-                ", tagNames=" + tagNames +
+                ", tags=" + tags +
                 '}';
     }
 }

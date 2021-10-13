@@ -6,6 +6,7 @@ import com.epam.esm.entity.Certificate;
 import com.epam.esm.entity.Tag;
 import com.epam.esm.service.CertificateService;
 import com.epam.esm.service.dto.request.CreateCertificateRequest;
+import com.epam.esm.service.dto.request.CreateTagRequest;
 import com.epam.esm.service.dto.request.UpdateCertificateRequest;
 import com.epam.esm.service.dto.response.CertificateItem;
 import com.epam.esm.service.dto.response.CertificateResponse;
@@ -70,8 +71,8 @@ public class CertificateServiceImpl implements CertificateService {
     @Override
     public CertificateResponse create(CreateCertificateRequest certificate) {
         Certificate certificateToCreate = mapper.map(certificate, Certificate.class);
-        if (certificate.getTagNames() != null) {
-            extractTags(certificateToCreate, certificate.getTagNames());
+        if (certificate.getTags() != null) {
+            extractTags(certificateToCreate, certificate.getTags());
         }
         executeDaoCall(() -> certificateDao.create(certificateToCreate));
         return mapper.map(certificateToCreate, CertificateResponse.class);
@@ -80,8 +81,8 @@ public class CertificateServiceImpl implements CertificateService {
     @Override
     public CertificateResponse update(UpdateCertificateRequest certificate) {
         Certificate certificateToUpdate = mapper.map(certificate, Certificate.class);
-        if (certificate.getTagNames() != null) {
-            extractTags(certificateToUpdate, certificate.getTagNames());
+        if (certificate.getTags() != null) {
+            extractTags(certificateToUpdate, certificate.getTags());
         }
         Certificate updatedCertificate = executeDaoCall(() -> certificateDao.update(certificateToUpdate));
         return mapper.map(updatedCertificate, CertificateResponse.class);
@@ -92,15 +93,15 @@ public class CertificateServiceImpl implements CertificateService {
         executeDaoCall(() -> certificateDao.delete(id));
     }
 
-    private void extractTags(Certificate certificateToCreate, Set<String> tagNames) {
-        for (String tagName : tagNames) {
-            if (tagName == null) {
-                throw new IllegalArgumentException("Tag name can't be null");
+    private void extractTags(Certificate certificateToCreate, Set<CreateTagRequest> tagRequests) {
+        for (CreateTagRequest tagRequest : tagRequests) {
+            if (tagRequest == null) {
+                throw new IllegalArgumentException("Tag can't be null");
             }
-            Optional<Tag> tag = tagDao.get(tagName);
+            Optional<Tag> tag = tagDao.get(tagRequest.getName());
             certificateToCreate.addTag(
                     tag.orElseGet(() -> {
-                        Tag tagToCreate = new Tag(tagName);
+                        Tag tagToCreate = new Tag(tagRequest.getName());
                         tagDao.create(tagToCreate);
                         return tagToCreate;
                     })

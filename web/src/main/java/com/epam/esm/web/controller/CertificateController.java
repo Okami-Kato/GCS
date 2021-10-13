@@ -2,10 +2,10 @@ package com.epam.esm.web.controller;
 
 import com.epam.esm.service.CertificateService;
 import com.epam.esm.service.dto.request.CreateCertificateRequest;
+import com.epam.esm.service.dto.request.CreateTagRequest;
 import com.epam.esm.service.dto.request.UpdateCertificateRequest;
 import com.epam.esm.service.dto.response.CertificateItem;
 import com.epam.esm.service.dto.response.CertificateResponse;
-import com.epam.esm.service.dto.response.TagResponse;
 import com.epam.esm.service.exception.ServiceException;
 import com.epam.esm.util.CertificateFilter;
 import com.epam.esm.util.CertificateFilter.CertificateFilterBuilder;
@@ -80,7 +80,7 @@ public class CertificateController {
      * @param size            size of page.
      * @param namePart        part in name.
      * @param descriptionPart part in description.
-     * @param tagIds          array of tag ids.
+     * @param tagNames          array of tag ids.
      * @param sort            sorting to be applied.
      * @return list of found certificates.
      * @throws BadRequestException if given parameters are invalid.
@@ -93,7 +93,7 @@ public class CertificateController {
             @Positive(message = "Size must be a positive number") Integer size,
             @RequestParam Optional<String> namePart,
             @RequestParam Optional<String> descriptionPart,
-            @RequestParam Optional<Integer[]> tagIds,
+            @RequestParam Optional<String[]> tagNames,
             @RequestParam Optional<List<
                     @NotBlank
                     @Pattern(regexp = "^[\\w]+[.](asc|desc)$",
@@ -104,7 +104,7 @@ public class CertificateController {
             CertificateFilterBuilder filterBuilder = CertificateFilter.newBuilder();
             namePart.ifPresent(filterBuilder::withPartInName);
             descriptionPart.ifPresent(filterBuilder::withPartInDescription);
-            tagIds.ifPresent(filterBuilder::withTags);
+            tagNames.ifPresent(filterBuilder::withTags);
             if (sort.isPresent()) {
                 List<Order> orders = new LinkedList<>();
                 for (String s : sort.get()) {
@@ -116,7 +116,7 @@ public class CertificateController {
             List<CertificateItem> certificateList = certificateService.findAllWithFilter(page, size, filterBuilder.build());
             CollectionModel<? extends CertificateItem> response = certificatePostProcessor.processCollection(certificateList);
             return response.add(linkTo(methodOn(CertificateController.class)
-                    .getAllCertificates(page, size, namePart, descriptionPart, tagIds, sort))
+                    .getAllCertificates(page, size, namePart, descriptionPart, tagNames, sort))
                     .withSelfRel());
         } catch (ServiceException e) {
             throw new BadRequestException(ErrorCode.CERTIFICATE_BAD_REQUEST, e.getMessage());
@@ -189,7 +189,7 @@ public class CertificateController {
 
         UpdateCertificateRequest updateRequest = new UpdateCertificateRequest(certificate.getId(), certificate.getName(),
                 certificate.getDescription(), certificate.getPrice(), certificate.getDuration(),
-                certificate.getTags().stream().map(TagResponse::getName).collect(Collectors.toSet()));
+                certificate.getTags().stream().map(tag -> new CreateTagRequest(tag.getName())).collect(Collectors.toSet()));
         try {
             UpdateCertificateRequest certificatePatched = applyPatchToCertificate(patch, updateRequest);
             CertificateResponse response = updateCertificate(certificatePatched);

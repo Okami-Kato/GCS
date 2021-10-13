@@ -79,7 +79,7 @@ public class TagController {
             @RequestParam(defaultValue = "5")
             @Positive(message = "Size must be a positive number") Integer size) {
         try {
-            List<TagResponse> response = tagService.findAllByCertificateId(page, size);
+            List<TagResponse> response = tagService.getAll(page, size);
             CollectionModel<? extends TagResponse> result = tagPostProcessor.processCollection(response);
             return result.add(linkTo(methodOn(TagController.class).getAllTags(page, size)).withSelfRel());
         } catch (ServiceException e) {
@@ -104,7 +104,7 @@ public class TagController {
             @Positive(message = "Size must be a positive number") Integer size,
             @PathVariable int id) {
         try {
-            List<CertificateItem> response = certificateService.findAllWithFilter(page, size, CertificateFilter.newBuilder().withTags(id).build());
+            List<CertificateItem> response = certificateService.findAllWithByTagId(page, size, id);
             CollectionModel<? extends CertificateItem> certificates = certificatePostProcessor.processCollection(response);
             return certificates.add(linkTo(methodOn(TagController.class).getCertificates(page, size, id)).withSelfRel());
         } catch (ServiceException e) {
