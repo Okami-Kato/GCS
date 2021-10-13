@@ -12,7 +12,7 @@ import java.util.Objects;
 @Relation(collectionRelation = "orders")
 public class UserOrderResponse extends RepresentationModel<UserOrderResponse> {
     private Integer id;
-    private UserResponse user;
+    private Integer userId;
     private CertificateItem certificate;
     private Integer cost;
 
@@ -23,9 +23,9 @@ public class UserOrderResponse extends RepresentationModel<UserOrderResponse> {
     public UserOrderResponse() {
     }
 
-    public UserOrderResponse(Integer id, UserResponse user, CertificateItem certificate, Integer cost, LocalDateTime timestamp) {
+    public UserOrderResponse(Integer id, Integer userId, CertificateItem certificate, Integer cost, LocalDateTime timestamp) {
         this.id = id;
-        this.user = user;
+        this.userId = userId;
         this.certificate = certificate;
         this.cost = cost;
         this.timestamp = timestamp;
@@ -39,12 +39,12 @@ public class UserOrderResponse extends RepresentationModel<UserOrderResponse> {
         this.id = id;
     }
 
-    public UserResponse getUser() {
-        return user;
+    public Integer getUserId() {
+        return userId;
     }
 
-    public void setUser(UserResponse user) {
-        this.user = user;
+    public void setUserId(Integer userId) {
+        this.userId = userId;
     }
 
     public CertificateItem getCertificate() {
@@ -76,19 +76,19 @@ public class UserOrderResponse extends RepresentationModel<UserOrderResponse> {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         UserOrderResponse that = (UserOrderResponse) o;
-        return id.equals(that.id) && user.equals(that.user) && certificate.equals(that.certificate) && cost.equals(that.cost) && Objects.equals(timestamp, that.timestamp);
+        return id.equals(that.id) && userId.equals(that.userId) && certificate.equals(that.certificate) && cost.equals(that.cost) && Objects.equals(timestamp, that.timestamp);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, user, certificate, cost, timestamp);
+        return Objects.hash(id, userId, certificate, cost, timestamp);
     }
 
     @Override
     public String toString() {
         return "UserOrderResponse{" +
                 "id=" + id +
-                ", user=" + user +
+                ", user=" + userId +
                 ", certificate=" + certificate +
                 ", cost=" + cost +
                 ", timestamp=" + timestamp +

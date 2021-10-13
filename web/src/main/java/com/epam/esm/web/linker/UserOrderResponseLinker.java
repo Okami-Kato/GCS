@@ -1,6 +1,7 @@
 package com.epam.esm.web.linker;
 
 import com.epam.esm.service.dto.response.UserOrderResponse;
+import com.epam.esm.web.controller.UserController;
 import com.epam.esm.web.controller.UserOrderController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -23,9 +24,11 @@ public class UserOrderResponseLinker implements RepresentationModelLinker<UserOr
     public void processEntity(UserOrderResponse entity) {
         entity.add(linkTo(methodOn(UserOrderController.class).getOrder(entity.getId())).withSelfRel());
         entity.add(linkTo(methodOn(UserOrderController.class)
-                .getAllOrdersByUserId(null, null, entity.getUser().getId()))
+                .getAllOrdersByUserId(null, null, entity.getUserId()))
                 .withRel("ordersOfUser"));
-        userPostProcessor.processEntity(entity.getUser());
+        entity.add(linkTo(methodOn(UserController.class)
+                .getUser(entity.getUserId()))
+                .withRel("user"));
         if (entity.getCertificate() != null) {
             entity.add(linkTo(methodOn(UserOrderController.class)
                     .getAllOrdersByCertificateId(null, null, entity.getCertificate().getId()))

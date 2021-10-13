@@ -102,7 +102,7 @@ public class CertificateServiceImpl implements CertificateService {
             certificateToCreate.addTag(
                     tag.orElseGet(() -> {
                         Tag tagToCreate = new Tag(tagRequest.getName());
-                        tagDao.create(tagToCreate);
+                        executeDaoCall(() -> tagDao.create(tagToCreate));
                         return tagToCreate;
                     })
             );

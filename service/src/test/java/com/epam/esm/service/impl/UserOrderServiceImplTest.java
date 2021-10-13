@@ -98,7 +98,7 @@ class UserOrderServiceImplTest {
 
         UserOrderResponse actualResponse = userOrderService.create(new CreateUserOrderRequest(firstUser.getId(), firstCertificate.getId()));
         UserOrderResponse expectedResponse = new UserOrderResponse(
-                firstOrder.getId(), new UserResponse(firstUser.getId(), firstUser.getFirstName(), firstUser.getLastName()),
+                firstOrder.getId(), firstUser.getId(),
                 new CertificateItem(firstCertificate.getId(), firstCertificate.getName(), firstCertificate.getPrice(), new HashSet<>()),
                 firstCertificate.getPrice(), null);
 
@@ -118,7 +118,7 @@ class UserOrderServiceImplTest {
         int notRealId = 2;
 
         UserOrderResponse expectedResponse = new UserOrderResponse(
-                firstOrder.getId(), new UserResponse(firstUser.getId(), firstUser.getFirstName(), firstUser.getLastName()),
+                firstOrder.getId(), firstUser.getId(),
                 new CertificateItem(firstCertificate.getId(), firstCertificate.getName(), firstCertificate.getPrice(), new HashSet<>()),
                 firstCertificate.getPrice(), null);
 
