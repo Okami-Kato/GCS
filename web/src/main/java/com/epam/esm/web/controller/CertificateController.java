@@ -2,7 +2,7 @@ package com.epam.esm.web.controller;
 
 import com.epam.esm.service.CertificateService;
 import com.epam.esm.service.dto.request.CreateCertificateRequest;
-import com.epam.esm.service.dto.request.CreateTagRequest;
+import com.epam.esm.service.dto.request.TagRequest;
 import com.epam.esm.service.dto.request.UpdateCertificateRequest;
 import com.epam.esm.service.dto.response.CertificateItem;
 import com.epam.esm.service.dto.response.CertificateResponse;
@@ -189,7 +189,7 @@ public class CertificateController {
 
         UpdateCertificateRequest updateRequest = new UpdateCertificateRequest(certificate.getId(), certificate.getName(),
                 certificate.getDescription(), certificate.getPrice(), certificate.getDuration(),
-                certificate.getTags().stream().map(tag -> new CreateTagRequest(tag.getName())).collect(Collectors.toSet()));
+                certificate.getTags().stream().map(tag -> new TagRequest(tag.getName())).collect(Collectors.toSet()));
         try {
             UpdateCertificateRequest certificatePatched = applyPatchToCertificate(patch, updateRequest);
             CertificateResponse response = updateCertificate(certificatePatched);

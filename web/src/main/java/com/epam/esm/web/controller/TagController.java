@@ -2,12 +2,11 @@ package com.epam.esm.web.controller;
 
 import com.epam.esm.service.CertificateService;
 import com.epam.esm.service.TagService;
-import com.epam.esm.service.dto.request.CreateTagRequest;
+import com.epam.esm.service.dto.request.TagRequest;
 import com.epam.esm.service.dto.response.CertificateItem;
 import com.epam.esm.service.dto.response.TagResponse;
 import com.epam.esm.service.dto.response.UserWithTags;
 import com.epam.esm.service.exception.ServiceException;
-import com.epam.esm.util.CertificateFilter;
 import com.epam.esm.web.exception.BadRequestException;
 import com.epam.esm.web.exception.EntityNotFoundException;
 import com.epam.esm.web.exception.ErrorCode;
@@ -142,7 +141,7 @@ public class TagController {
     }
 
     /**
-     * Creates new tag from given {@link CreateTagRequest}.
+     * Creates new tag from given {@link TagRequest}.
      *
      * @param tag tag to be created.
      * @return created tag, if tag is valid and service call was successful.
@@ -150,7 +149,7 @@ public class TagController {
      */
     @PostMapping(value = "/tags")
     @ResponseStatus(HttpStatus.CREATED)
-    public TagResponse createTag(@Valid @RequestBody CreateTagRequest tag) {
+    public TagResponse createTag(@Valid @RequestBody TagRequest tag) {
         try {
             TagResponse response = tagService.create(tag);
             tagPostProcessor.processEntity(response);

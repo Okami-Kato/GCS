@@ -6,7 +6,7 @@ import com.epam.esm.entity.Certificate;
 import com.epam.esm.entity.Tag;
 import com.epam.esm.service.CertificateService;
 import com.epam.esm.service.dto.request.CreateCertificateRequest;
-import com.epam.esm.service.dto.request.CreateTagRequest;
+import com.epam.esm.service.dto.request.TagRequest;
 import com.epam.esm.service.dto.request.UpdateCertificateRequest;
 import com.epam.esm.service.dto.response.CertificateItem;
 import com.epam.esm.service.dto.response.CertificateResponse;
@@ -78,9 +78,9 @@ class CertificateServiceImplTest {
                 new CreateCertificateRequest(certificate.getName(), certificate.getDescription(),
                         certificate.getPrice(), certificate.getDuration(),
                         new HashSet<>(Arrays.asList(
-                                new CreateTagRequest(firstTag.getName()),
-                                new CreateTagRequest(secondTag.getName()),
-                                new CreateTagRequest(thirdTag.getName()))));
+                                new TagRequest(firstTag.getName()),
+                                new TagRequest(secondTag.getName()),
+                                new TagRequest(thirdTag.getName()))));
 
         CertificateResponse expectedResponse = new CertificateResponse();
         expectedResponse.setId(certificate.getId());
@@ -167,8 +167,8 @@ class CertificateServiceImplTest {
         updateRequest.setPrice(updated.getPrice());
         updateRequest.setDuration(updated.getDuration());
         updateRequest.setTags(new HashSet<>(Arrays.asList(
-                new CreateTagRequest(firstTag.getName()),
-                new CreateTagRequest(thirdTag.getName()))));
+                new TagRequest(firstTag.getName()),
+                new TagRequest(thirdTag.getName()))));
 
         CertificateResponse expectedResponse = new CertificateResponse();
         expectedResponse.setId(updated.getId());

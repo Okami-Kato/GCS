@@ -6,7 +6,7 @@ import com.epam.esm.entity.Certificate;
 import com.epam.esm.entity.Tag;
 import com.epam.esm.service.CertificateService;
 import com.epam.esm.service.dto.request.CreateCertificateRequest;
-import com.epam.esm.service.dto.request.CreateTagRequest;
+import com.epam.esm.service.dto.request.TagRequest;
 import com.epam.esm.service.dto.request.UpdateCertificateRequest;
 import com.epam.esm.service.dto.response.CertificateItem;
 import com.epam.esm.service.dto.response.CertificateResponse;
@@ -93,8 +93,8 @@ public class CertificateServiceImpl implements CertificateService {
         executeDaoCall(() -> certificateDao.delete(id));
     }
 
-    private void extractTags(Certificate certificateToCreate, Set<CreateTagRequest> tagRequests) {
-        for (CreateTagRequest tagRequest : tagRequests) {
+    private void extractTags(Certificate certificateToCreate, Set<TagRequest> tagRequests) {
+        for (TagRequest tagRequest : tagRequests) {
             if (tagRequest == null) {
                 throw new IllegalArgumentException("Tag can't be null");
             }

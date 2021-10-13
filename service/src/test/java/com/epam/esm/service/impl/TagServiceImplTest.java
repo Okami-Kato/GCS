@@ -3,7 +3,7 @@ package com.epam.esm.service.impl;
 import com.epam.esm.dao.TagDao;
 import com.epam.esm.entity.Tag;
 import com.epam.esm.service.TagService;
-import com.epam.esm.service.dto.request.CreateTagRequest;
+import com.epam.esm.service.dto.request.TagRequest;
 import com.epam.esm.service.dto.response.TagResponse;
 import com.epam.esm.service.exception.ServiceException;
 import org.junit.jupiter.api.BeforeAll;
@@ -63,10 +63,10 @@ class TagServiceImplTest {
             ((Tag) args[0]).setId(firstTag.getId());
             return null;
         }).when(tagDao).create(new Tag(firstTag.getName()));
-        TagResponse actualResponse = tagService.create(new CreateTagRequest(firstTag.getName()));
+        TagResponse actualResponse = tagService.create(new TagRequest(firstTag.getName()));
         TagResponse expectedResponse = new TagResponse(firstTag.getId(), firstTag.getName());
         assertEquals(expectedResponse, actualResponse);
-        assertThrows(ServiceException.class, () -> tagService.create(new CreateTagRequest(thirdTag.getName())));
+        assertThrows(ServiceException.class, () -> tagService.create(new TagRequest(thirdTag.getName())));
         assertThrows(IllegalArgumentException.class, () -> tagService.create(null));
     }
 

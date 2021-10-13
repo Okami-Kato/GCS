@@ -3,7 +3,7 @@ package com.epam.esm.service.impl;
 import com.epam.esm.dao.TagDao;
 import com.epam.esm.entity.Tag;
 import com.epam.esm.service.TagService;
-import com.epam.esm.service.dto.request.CreateTagRequest;
+import com.epam.esm.service.dto.request.TagRequest;
 import com.epam.esm.service.dto.response.TagResponse;
 import com.epam.esm.service.dto.response.UserResponse;
 import com.epam.esm.service.dto.response.UserWithTags;
@@ -11,7 +11,6 @@ import com.epam.esm.service.exception.ServiceException;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -76,7 +75,7 @@ public class TagServiceImpl implements TagService {
     }
 
     @Override
-    public TagResponse create(CreateTagRequest tag) {
+    public TagResponse create(TagRequest tag) {
         Tag tagToCreate = mapper.map(tag, Tag.class);
         try {
             tagDao.create(tagToCreate);

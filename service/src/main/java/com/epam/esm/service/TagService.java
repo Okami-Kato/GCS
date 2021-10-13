@@ -1,11 +1,10 @@
 package com.epam.esm.service;
 
-import com.epam.esm.service.dto.request.CreateTagRequest;
+import com.epam.esm.service.dto.request.TagRequest;
 import com.epam.esm.service.dto.response.TagResponse;
 import com.epam.esm.service.dto.response.UserWithTags;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 public interface TagService {
@@ -21,7 +20,7 @@ public interface TagService {
 
     long getCount();
 
-    TagResponse create(CreateTagRequest tag);
+    TagResponse create(TagRequest tag);
 
     void delete(int id);
 }

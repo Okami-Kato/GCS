@@ -9,7 +9,7 @@ import com.epam.esm.random.primitive.RandomSentence;
 import com.epam.esm.service.CertificateService;
 import com.epam.esm.service.TagService;
 import com.epam.esm.service.dto.request.CreateCertificateRequest;
-import com.epam.esm.service.dto.request.CreateTagRequest;
+import com.epam.esm.service.dto.request.TagRequest;
 import com.epam.esm.service.dto.response.TagResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -57,7 +57,7 @@ public class CertificateConfig {
                         certificateProperties.getTagAmount().getMax()
                 ).getValue()
                         .stream()
-                        .map(CreateTagRequest::new)
+                        .map(TagRequest::new)
                         .collect(Collectors.toSet()))
         );
         return certificate;

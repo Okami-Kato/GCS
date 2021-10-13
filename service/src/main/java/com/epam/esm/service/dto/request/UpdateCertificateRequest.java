@@ -30,12 +30,12 @@ public class UpdateCertificateRequest {
     @Positive(message = "Certificate duration must be positive number.")
     private Integer duration;
 
-    private Set<@Valid CreateTagRequest> tags;
+    private Set<@Valid TagRequest> tags;
 
     public UpdateCertificateRequest() {
     }
 
-    public UpdateCertificateRequest(Integer id, String name, String description, Integer price, Integer duration, Set<CreateTagRequest> tags) {
+    public UpdateCertificateRequest(Integer id, String name, String description, Integer price, Integer duration, Set<TagRequest> tags) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -84,11 +84,11 @@ public class UpdateCertificateRequest {
         this.duration = duration;
     }
 
-    public Set<CreateTagRequest> getTags() {
+    public Set<TagRequest> getTags() {
         return tags;
     }
 
-    public void setTags(Set<CreateTagRequest> tagNames) {
+    public void setTags(Set<TagRequest> tagNames) {
         this.tags = tagNames;
     }
 

@@ -6,16 +6,16 @@ import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 import java.util.Objects;
 
-public class CreateTagRequest {
+public class TagRequest {
     @NotBlank(message = "Tag name can't be blank")
     @Size(min = 3, max = 25, message = "Tag name must be {min}-{max} characters long.")
     @Pattern(regexp = "^[a-zA-Z\\s]+$", message = "Tag name can contain only letters.")
     private String name;
 
-    public CreateTagRequest() {
+    public TagRequest() {
     }
 
-    public CreateTagRequest(String name) {
+    public TagRequest(String name) {
         this.name = name;
     }
 
@@ -31,7 +31,7 @@ public class CreateTagRequest {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        CreateTagRequest that = (CreateTagRequest) o;
+        TagRequest that = (TagRequest) o;
         return name.equals(that.name);
     }
 
