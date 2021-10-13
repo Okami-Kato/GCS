@@ -7,16 +7,13 @@ import com.epam.esm.service.TagService;
 import com.epam.esm.service.dto.request.CreateTagRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Scope;
 
 import java.util.List;
 import java.util.Map;
 
 @Configuration
 public class TagConfig {
-    @Bean
-    @Scope("prototype")
-    public CreateTagRequest tag(GenerationProperties properties, Map<Integer, List<String>> dictionary) {
+    private CreateTagRequest generateRandomTag(GenerationProperties properties, Map<Integer, List<String>> dictionary) {
         return new CreateTagRequest(
                 new RandomSentence(dictionary,
                         properties.getTag().getName().getMinSize(),
@@ -30,7 +27,7 @@ public class TagConfig {
         return new TagCreator(tagService) {
             @Override
             protected CreateTagRequest getTag() {
-                return tag(properties, dictionary);
+                return generateRandomTag(properties, dictionary);
             }
         };
     }

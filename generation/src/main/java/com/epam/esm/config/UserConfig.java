@@ -8,16 +8,13 @@ import com.epam.esm.service.UserService;
 import com.epam.esm.service.dto.request.CreateUserRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Scope;
 
 import java.util.List;
 import java.util.Map;
 
 @Configuration
 public class UserConfig {
-    @Bean
-    @Scope("prototype")
-    public CreateUserRequest user(GenerationProperties properties, Map<Integer, List<String>> dictionary) {
+    private CreateUserRequest generateRandomUser(GenerationProperties properties, Map<Integer, List<String>> dictionary) {
         UserProperties userProperties = properties.getUser();
         CreateUserRequest user = new CreateUserRequest();
         user.setFirstName(
@@ -52,7 +49,7 @@ public class UserConfig {
         return new UserCreator(userService) {
             @Override
             protected CreateUserRequest getUser() {
-                return user(properties, dictionary);
+                return generateRandomUser(properties, dictionary);
             }
         };
     }
