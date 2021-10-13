@@ -19,6 +19,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static com.epam.esm.service.util.ServiceUtil.executeDaoCall;
+
 @Service
 @Transactional
 public class UserServiceImpl implements UserService {
@@ -33,13 +35,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<UserResponse> getAll(int pageNumber, int pageSize) {
-        try {
-            return userDao.getAll(pageNumber, pageSize).stream()
-                    .map(user -> mapper.map(user, UserResponse.class))
-                    .collect(Collectors.toList());
-        } catch (InvalidDataAccessApiUsageException e) {
-            throw new ServiceException(e);
-        }
+        return executeDaoCall(() -> userDao.getAll(pageNumber, pageSize).stream()
+                .map(user -> mapper.map(user, UserResponse.class))
+                .collect(Collectors.toList()));
     }
 
     @Override

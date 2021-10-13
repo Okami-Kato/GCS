@@ -107,8 +107,8 @@ class UserOrderServiceImplTest {
         assertThrows(ServiceException.class, () -> userOrderService.create(new CreateUserOrderRequest(firstUser.getId(), firstCertificate.getId())));
         assertThrows(ServiceException.class, () -> userOrderService.create(new CreateUserOrderRequest(notRealId, firstCertificate.getId())));
         assertThrows(ServiceException.class, () -> userOrderService.create(new CreateUserOrderRequest(firstUser.getId(), notRealId)));
-        assertThrows(IllegalArgumentException.class, () -> userOrderService.create(new CreateUserOrderRequest(null, firstCertificate.getId())));
-        assertThrows(IllegalArgumentException.class, () -> userOrderService.create(new CreateUserOrderRequest(firstUser.getId(), null)));
+        assertThrows(ServiceException.class, () -> userOrderService.create(new CreateUserOrderRequest(null, firstCertificate.getId())));
+        assertThrows(ServiceException.class, () -> userOrderService.create(new CreateUserOrderRequest(firstUser.getId(), null)));
         assertThrows(IllegalArgumentException.class, () -> userOrderService.create(null));
     }
 

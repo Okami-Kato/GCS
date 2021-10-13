@@ -109,6 +109,7 @@ class UserOrderDaoImplTest {
     void create() {
         UserOrder order = new UserOrder(thirdUser, thirdCertificate, thirdCertificate.getPrice());
         assertDoesNotThrow(() -> userOrderDao.create(order));
+        assertThrows(InvalidDataAccessApiUsageException.class, () -> userOrderDao.get(null));
         Optional<UserOrder> persisted = userOrderDao.get(order.getId());
         assertTrue(persisted.isPresent());
         assertFalse(userOrderDao.get(order.getId() * (-1)).isPresent());

@@ -8,7 +8,6 @@ import com.epam.esm.entity.Certificate;
 import com.epam.esm.entity.Tag;
 import com.epam.esm.entity.User;
 import com.epam.esm.entity.UserOrder;
-import com.epam.esm.util.CertificateFilter;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -71,7 +70,7 @@ class TagDaoImplTest {
     }
 
     @AfterAll
-    void destroy(){
+    void destroy() {
         tagDao.delete(firstTag.getId());
         tagDao.delete(secondTag.getId());
         tagDao.delete(thirdTag.getId());
@@ -85,13 +84,8 @@ class TagDaoImplTest {
         assertThrows(DataIntegrityViolationException.class, () -> tagDao.create(new Tag(firstTag.getName())));
         Optional<Tag> persisted = tagDao.get(firstTag.getId());
         assertTrue(persisted.isPresent());
-        Integer tagId = persisted.get().getId();
-        int certificateDaoCount = (int) certificateDao.getCount();
         assertEquals(Arrays.asList(firstCertificate, secondCertificate),
-                certificateDao.findAllWithFilter(1, certificateDaoCount,
-                        CertificateFilter.newBuilder()
-                                .withTags(tagId)
-                                .build())
+                certificateDao.findAllByTagId(1, 2, persisted.get().getId())
         );
         assertEquals(persisted, tagDao.get(firstTag.getName()));
         assertFalse(tagDao.get(firstTag.getId() + 1000).isPresent());

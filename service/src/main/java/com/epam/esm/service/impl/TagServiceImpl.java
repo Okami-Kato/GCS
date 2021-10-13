@@ -20,6 +20,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static com.epam.esm.service.util.ServiceUtil.executeDaoCall;
+
 @Service
 @Transactional
 public class TagServiceImpl implements TagService {
@@ -34,24 +36,16 @@ public class TagServiceImpl implements TagService {
 
     @Override
     public List<TagResponse> getAll(int pageNumber, int pageSize) {
-        try {
-            return tagDao.getAll(pageNumber, pageSize).stream()
-                    .map(tag -> mapper.map(tag, TagResponse.class))
-                    .collect(Collectors.toList());
-        } catch (InvalidDataAccessApiUsageException e) {
-            throw new ServiceException(e);
-        }
+        return executeDaoCall(() -> tagDao.getAll(pageNumber, pageSize).stream()
+                .map(tag -> mapper.map(tag, TagResponse.class))
+                .collect(Collectors.toList()));
     }
 
     @Override
     public List<TagResponse> findAllByCertificateId(int pageNumber, int pageSize, int certificateId) {
-        try {
-            return tagDao.findAllByCertificateId(pageNumber, pageSize, certificateId).stream()
-                    .map(tag -> mapper.map(tag, TagResponse.class))
-                    .collect(Collectors.toList());
-        } catch (InvalidDataAccessApiUsageException e) {
-            throw new ServiceException(e);
-        }
+        return executeDaoCall(() -> tagDao.findAllByCertificateId(pageNumber, pageSize, certificateId).stream()
+                .map(tag -> mapper.map(tag, TagResponse.class))
+                .collect(Collectors.toList()));
     }
 
     @Override
@@ -61,11 +55,7 @@ public class TagServiceImpl implements TagService {
 
     @Override
     public Optional<TagResponse> get(String name) {
-        try {
-            return tagDao.get(name).map(tag -> mapper.map(tag, TagResponse.class));
-        } catch (InvalidDataAccessApiUsageException e) {
-            throw new ServiceException(e);
-        }
+        return executeDaoCall(() -> tagDao.get(name).map(tag -> mapper.map(tag, TagResponse.class)));
     }
 
     @Override
@@ -98,10 +88,6 @@ public class TagServiceImpl implements TagService {
 
     @Override
     public void delete(int id) {
-        try {
-            tagDao.delete(id);
-        } catch (InvalidDataAccessApiUsageException e) {
-            throw new ServiceException(e);
-        }
+        executeDaoCall(() -> tagDao.delete(id));
     }
 }

@@ -9,12 +9,9 @@ import com.epam.esm.service.dto.request.CreateCertificateRequest;
 import com.epam.esm.service.dto.request.UpdateCertificateRequest;
 import com.epam.esm.service.dto.response.CertificateItem;
 import com.epam.esm.service.dto.response.CertificateResponse;
-import com.epam.esm.service.exception.ServiceException;
 import com.epam.esm.util.CertificateFilter;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,6 +19,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import static com.epam.esm.service.util.ServiceUtil.executeDaoCall;
 
 @Service
 @Transactional
@@ -39,33 +38,28 @@ public class CertificateServiceImpl implements CertificateService {
 
     @Override
     public List<CertificateItem> getAll(int pageNumber, int pageSize) {
-        try {
-            return certificateDao.getAll(pageNumber, pageSize).stream()
-                    .map(c -> mapper.map(c, CertificateItem.class))
-                    .collect(Collectors.toList());
-        } catch (InvalidDataAccessApiUsageException e) {
-            throw new ServiceException(e);
-        }
+        return executeDaoCall(() -> certificateDao.getAll(pageNumber, pageSize).stream()
+                .map(c -> mapper.map(c, CertificateItem.class))
+                .collect(Collectors.toList()));
     }
 
     @Override
     public List<CertificateItem> findAllWithFilter(int pageNumber, int pageSize, CertificateFilter certificateFilter) {
-        try {
-            return certificateDao.findAllWithFilter(pageNumber, pageSize, certificateFilter).stream()
-                    .map(c -> mapper.map(c, CertificateItem.class))
-                    .collect(Collectors.toList());
-        } catch (InvalidDataAccessApiUsageException e) {
-            throw new ServiceException(e);
-        }
+        return executeDaoCall(() -> certificateDao.findAllWithFilter(pageNumber, pageSize, certificateFilter).stream()
+                .map(c -> mapper.map(c, CertificateItem.class))
+                .collect(Collectors.toList()));
+    }
+
+    @Override
+    public List<CertificateItem> findAllWithByTagId(int pageNumber, int pageSize, int tagId) {
+        return executeDaoCall(() -> certificateDao.findAllByTagId(pageNumber, pageSize, tagId).stream()
+                .map(c -> mapper.map(c, CertificateItem.class))
+                .collect(Collectors.toList()));
     }
 
     @Override
     public Optional<CertificateResponse> get(int id) {
-        try {
-            return certificateDao.get(id).map(o -> mapper.map(o, CertificateResponse.class));
-        } catch (InvalidDataAccessApiUsageException e) {
-            throw new ServiceException(e);
-        }
+        return executeDaoCall(() -> certificateDao.get(id).map(o -> mapper.map(o, CertificateResponse.class)));
     }
 
     @Override
@@ -79,11 +73,7 @@ public class CertificateServiceImpl implements CertificateService {
         if (certificate.getTagNames() != null) {
             extractTags(certificateToCreate, certificate.getTagNames());
         }
-        try {
-            certificateDao.create(certificateToCreate);
-        } catch (DataIntegrityViolationException e) {
-            throw new ServiceException(e);
-        }
+        executeDaoCall(() -> certificateDao.create(certificateToCreate));
         return mapper.map(certificateToCreate, CertificateResponse.class);
     }
 
@@ -93,20 +83,13 @@ public class CertificateServiceImpl implements CertificateService {
         if (certificate.getTagNames() != null) {
             extractTags(certificateToUpdate, certificate.getTagNames());
         }
-        try {
-            return mapper.map(certificateDao.update(certificateToUpdate), CertificateResponse.class);
-        } catch (DataIntegrityViolationException | InvalidDataAccessApiUsageException e) {
-            throw new ServiceException(e);
-        }
+        Certificate updatedCertificate = executeDaoCall(() -> certificateDao.update(certificateToUpdate));
+        return mapper.map(updatedCertificate, CertificateResponse.class);
     }
 
     @Override
     public void delete(int id) {
-        try {
-            certificateDao.delete(id);
-        } catch (InvalidDataAccessApiUsageException e) {
-            throw new ServiceException(e);
-        }
+        executeDaoCall(() -> certificateDao.delete(id));
     }
 
     private void extractTags(Certificate certificateToCreate, Set<String> tagNames) {
@@ -115,13 +98,13 @@ public class CertificateServiceImpl implements CertificateService {
                 throw new IllegalArgumentException("Tag name can't be null");
             }
             Optional<Tag> tag = tagDao.get(tagName);
-            if (tag.isPresent()) {
-                certificateToCreate.addTag(tag.get());
-            } else {
-                Tag tagToCreate = new Tag(tagName);
-                tagDao.create(tagToCreate);
-                certificateToCreate.addTag(tagToCreate);
-            }
+            certificateToCreate.addTag(
+                    tag.orElseGet(() -> {
+                        Tag tagToCreate = new Tag(tagName);
+                        tagDao.create(tagToCreate);
+                        return tagToCreate;
+                    })
+            );
         }
     }
 }

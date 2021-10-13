@@ -13,14 +13,14 @@ import com.epam.esm.service.dto.response.UserOrderResponse;
 import com.epam.esm.service.exception.ServiceException;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+import static com.epam.esm.service.util.ServiceUtil.executeDaoCall;
 
 @Service
 @Transactional
@@ -40,35 +40,23 @@ public class UserOrderServiceImpl implements UserOrderService {
 
     @Override
     public List<UserOrderItem> getAll(int pageNumber, int pageSize) {
-        try {
-            return userOrderDao.getAll(pageNumber, pageSize).stream()
-                    .map(order -> mapper.map(order, UserOrderItem.class))
-                    .collect(Collectors.toList());
-        } catch (InvalidDataAccessApiUsageException e) {
-            throw new ServiceException(e);
-        }
+        return executeDaoCall(() -> userOrderDao.getAll(pageNumber, pageSize).stream()
+                .map(order -> mapper.map(order, UserOrderItem.class))
+                .collect(Collectors.toList()));
     }
 
     @Override
     public List<UserOrderItem> findAllByUserId(int pageNumber, int pageSize, int userId) {
-        try {
-            return userOrderDao.findAllByUserId(pageNumber, pageSize, userId).stream()
-                    .map(order -> mapper.map(order, UserOrderItem.class))
-                    .collect(Collectors.toList());
-        } catch (InvalidDataAccessApiUsageException e) {
-            throw new ServiceException(e);
-        }
+        return executeDaoCall(() -> userOrderDao.findAllByUserId(pageNumber, pageSize, userId).stream()
+                .map(order -> mapper.map(order, UserOrderItem.class))
+                .collect(Collectors.toList()));
     }
 
     @Override
     public List<UserOrderItem> findAllByCertificateId(int pageNumber, int pageSize, int certificateId) {
-        try {
-            return userOrderDao.findAllByCertificateId(pageNumber, pageSize, certificateId).stream()
-                    .map(order -> mapper.map(order, UserOrderItem.class))
-                    .collect(Collectors.toList());
-        } catch (InvalidDataAccessApiUsageException e) {
-            throw new ServiceException(e);
-        }
+        return executeDaoCall(() -> userOrderDao.findAllByCertificateId(pageNumber, pageSize, certificateId).stream()
+                .map(order -> mapper.map(order, UserOrderItem.class))
+                .collect(Collectors.toList()));
     }
 
     @Override
@@ -86,30 +74,18 @@ public class UserOrderServiceImpl implements UserOrderService {
         if (userOrder == null) {
             throw new IllegalArgumentException("Passed UserOrder can't be null");
         }
-        if (userOrder.getUserId() == null) {
-            throw new IllegalArgumentException("User id can't be null");
-        }
-        if (userOrder.getCertificateId() == null) {
-            throw new IllegalArgumentException("Certificate id can't be null");
-        }
+        Optional<User> user = executeDaoCall(() -> userDao.get(userOrder.getUserId()));
+        Optional<Certificate> certificate = executeDaoCall(() -> certificateDao.get(userOrder.getCertificateId()));
 
-        Optional<User> user = userDao.get(userOrder.getUserId());
-        if (!user.isPresent()) {
-            throw new ServiceException(String.format("User not found (%s)", "id=" + userOrder.getUserId()));
-        }
+        UserOrder orderToCreate = new UserOrder(
+                user.orElseThrow(() -> new ServiceException(
+                        String.format("User not found (%s)", "id=" + userOrder.getUserId()))),
+                certificate.orElseThrow(() -> new ServiceException(
+                        String.format("Certificate not found (%s)", "id=" + userOrder.getUserId()))),
+                certificate.get().getPrice()
+        );
 
-        Optional<Certificate> certificate = certificateDao.get(userOrder.getCertificateId());
-        if (!certificate.isPresent()) {
-            throw new ServiceException(String.format("Certificate not found (%s)", "id=" + userOrder.getUserId()));
-        }
-
-        UserOrder orderToCreate = new UserOrder(user.get(), certificate.get(), certificate.get().getPrice());
-
-        try {
-            userOrderDao.create(orderToCreate);
-        } catch (DataIntegrityViolationException e) {
-            throw new ServiceException(e);
-        }
+        executeDaoCall(() -> userOrderDao.create(orderToCreate));
         return mapper.map(orderToCreate, UserOrderResponse.class);
     }
 }

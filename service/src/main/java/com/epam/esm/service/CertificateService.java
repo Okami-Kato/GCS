@@ -14,6 +14,8 @@ public interface CertificateService {
 
     List<CertificateItem> findAllWithFilter(int pageNumber, int pageSize, CertificateFilter certificateFilter);
 
+    List<CertificateItem> findAllWithByTagId(int pageNumber, int pageSize, int tagId);
+
     Optional<CertificateResponse> get(int id);
 
     long getCount();
