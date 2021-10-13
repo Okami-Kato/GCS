@@ -8,8 +8,8 @@ import com.epam.esm.service.exception.ServiceException;
 import com.epam.esm.web.exception.BadRequestException;
 import com.epam.esm.web.exception.EntityNotFoundException;
 import com.epam.esm.web.exception.ErrorCode;
-import com.epam.esm.web.processor.UserOrderItemPostProcessor;
-import com.epam.esm.web.processor.UserOrderResponsePostProcessor;
+import com.epam.esm.web.linker.UserOrderItemLinker;
+import com.epam.esm.web.linker.UserOrderResponseLinker;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.http.HttpStatus;
@@ -36,12 +36,12 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 public class UserOrderController {
     private final UserOrderService orderService;
 
-    private final UserOrderItemPostProcessor userOrderItemPostProcessor;
-    private final UserOrderResponsePostProcessor userOrderResponsePostProcessor;
+    private final UserOrderItemLinker userOrderItemPostProcessor;
+    private final UserOrderResponseLinker userOrderResponsePostProcessor;
 
     @Autowired
-    public UserOrderController(UserOrderService orderService, UserOrderItemPostProcessor userOrderItemPostProcessor,
-                               UserOrderResponsePostProcessor userOrderResponsePostProcessor) {
+    public UserOrderController(UserOrderService orderService, UserOrderItemLinker userOrderItemPostProcessor,
+                               UserOrderResponseLinker userOrderResponsePostProcessor) {
         this.orderService = orderService;
         this.userOrderItemPostProcessor = userOrderItemPostProcessor;
         this.userOrderResponsePostProcessor = userOrderResponsePostProcessor;

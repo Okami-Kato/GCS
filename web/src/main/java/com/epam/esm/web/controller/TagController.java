@@ -10,10 +10,10 @@ import com.epam.esm.service.exception.ServiceException;
 import com.epam.esm.web.exception.BadRequestException;
 import com.epam.esm.web.exception.EntityNotFoundException;
 import com.epam.esm.web.exception.ErrorCode;
-import com.epam.esm.web.processor.CertificatePostProcessor;
-import com.epam.esm.web.processor.TagPostProcessor;
-import com.epam.esm.web.processor.UserPostProcessor;
-import com.epam.esm.web.processor.UserWithTagsPostProcessor;
+import com.epam.esm.web.linker.CertificateLinker;
+import com.epam.esm.web.linker.TagLinker;
+import com.epam.esm.web.linker.UserLinker;
+import com.epam.esm.web.linker.UserWithTagsLinker;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.http.HttpStatus;
@@ -45,22 +45,22 @@ public class TagController {
     private final CertificateService certificateService;
     private final TagService tagService;
 
-    private final TagPostProcessor tagPostProcessor;
-    private final UserPostProcessor userPostProcessor;
-    private final UserWithTagsPostProcessor userWithTagsPostProcessor;
-    private final CertificatePostProcessor certificatePostProcessor;
+    private final TagLinker tagPostProcessor;
+    private final UserLinker userPostProcessor;
+    private final UserWithTagsLinker userWithTagsPostProcessor;
+    private final CertificateLinker certificateLinker;
 
     @Autowired
     public TagController(CertificateService certificateService, TagService tagService,
-                         TagPostProcessor tagPostProcessor, UserPostProcessor userPostProcessor,
-                         UserWithTagsPostProcessor userWithTagsPostProcessor,
-                         CertificatePostProcessor certificatePostProcessor) {
+                         TagLinker tagPostProcessor, UserLinker userPostProcessor,
+                         UserWithTagsLinker userWithTagsPostProcessor,
+                         CertificateLinker certificateLinker) {
         this.certificateService = certificateService;
         this.tagService = tagService;
         this.tagPostProcessor = tagPostProcessor;
         this.userPostProcessor = userPostProcessor;
         this.userWithTagsPostProcessor = userWithTagsPostProcessor;
-        this.certificatePostProcessor = certificatePostProcessor;
+        this.certificateLinker = certificateLinker;
     }
 
     /**
@@ -104,7 +104,7 @@ public class TagController {
             @PathVariable int id) {
         try {
             List<CertificateItem> response = certificateService.findAllWithByTagId(page, size, id);
-            CollectionModel<? extends CertificateItem> certificates = certificatePostProcessor.processCollection(response);
+            CollectionModel<? extends CertificateItem> certificates = certificateLinker.processCollection(response);
             return certificates.add(linkTo(methodOn(TagController.class).getCertificates(page, size, id)).withSelfRel());
         } catch (ServiceException e) {
             throw new BadRequestException(ErrorCode.CERTIFICATE_BAD_REQUEST, e.getMessage());

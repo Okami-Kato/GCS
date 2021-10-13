@@ -1,4 +1,4 @@
-package com.epam.esm.web.processor;
+package com.epam.esm.web.linker;
 
 import com.epam.esm.service.dto.response.TagResponse;
 import com.epam.esm.web.controller.TagController;
@@ -8,7 +8,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @Component
-public class TagPostProcessor implements RepresentationModelPostProcessor<TagResponse> {
+public class TagLinker implements RepresentationModelLinker<TagResponse> {
     @Override
     public void processEntity(TagResponse entity) {
         entity.add(linkTo(methodOn(TagController.class).getTag(entity.getId())).withSelfRel());

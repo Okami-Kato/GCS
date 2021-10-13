@@ -1,4 +1,4 @@
-package com.epam.esm.web.processor;
+package com.epam.esm.web.linker;
 
 import com.epam.esm.service.dto.response.UserOrderResponse;
 import com.epam.esm.web.controller.UserOrderController;
@@ -9,13 +9,13 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @Component
-public class UserOrderResponsePostProcessor implements RepresentationModelPostProcessor<UserOrderResponse> {
-    private final CertificatePostProcessor certificatePostProcessor;
-    private final UserPostProcessor userPostProcessor;
+public class UserOrderResponseLinker implements RepresentationModelLinker<UserOrderResponse> {
+    private final CertificateLinker certificateLinker;
+    private final UserLinker userPostProcessor;
 
     @Autowired
-    public UserOrderResponsePostProcessor(CertificatePostProcessor certificatePostProcessor, UserPostProcessor userPostProcessor) {
-        this.certificatePostProcessor = certificatePostProcessor;
+    public UserOrderResponseLinker(CertificateLinker certificateLinker, UserLinker userPostProcessor) {
+        this.certificateLinker = certificateLinker;
         this.userPostProcessor = userPostProcessor;
     }
 
@@ -30,7 +30,7 @@ public class UserOrderResponsePostProcessor implements RepresentationModelPostPr
             entity.add(linkTo(methodOn(UserOrderController.class)
                     .getAllOrdersByCertificateId(null, null, entity.getCertificate().getId()))
                     .withRel("ordersOnCertificate"));
-            certificatePostProcessor.processEntity(entity.getCertificate());
+            certificateLinker.processEntity(entity.getCertificate());
         }
     }
 }

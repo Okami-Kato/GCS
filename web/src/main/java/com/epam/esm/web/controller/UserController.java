@@ -6,7 +6,7 @@ import com.epam.esm.service.exception.ServiceException;
 import com.epam.esm.web.exception.BadRequestException;
 import com.epam.esm.web.exception.EntityNotFoundException;
 import com.epam.esm.web.exception.ErrorCode;
-import com.epam.esm.web.processor.UserPostProcessor;
+import com.epam.esm.web.linker.UserLinker;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.http.MediaType;
@@ -29,10 +29,10 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 public class UserController {
     private final UserService userService;
 
-    private final UserPostProcessor userPostProcessor;
+    private final UserLinker userPostProcessor;
 
     @Autowired
-    public UserController(UserService userService, UserPostProcessor userPostProcessor) {
+    public UserController(UserService userService, UserLinker userPostProcessor) {
         this.userService = userService;
         this.userPostProcessor = userPostProcessor;
     }

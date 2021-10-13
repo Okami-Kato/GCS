@@ -1,4 +1,4 @@
-package com.epam.esm.web.processor;
+package com.epam.esm.web.linker;
 
 import com.epam.esm.service.dto.response.CertificateItem;
 import com.epam.esm.web.controller.CertificateController;
@@ -12,11 +12,11 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @Component
-public class CertificatePostProcessor implements RepresentationModelPostProcessor<CertificateItem> {
-    private final TagPostProcessor tagPostProcessor;
+public class CertificateLinker implements RepresentationModelLinker<CertificateItem> {
+    private final TagLinker tagPostProcessor;
 
     @Autowired
-    public CertificatePostProcessor(TagPostProcessor tagPostProcessor) {
+    public CertificateLinker(TagLinker tagPostProcessor) {
         this.tagPostProcessor = tagPostProcessor;
     }
 

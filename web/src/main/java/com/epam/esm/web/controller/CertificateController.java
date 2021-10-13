@@ -15,7 +15,7 @@ import com.epam.esm.util.SortDirection;
 import com.epam.esm.web.exception.BadRequestException;
 import com.epam.esm.web.exception.EntityNotFoundException;
 import com.epam.esm.web.exception.ErrorCode;
-import com.epam.esm.web.processor.CertificatePostProcessor;
+import com.epam.esm.web.linker.CertificateLinker;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -61,14 +61,14 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 public class CertificateController {
     private final CertificateService certificateService;
 
-    private final CertificatePostProcessor certificatePostProcessor;
+    private final CertificateLinker certificateLinker;
 
     private final ObjectMapper objectMapper;
 
     @Autowired
-    public CertificateController(CertificatePostProcessor certificatePostProcessor, CertificateService certificateService,
+    public CertificateController(CertificateLinker certificateLinker, CertificateService certificateService,
                                  ObjectMapper objectMapper) {
-        this.certificatePostProcessor = certificatePostProcessor;
+        this.certificateLinker = certificateLinker;
         this.certificateService = certificateService;
         this.objectMapper = objectMapper;
     }
@@ -114,7 +114,7 @@ public class CertificateController {
                 filterBuilder.withSort(Sort.by(orders));
             }
             List<CertificateItem> certificateList = certificateService.findAllWithFilter(page, size, filterBuilder.build());
-            CollectionModel<? extends CertificateItem> response = certificatePostProcessor.processCollection(certificateList);
+            CollectionModel<? extends CertificateItem> response = certificateLinker.processCollection(certificateList);
             return response.add(linkTo(methodOn(CertificateController.class)
                     .getAllCertificates(page, size, namePart, descriptionPart, tagNames, sort))
                     .withSelfRel());
@@ -133,7 +133,7 @@ public class CertificateController {
     @GetMapping(value = "/certificates/{id}")
     public CertificateResponse getCertificate(@PathVariable int id) {
         Optional<CertificateResponse> response = certificateService.get(id);
-        response.ifPresent(certificatePostProcessor::processEntity);
+        response.ifPresent(certificateLinker::processEntity);
         return response.orElseThrow(() -> new EntityNotFoundException(ErrorCode.CERTIFICATE_NOT_FOUND, "id=" + id));
     }
 
@@ -149,7 +149,7 @@ public class CertificateController {
     public CertificateResponse createCertificate(@Valid @RequestBody CreateCertificateRequest certificate) {
         try {
             CertificateResponse response = certificateService.create(certificate);
-            certificatePostProcessor.processEntity(response);
+            certificateLinker.processEntity(response);
             return response;
         } catch (ServiceException e) {
             throw new BadRequestException(ErrorCode.CERTIFICATE_BAD_REQUEST, e.getMessage());
@@ -193,7 +193,7 @@ public class CertificateController {
         try {
             UpdateCertificateRequest certificatePatched = applyPatchToCertificate(patch, updateRequest);
             CertificateResponse response = updateCertificate(certificatePatched);
-            certificatePostProcessor.processEntity(response);
+            certificateLinker.processEntity(response);
             return response;
         } catch (ServiceException | JsonPatchException | JsonProcessingException e) {
             throw new BadRequestException(ErrorCode.CERTIFICATE_BAD_REQUEST, e.getMessage());

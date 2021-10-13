@@ -1,16 +1,16 @@
-package com.epam.esm.web.processor;
+package com.epam.esm.web.linker;
 
 import com.epam.esm.service.dto.response.UserWithTags;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class UserWithTagsPostProcessor implements RepresentationModelPostProcessor<UserWithTags> {
-    private final UserPostProcessor userPostProcessor;
-    private final TagPostProcessor tagPostProcessor;
+public class UserWithTagsLinker implements RepresentationModelLinker<UserWithTags> {
+    private final UserLinker userPostProcessor;
+    private final TagLinker tagPostProcessor;
 
     @Autowired
-    public UserWithTagsPostProcessor(UserPostProcessor userPostProcessor, TagPostProcessor tagPostProcessor) {
+    public UserWithTagsLinker(UserLinker userPostProcessor, TagLinker tagPostProcessor) {
         this.userPostProcessor = userPostProcessor;
         this.tagPostProcessor = tagPostProcessor;
     }
