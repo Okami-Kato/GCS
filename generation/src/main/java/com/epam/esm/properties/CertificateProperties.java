@@ -3,12 +3,10 @@ package com.epam.esm.properties;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
 
 public class CertificateProperties {
-    private Integer amount;
-
     @NestedConfigurationProperty
-    private StringProperties name;
+    private SizeProperties name;
     @NestedConfigurationProperty
-    private StringProperties description;
+    private SizeProperties description;
     @NestedConfigurationProperty
     private IntegerProperties price;
     @NestedConfigurationProperty
@@ -16,27 +14,19 @@ public class CertificateProperties {
     @NestedConfigurationProperty
     private IntegerProperties tagAmount;
 
-    public Integer getAmount() {
-        return amount;
-    }
-
-    public void setAmount(Integer amount) {
-        this.amount = amount;
-    }
-
-    public StringProperties getName() {
+    public SizeProperties getName() {
         return name;
     }
 
-    public void setName(StringProperties name) {
+    public void setName(SizeProperties name) {
         this.name = name;
     }
 
-    public StringProperties getDescription() {
+    public SizeProperties getDescription() {
         return description;
     }
 
-    public void setDescription(StringProperties description) {
+    public void setDescription(SizeProperties description) {
         this.description = description;
     }
 

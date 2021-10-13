@@ -1,6 +1,6 @@
 package com.epam.esm.properties;
 
-public class StringProperties {
+public class SizeProperties {
     private Integer minSize;
     private Integer maxSize;
 

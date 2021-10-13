@@ -13,7 +13,7 @@ gradlew.bat
 gradlew
 
 /dao/src/test/resources/application-test.yml
-/data-generation/src/main/resources/application.yml
 /web/src/main/resources/application-dev.yml
 /web/src/main/resources/application-prod.yml
-/generation/src/main/resources/application.yml
+/generation/src/main/resources/application-dev.yml
+/generation/src/main/resources/application-prod.yml

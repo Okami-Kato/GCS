@@ -3,53 +3,44 @@ package com.epam.esm.properties;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
 
 public class UserProperties {
-    private Integer amount;
     @NestedConfigurationProperty
-    private StringProperties firstName;
+    private SizeProperties firstName;
     @NestedConfigurationProperty
-    private StringProperties lastName;
+    private SizeProperties lastName;
     @NestedConfigurationProperty
-    private StringProperties login;
+    private SizeProperties login;
     @NestedConfigurationProperty
-    private StringProperties password;
+    private SizeProperties password;
 
-    public Integer getAmount() {
-        return amount;
-    }
-
-    public void setAmount(Integer amount) {
-        this.amount = amount;
-    }
-
-    public StringProperties getFirstName() {
+    public SizeProperties getFirstName() {
         return firstName;
     }
 
-    public void setFirstName(StringProperties firstName) {
+    public void setFirstName(SizeProperties firstName) {
         this.firstName = firstName;
     }
 
-    public StringProperties getLastName() {
+    public SizeProperties getLastName() {
         return lastName;
     }
 
-    public void setLastName(StringProperties lastName) {
+    public void setLastName(SizeProperties lastName) {
         this.lastName = lastName;
     }
 
-    public StringProperties getLogin() {
+    public SizeProperties getLogin() {
         return login;
     }
 
-    public void setLogin(StringProperties login) {
+    public void setLogin(SizeProperties login) {
         this.login = login;
     }
 
-    public StringProperties getPassword() {
+    public SizeProperties getPassword() {
         return password;
     }
 
-    public void setPassword(StringProperties password) {
+    public void setPassword(SizeProperties password) {
         this.password = password;
     }
 }

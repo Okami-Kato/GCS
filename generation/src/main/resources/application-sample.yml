@@ -21,9 +21,8 @@ spring:
 #generation properties
 generation:
   dictionary-file: generation/src/main/resources/dictionary.txt
-
+  certificate-amount: 10
   certificate:
-    amount: 10
     name:
       minSize: 3
       maxSize: 50
@@ -40,14 +39,14 @@ generation:
       min: 3
       max: 10
 
+  tag-amount: 15
   tag:
-    amount: 15
     name:
       minSize: 5
       maxSize: 25
 
+  user-amount: 10
   user:
-    amount: 10
     first-name:
       minSize: 3
       maxSize: 25
@@ -61,5 +60,4 @@ generation:
       minSize: 3
       maxSize: 25
 
-  user-order:
-    amount: 10
+  user-order-amount: 15

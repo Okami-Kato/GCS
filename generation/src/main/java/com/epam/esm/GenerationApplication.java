@@ -30,16 +30,16 @@ public class GenerationApplication {
             GenerationProperties properties = context.getBean(GenerationProperties.class);
 
             TagCreator tagCreator = context.getBean(TagCreator.class);
-            tagCreator.create(properties.getTag().getAmount());
+            tagCreator.create(properties.getTagAmount());
 
             CertificateCreator certificateCreator = context.getBean(CertificateCreator.class);
-            certificateCreator.create(properties.getCertificate().getAmount());
+            certificateCreator.create(properties.getCertificateAmount());
 
             UserCreator userCreator = context.getBean(UserCreator.class);
-            userCreator.create(properties.getUser().getAmount());
+            userCreator.create(properties.getUserAmount());
 
             UserOrderCreator userOrderCreator = context.getBean(UserOrderCreator.class);
-            userOrderCreator.create(properties.getUserOrder().getAmount());
+            userOrderCreator.create(properties.getUserOrderAmount());
         }
     }
 

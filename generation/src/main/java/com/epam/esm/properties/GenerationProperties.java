@@ -6,15 +6,16 @@ import org.springframework.boot.context.properties.NestedConfigurationProperty;
 @ConfigurationProperties("generation")
 public class GenerationProperties {
     private String dictionaryFile;
-
+    private Integer certificateAmount;
+    private Integer tagAmount;
+    private Integer userAmount;
+    private Integer userOrderAmount;
     @NestedConfigurationProperty
     private CertificateProperties certificate;
     @NestedConfigurationProperty
     private TagProperties tag;
     @NestedConfigurationProperty
     private UserProperties user;
-    @NestedConfigurationProperty
-    private UserOrderProperties userOrder;
 
     public String getDictionaryFile() {
         return dictionaryFile;
@@ -22,6 +23,38 @@ public class GenerationProperties {
 
     public void setDictionaryFile(String dictionaryFile) {
         this.dictionaryFile = dictionaryFile;
+    }
+
+    public Integer getCertificateAmount() {
+        return certificateAmount;
+    }
+
+    public void setCertificateAmount(Integer certificateAmount) {
+        this.certificateAmount = certificateAmount;
+    }
+
+    public Integer getTagAmount() {
+        return tagAmount;
+    }
+
+    public void setTagAmount(Integer tagAmount) {
+        this.tagAmount = tagAmount;
+    }
+
+    public Integer getUserAmount() {
+        return userAmount;
+    }
+
+    public void setUserAmount(Integer userAmount) {
+        this.userAmount = userAmount;
+    }
+
+    public Integer getUserOrderAmount() {
+        return userOrderAmount;
+    }
+
+    public void setUserOrderAmount(Integer userOrderAmount) {
+        this.userOrderAmount = userOrderAmount;
     }
 
     public CertificateProperties getCertificate() {
@@ -46,13 +79,5 @@ public class GenerationProperties {
 
     public void setUser(UserProperties user) {
         this.user = user;
-    }
-
-    public UserOrderProperties getUserOrder() {
-        return userOrder;
-    }
-
-    public void setUserOrder(UserOrderProperties userOrder) {
-        this.userOrder = userOrder;
     }
 }
