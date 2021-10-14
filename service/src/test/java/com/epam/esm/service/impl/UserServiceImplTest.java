@@ -5,7 +5,7 @@ import com.epam.esm.entity.User;
 import com.epam.esm.service.UserService;
 import com.epam.esm.service.dto.request.CreateUserRequest;
 import com.epam.esm.service.dto.response.UserResponse;
-import com.epam.esm.service.exception.ServiceException;
+import com.epam.esm.service.exception.EntityExistsException;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -24,6 +24,8 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.intThat;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doThrow;
@@ -55,19 +57,20 @@ class UserServiceImplTest {
 
     @Test
     void create() {
-        doThrow(DataIntegrityViolationException.class).when(userDao).create(
-                new User(thirdUser.getFirstName(), thirdUser.getLastName(), thirdUser.getLogin(), thirdUser.getPassword()));
         doAnswer(invocation -> {
             Object[] args = invocation.getArguments();
             ((User) args[0]).setId(firstUser.getId());
             return null;
         }).when(userDao).create(new User(firstUser.getFirstName(), firstUser.getLastName(), firstUser.getLogin(), firstUser.getPassword()));
+
         UserResponse actualResponse = userService.create(
                 new CreateUserRequest(firstUser.getFirstName(), firstUser.getLastName(), firstUser.getLogin(), firstUser.getPassword()));
         UserResponse expectedResponse = new UserResponse(firstUser.getId(), firstUser.getFirstName(), firstUser.getLastName());
         assertEquals(expectedResponse, actualResponse);
-        assertThrows(ServiceException.class, () -> userService.create(
-                new CreateUserRequest(thirdUser.getFirstName(), thirdUser.getLastName(), thirdUser.getLogin(), thirdUser.getPassword())));
+
+        when(userDao.get(firstUser.getLogin())).thenReturn(Optional.of(firstUser));
+        assertThrows(EntityExistsException.class, () -> userService.create(
+                new CreateUserRequest(secondUser.getFirstName(), thirdUser.getLastName(), firstUser.getLogin(), firstUser.getPassword())));
         assertThrows(IllegalArgumentException.class, () -> userService.create(null));
     }
 
@@ -114,7 +117,7 @@ class UserServiceImplTest {
         assertEquals(Collections.singletonList(thirdResponse), userService.getAll(2, 2));
         assertEquals(Arrays.asList(firstResponse, secondResponse, thirdResponse), userService.getAll(1, 3));
 
-        assertThrows(ServiceException.class, () -> userService.getAll(-1, 2));
-        assertThrows(ServiceException.class, () -> userService.getAll(1, -1));
+        assertThrows(IllegalArgumentException.class, () -> userService.getAll(-1, 2));
+        assertThrows(IllegalArgumentException.class, () -> userService.getAll(1, -1));
     }
 }

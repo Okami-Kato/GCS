@@ -17,6 +17,20 @@ import java.util.stream.Collectors;
 
 @Configuration
 public class UserOrderConfig {
+    @Bean
+    @Lazy
+    public UserOrderCreator userOrderCreator(UserOrderService userOrderService, UserService userService,
+                                             CertificateService certificateService) {
+        Set<Integer> userIds = getAvailableUsersIds(userService);
+        Set<Integer> certificateIds = getAvailableCertificatesIds(certificateService);
+        return new UserOrderCreator(userOrderService) {
+            @Override
+            protected CreateUserOrderRequest getUserOrder() {
+                return getRandomUserOrder(userIds, certificateIds);
+            }
+        };
+    }
+
     private CreateUserOrderRequest getRandomUserOrder(Set<Integer> usersIds, Set<Integer> certificatesIds) {
         return new CreateUserOrderRequest(
                 new RandomElementFromCollection<>(usersIds).getValue(),
@@ -35,19 +49,5 @@ public class UserOrderConfig {
                 .stream()
                 .map(CertificateItem::getId)
                 .collect(Collectors.toSet());
-    }
-
-    @Bean
-    @Lazy
-    public UserOrderCreator userOrderCreator(UserOrderService userOrderService, UserService userService,
-                                             CertificateService certificateService) {
-        Set<Integer> userIds = getAvailableUsersIds(userService);
-        Set<Integer> certificateIds = getAvailableCertificatesIds(certificateService);
-        return new UserOrderCreator(userOrderService) {
-            @Override
-            protected CreateUserOrderRequest getUserOrder() {
-                return getRandomUserOrder(userIds, certificateIds);
-            }
-        };
     }
 }

@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
+import org.springframework.orm.jpa.JpaObjectRetrievalFailureException;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.util.Arrays;
@@ -61,7 +62,7 @@ class CertificateDaoImplTest {
     }
 
     @AfterAll
-    void destroy(){
+    void destroy() {
         tagDao.delete(firstTag.getId());
         tagDao.delete(secondTag.getId());
     }
@@ -112,7 +113,7 @@ class CertificateDaoImplTest {
         assertThrows(DataIntegrityViolationException.class, () -> certificateDao.update(certificate));
         certificate.setName("name");
         certificate.setId(thirdCertificate.getId() * (-1));
-        assertThrows(InvalidDataAccessApiUsageException.class, () -> certificateDao.update(certificate));
+        assertThrows(JpaObjectRetrievalFailureException.class, () -> certificateDao.update(certificate));
         assertThrows(InvalidDataAccessApiUsageException.class, () -> certificateDao.update(null));
     }
 
@@ -124,7 +125,7 @@ class CertificateDaoImplTest {
         assertTrue(persisted.isPresent());
         assertDoesNotThrow(() -> certificateDao.delete(certificate.getId()));
         assertFalse(certificateDao.get(certificate.getId()).isPresent());
-        assertThrows(InvalidDataAccessApiUsageException.class, () -> certificateDao.delete(certificate.getId()));
+        assertThrows(JpaObjectRetrievalFailureException.class, () -> certificateDao.delete(certificate.getId()));
         assertThrows(InvalidDataAccessApiUsageException.class, () -> certificateDao.delete(null));
     }
 
@@ -132,6 +133,7 @@ class CertificateDaoImplTest {
     void read() {
         assertEquals(3, certificateDao.getAll(1, 3).size());
         assertEquals(2, certificateDao.getAll(1, 2).size());
+        assertDoesNotThrow(() -> certificateDao.getAll(1, 0));
         assertThrows(InvalidDataAccessApiUsageException.class, () -> certificateDao.getAll(-1, 10));
         assertThrows(InvalidDataAccessApiUsageException.class, () -> certificateDao.getAll(1, -10));
 

@@ -1,9 +1,9 @@
 package com.epam.esm.service;
 
-import com.epam.esm.service.dto.request.UpdateCertificateRequest;
-import com.epam.esm.service.dto.response.CertificateResponse;
-import com.epam.esm.service.dto.response.CertificateItem;
 import com.epam.esm.service.dto.request.CreateCertificateRequest;
+import com.epam.esm.service.dto.request.UpdateCertificateRequest;
+import com.epam.esm.service.dto.response.CertificateItem;
+import com.epam.esm.service.dto.response.CertificateResponse;
 import com.epam.esm.util.CertificateFilter;
 
 import java.util.List;
@@ -14,7 +14,7 @@ public interface CertificateService {
 
     List<CertificateItem> findAllWithFilter(int pageNumber, int pageSize, CertificateFilter certificateFilter);
 
-    List<CertificateItem> findAllWithByTagId(int pageNumber, int pageSize, int tagId);
+    List<CertificateItem> findAllByTagId(int pageNumber, int pageSize, int tagId);
 
     Optional<CertificateResponse> get(int id);
 

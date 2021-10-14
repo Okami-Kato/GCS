@@ -1,9 +1,24 @@
 package com.epam.esm.util;
 
+/**
+ * Storage for filter properties to be applied, when searching for certificates
+ */
 public class CertificateFilter {
+    /**
+     * Substring in name
+     */
     private String namePart;
+    /**
+     * Substring in description
+     */
     private String descriptionPart;
+    /**
+     * Assigned tags (and condition)
+     */
     private String[] tagNames;
+    /**
+     * Object, encapsulating sort properties and directions
+     */
     private Sort sort;
 
     public CertificateFilter() {

@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
+import org.springframework.orm.jpa.JpaObjectRetrievalFailureException;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.util.Optional;
@@ -57,7 +58,7 @@ class UserDaoImplTest {
         assertTrue(persisted.isPresent());
         assertDoesNotThrow(() -> userDao.delete(user.getId()));
         assertFalse(userDao.get(user.getId()).isPresent());
-        assertThrows(InvalidDataAccessApiUsageException.class, () -> userDao.delete(user.getId()));
+        assertThrows(JpaObjectRetrievalFailureException.class, () -> userDao.delete(user.getId()));
         assertThrows(InvalidDataAccessApiUsageException.class, () -> userDao.delete(null));
     }
 

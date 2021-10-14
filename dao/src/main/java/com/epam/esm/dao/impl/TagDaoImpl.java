@@ -3,10 +3,14 @@ package com.epam.esm.dao.impl;
 import com.epam.esm.dao.TagDao;
 import com.epam.esm.entity.Tag;
 import com.epam.esm.entity.User;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.InvalidDataAccessApiUsageException;
+import org.springframework.orm.jpa.JpaObjectRetrievalFailureException;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
+import javax.persistence.EntityNotFoundException;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
@@ -61,11 +65,25 @@ public class TagDaoImpl implements TagDao {
     @PersistenceContext
     private EntityManager manager;
 
+    /**
+     * Retrieves tag with given id.
+     *
+     * @param id id of tag.
+     * @return Optional with tag, if it was found, otherwise an empty Optional.
+     * @throws InvalidDataAccessApiUsageException if id is null.
+     */
     @Override
     public Optional<Tag> get(Integer id) {
         return Optional.ofNullable(manager.find(Tag.class, id));
     }
 
+    /**
+     * Retrieves tag with given name.
+     *
+     * @param name name of tag.
+     * @return Optional with tag, if it was found, otherwise an empty Optional.
+     * @throws InvalidDataAccessApiUsageException if name is null.
+     */
     @Override
     public Optional<Tag> get(String name) {
         if (name == null) {
@@ -80,6 +98,11 @@ public class TagDaoImpl implements TagDao {
         }
     }
 
+    /**
+     * Retrieves the most widely used tags of users with the highest cost of all orders.
+     *
+     * @return found users and corresponding tags.
+     */
     @Override
     public Map<User, List<Tag>> getTheMostUsedTagsOfUsersWithTheHighestCost() {
         Map<User, List<Tag>> result = new HashMap<>();
@@ -93,6 +116,14 @@ public class TagDaoImpl implements TagDao {
         return result;
     }
 
+    /**
+     * Retrieves all tags.
+     *
+     * @param pageNumber number of page (starts from 1).
+     * @param pageSize   size of page.
+     * @return list of tags.
+     * @throws InvalidDataAccessApiUsageException if pageNumber < 1, or pageSize < 0.
+     */
     @Override
     public List<Tag> getAll(int pageNumber, int pageSize) {
         TypedQuery<Tag> query = manager.createQuery(GET_ALL_TAGS, Tag.class);
@@ -110,11 +141,23 @@ public class TagDaoImpl implements TagDao {
                 .getResultList();
     }
 
+    /**
+     * Returns count of tags.
+     *
+     * @return count of tags.
+     */
     @Override
     public long getCount() {
         return manager.createQuery(GET_COUNT, Long.class).getSingleResult();
     }
 
+    /**
+     * Creates tag.
+     *
+     * @param tag tag to create.
+     * @throws InvalidDataAccessApiUsageException if given tag already exists, or if given tag is null.
+     * @throws DataIntegrityViolationException    if given tag is invalid, or tag with the same name already exists.
+     */
     @Override
     public void create(Tag tag) {
         manager.persist(tag);
@@ -126,13 +169,20 @@ public class TagDaoImpl implements TagDao {
         throw new UnsupportedOperationException("Method update() isn't supported in TagDaoImpl");
     }
 
+    /**
+     * Deletes tag with given id.
+     *
+     * @param id id of tag to delete.
+     * @throws InvalidDataAccessApiUsageException if given id is null.
+     * @throws JpaObjectRetrievalFailureException if tag with given id doesn't exist.
+     */
     @Override
     public void delete(Integer id) {
         Optional<Tag> tag = get(id);
         if (tag.isPresent()) {
             manager.remove(tag.get());
         } else {
-            throw new IllegalArgumentException(String.format("Entity wasn't found (%s)", "id=" + id));
+            throw new EntityNotFoundException(String.format("Tag not found (id=%s)", id));
         }
     }
 }

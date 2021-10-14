@@ -2,10 +2,8 @@ package com.epam.esm.web.controller;
 
 import com.epam.esm.service.UserService;
 import com.epam.esm.service.dto.response.UserResponse;
-import com.epam.esm.service.exception.ServiceException;
-import com.epam.esm.web.exception.BadRequestException;
-import com.epam.esm.web.exception.EntityNotFoundException;
-import com.epam.esm.web.exception.ErrorCode;
+import com.epam.esm.service.exception.EntityNotFoundException;
+import com.epam.esm.service.exception.ErrorCode;
 import com.epam.esm.web.linker.UserLinker;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.CollectionModel;
@@ -40,23 +38,19 @@ public class UserController {
     /**
      * Retrieves all gift users, that match given properties.
      *
-     * @param page number of page.
+     * @param page number of page (starts from 1).
      * @param size size of page.
      * @return list of found users.
-     * @throws BadRequestException if given parameters are invalid.
+     * @throws IllegalArgumentException if pageNumber < 1, or pageSize < 0.
      */
     @GetMapping(value = "/users")
     public CollectionModel<? extends UserResponse> getAllUsers(
             @RequestParam(defaultValue = "1")
-            @Positive(message = "Page number must be a positive number") Integer page,
+            @Positive(message = "Page must be a positive number") Integer page,
             @RequestParam(defaultValue = "5")
             @Positive(message = "Size must be a positive number") Integer size) {
-        try {
-            CollectionModel<? extends UserResponse> response = userPostProcessor.processCollection(userService.getAll(page, size));
-            return response.add(linkTo(methodOn(UserController.class).getAllUsers(page, size)).withSelfRel());
-        } catch (ServiceException e) {
-            throw new BadRequestException(ErrorCode.USER_BAD_REQUEST, e.getMessage());
-        }
+        CollectionModel<? extends UserResponse> response = userPostProcessor.processCollection(userService.getAll(page, size));
+        return response.add(linkTo(methodOn(UserController.class).getAllUsers(page, size)).withSelfRel());
     }
 
     /**
@@ -70,6 +64,6 @@ public class UserController {
     public UserResponse getUser(@PathVariable int id) {
         Optional<UserResponse> response = userService.get(id);
         response.ifPresent(userPostProcessor::processEntity);
-        return response.orElseThrow(() -> new EntityNotFoundException(ErrorCode.USER_NOT_FOUND, "id=" + id));
+        return response.orElseThrow(() -> new EntityNotFoundException("id=" + id, ErrorCode.USER_NOT_FOUND));
     }
 }

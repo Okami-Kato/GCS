@@ -1,15 +1,14 @@
 package com.epam.esm.service.exception;
 
 public class ServiceException extends RuntimeException{
-    public ServiceException(String message) {
+    private final ErrorCode errorCode;
+
+    public ServiceException(String message, ErrorCode errorCode) {
         super(message);
+        this.errorCode = errorCode;
     }
 
-    public ServiceException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
-    public ServiceException(Throwable cause) {
-        super(cause);
+    public ErrorCode getErrorCode() {
+        return errorCode;
     }
 }

@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
+import org.springframework.orm.jpa.JpaObjectRetrievalFailureException;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -106,7 +107,7 @@ class TagDaoImplTest {
         assertTrue(persisted.isPresent());
         assertDoesNotThrow(() -> tagDao.delete(tag.getId()));
         assertFalse(tagDao.get(tag.getId()).isPresent());
-        assertThrows(InvalidDataAccessApiUsageException.class, () -> tagDao.delete(tag.getId()));
+        assertThrows(JpaObjectRetrievalFailureException.class, () -> tagDao.delete(tag.getId()));
         assertThrows(InvalidDataAccessApiUsageException.class, () -> tagDao.delete(null));
     }
 

@@ -1,4 +1,4 @@
-package com.epam.esm.web.exception;
+package com.epam.esm.web.handler;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;

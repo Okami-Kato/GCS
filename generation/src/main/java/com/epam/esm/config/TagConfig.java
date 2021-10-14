@@ -13,15 +13,6 @@ import java.util.Map;
 
 @Configuration
 public class TagConfig {
-    private TagRequest generateRandomTag(GenerationProperties properties, Map<Integer, List<String>> dictionary) {
-        return new TagRequest(
-                new RandomSentence(dictionary,
-                        properties.getTag().getName().getMinSize(),
-                        properties.getTag().getName().getMaxSize()
-                ).getValue()
-        );
-    }
-
     @Bean
     public TagCreator tagCreator(TagService tagService, GenerationProperties properties, Map<Integer, List<String>> dictionary) {
         return new TagCreator(tagService) {
@@ -30,5 +21,14 @@ public class TagConfig {
                 return generateRandomTag(properties, dictionary);
             }
         };
+    }
+
+    private TagRequest generateRandomTag(GenerationProperties properties, Map<Integer, List<String>> dictionary) {
+        return new TagRequest(
+                new RandomSentence(dictionary,
+                        properties.getTag().getName().getMinSize(),
+                        properties.getTag().getName().getMaxSize()
+                ).getValue()
+        );
     }
 }

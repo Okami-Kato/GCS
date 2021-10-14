@@ -23,6 +23,19 @@ import java.util.stream.Collectors;
 
 @Configuration
 public class CertificateConfig {
+    @Bean
+    @Lazy
+    public CertificateCreator certificateCreator(CertificateService certificateService, TagService tagService,
+                                                 GenerationProperties properties, Map<Integer, List<String>> dictionary) {
+        Set<String> availableTagNames = getAvailableTagNames(tagService);
+        return new CertificateCreator(certificateService) {
+            @Override
+            protected CreateCertificateRequest getCertificate() {
+                return generateRandomCertificate(properties, dictionary, availableTagNames);
+            }
+        };
+    }
+
     private CreateCertificateRequest generateRandomCertificate(GenerationProperties properties, Map<Integer, List<String>> dictionary,
                                                                Set<String> availableTagNames) {
         CertificateProperties certificateProperties = properties.getCertificate();
@@ -68,18 +81,5 @@ public class CertificateConfig {
                 .stream()
                 .map(TagResponse::getName)
                 .collect(Collectors.toSet());
-    }
-
-    @Bean
-    @Lazy
-    public CertificateCreator certificateCreator(CertificateService certificateService, TagService tagService,
-                                                 GenerationProperties properties, Map<Integer, List<String>> dictionary) {
-        Set<String> availableTagNames = getAvailableTagNames(tagService);
-        return new CertificateCreator(certificateService) {
-            @Override
-            protected CreateCertificateRequest getCertificate() {
-                return generateRandomCertificate(properties, dictionary, availableTagNames);
-            }
-        };
     }
 }

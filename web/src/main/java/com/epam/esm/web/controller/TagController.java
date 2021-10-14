@@ -6,13 +6,12 @@ import com.epam.esm.service.dto.request.TagRequest;
 import com.epam.esm.service.dto.response.CertificateItem;
 import com.epam.esm.service.dto.response.TagResponse;
 import com.epam.esm.service.dto.response.UserWithTags;
-import com.epam.esm.service.exception.ServiceException;
-import com.epam.esm.web.exception.BadRequestException;
-import com.epam.esm.web.exception.EntityNotFoundException;
-import com.epam.esm.web.exception.ErrorCode;
+import com.epam.esm.service.exception.EntityExistsException;
+import com.epam.esm.service.exception.EntityNotFoundException;
+import com.epam.esm.service.exception.ErrorCode;
+import com.epam.esm.service.exception.InvalidEntityException;
 import com.epam.esm.web.linker.CertificateLinker;
 import com.epam.esm.web.linker.TagLinker;
-import com.epam.esm.web.linker.UserLinker;
 import com.epam.esm.web.linker.UserWithTagsLinker;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.CollectionModel;
@@ -46,19 +45,16 @@ public class TagController {
     private final TagService tagService;
 
     private final TagLinker tagPostProcessor;
-    private final UserLinker userPostProcessor;
     private final UserWithTagsLinker userWithTagsPostProcessor;
     private final CertificateLinker certificateLinker;
 
     @Autowired
     public TagController(CertificateService certificateService, TagService tagService,
-                         TagLinker tagPostProcessor, UserLinker userPostProcessor,
-                         UserWithTagsLinker userWithTagsPostProcessor,
+                         TagLinker tagPostProcessor, UserWithTagsLinker userWithTagsPostProcessor,
                          CertificateLinker certificateLinker) {
         this.certificateService = certificateService;
         this.tagService = tagService;
         this.tagPostProcessor = tagPostProcessor;
-        this.userPostProcessor = userPostProcessor;
         this.userWithTagsPostProcessor = userWithTagsPostProcessor;
         this.certificateLinker = certificateLinker;
     }
@@ -66,56 +62,48 @@ public class TagController {
     /**
      * Retrieves all tags.
      *
-     * @param page number of page.
+     * @param page number of page (starts from 1).
      * @param size size of page.
      * @return list of found tags.
-     * @throws BadRequestException if given parameters are invalid.
+     * @throws IllegalArgumentException if pageNumber < 1, or pageSize < 0.
      */
     @GetMapping(value = "/tags")
     public CollectionModel<? extends TagResponse> getAllTags(
             @RequestParam(defaultValue = "1")
-            @Positive(message = "Page number must be a positive number") Integer page,
+            @Positive(message = "Page must be a positive number") Integer page,
             @RequestParam(defaultValue = "5")
             @Positive(message = "Size must be a positive number") Integer size) {
-        try {
-            List<TagResponse> response = tagService.getAll(page, size);
-            CollectionModel<? extends TagResponse> result = tagPostProcessor.processCollection(response);
-            return result.add(linkTo(methodOn(TagController.class).getAllTags(page, size)).withSelfRel());
-        } catch (ServiceException e) {
-            throw new BadRequestException(ErrorCode.TAG_BAD_REQUEST, e.getMessage());
-        }
+        List<TagResponse> response = tagService.getAll(page, size);
+        CollectionModel<? extends TagResponse> result = tagPostProcessor.processCollection(response);
+        return result.add(linkTo(methodOn(TagController.class).getAllTags(page, size)).withSelfRel());
     }
 
     /**
      * Retrieves all certificates, assigned to given tag.
      *
-     * @param page number of page.
+     * @param page number of page (starts from 1).
      * @param size size of page.
      * @param id   id of tag.
      * @return list of found certificates.
-     * @throws BadRequestException if given parameters are invalid.
+     * @throws IllegalArgumentException if pageNumber < 1, or pageSize < 0.
+     * @throws EntityNotFoundException  if tag with given id wasn't found.
      */
     @GetMapping(value = "/tags/{id}/certificates")
     public CollectionModel<? extends CertificateItem> getCertificates(
             @RequestParam(defaultValue = "1")
-            @Positive(message = "Page number must be a positive number") Integer page,
+            @Positive(message = "Page must be a positive number") Integer page,
             @RequestParam(defaultValue = "5")
             @Positive(message = "Size must be a positive number") Integer size,
             @PathVariable int id) {
-        try {
-            List<CertificateItem> response = certificateService.findAllWithByTagId(page, size, id);
-            CollectionModel<? extends CertificateItem> certificates = certificateLinker.processCollection(response);
-            return certificates.add(linkTo(methodOn(TagController.class).getCertificates(page, size, id)).withSelfRel());
-        } catch (ServiceException e) {
-            throw new BadRequestException(ErrorCode.CERTIFICATE_BAD_REQUEST, e.getMessage());
-        }
+        List<CertificateItem> response = certificateService.findAllByTagId(page, size, id);
+        CollectionModel<? extends CertificateItem> certificates = certificateLinker.processCollection(response);
+        return certificates.add(linkTo(methodOn(TagController.class).getCertificates(page, size, id)).withSelfRel());
     }
 
     /**
-     * Retrieves the most widely used tag of a user with the highest cost of all orders.
+     * Retrieves the most widely used tags of users with the highest cost of all orders.
      *
-     * @return found tag.
-     * @throws EntityNotFoundException if tag wasn't found.
+     * @return found users and corresponding tags.
      */
     @GetMapping(value = "/tags/theMostUsedTagsOfUsersWithTheHighestCost")
     public CollectionModel<? extends UserWithTags> getTheMostUsedTagsOfUsersWithTheHighestCost() {
@@ -137,7 +125,7 @@ public class TagController {
     public TagResponse getTag(@PathVariable int id) {
         Optional<TagResponse> response = tagService.get(id);
         response.ifPresent(tagPostProcessor::processEntity);
-        return response.orElseThrow(() -> new EntityNotFoundException(ErrorCode.TAG_NOT_FOUND, "id=" + id));
+        return response.orElseThrow(() -> new EntityNotFoundException("id=" + id, ErrorCode.TAG_NOT_FOUND));
     }
 
     /**
@@ -145,18 +133,16 @@ public class TagController {
      *
      * @param tag tag to be created.
      * @return created tag, if tag is valid and service call was successful.
-     * @throws BadRequestException if given tag was invalid.
+     * @throws IllegalArgumentException if tag is null.
+     * @throws InvalidEntityException   if tag is invalid.
+     * @throws EntityExistsException    if tag with the same name already exists.
      */
     @PostMapping(value = "/tags")
     @ResponseStatus(HttpStatus.CREATED)
     public TagResponse createTag(@Valid @RequestBody TagRequest tag) {
-        try {
-            TagResponse response = tagService.create(tag);
-            tagPostProcessor.processEntity(response);
-            return response;
-        } catch (ServiceException e) {
-            throw new BadRequestException(ErrorCode.TAG_BAD_REQUEST, e.getMessage());
-        }
+        TagResponse response = tagService.create(tag);
+        tagPostProcessor.processEntity(response);
+        return response;
     }
 
     /**
@@ -168,11 +154,7 @@ public class TagController {
     @DeleteMapping(value = "/tags/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public ResponseEntity<Void> deleteTag(@PathVariable int id) {
-        try {
-            tagService.delete(id);
-            return ResponseEntity.noContent().build();
-        } catch (ServiceException e) {
-            throw new EntityNotFoundException(ErrorCode.TAG_NOT_FOUND, "id=" + id);
-        }
+        tagService.delete(id);
+        return ResponseEntity.noContent().build();
     }
 }

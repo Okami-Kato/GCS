@@ -14,6 +14,16 @@ import java.util.Map;
 
 @Configuration
 public class UserConfig {
+    @Bean
+    public UserCreator userCreator(UserService userService, GenerationProperties properties, Map<Integer, List<String>> dictionary) {
+        return new UserCreator(userService) {
+            @Override
+            protected CreateUserRequest getUser() {
+                return generateRandomUser(properties, dictionary);
+            }
+        };
+    }
+
     private CreateUserRequest generateRandomUser(GenerationProperties properties, Map<Integer, List<String>> dictionary) {
         UserProperties userProperties = properties.getUser();
         CreateUserRequest user = new CreateUserRequest();
@@ -42,15 +52,5 @@ public class UserConfig {
                 ).getValue()
         );
         return user;
-    }
-
-    @Bean
-    public UserCreator userCreator(UserService userService, GenerationProperties properties, Map<Integer, List<String>> dictionary) {
-        return new UserCreator(userService) {
-            @Override
-            protected CreateUserRequest getUser() {
-                return generateRandomUser(properties, dictionary);
-            }
-        };
     }
 }

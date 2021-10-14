@@ -11,6 +11,5 @@ dependencies {
     implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
 
 
-
     implementation 'org.modelmapper:modelmapper:2.4.4'
 }

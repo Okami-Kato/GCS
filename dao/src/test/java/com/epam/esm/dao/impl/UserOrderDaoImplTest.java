@@ -86,7 +86,7 @@ class UserOrderDaoImplTest {
     }
 
     @AfterAll
-    void destroy(){
+    void destroy() {
         userDao.delete(firstUser.getId());
         userDao.delete(secondUser.getId());
         userDao.delete(thirdUser.getId());
@@ -118,7 +118,7 @@ class UserOrderDaoImplTest {
     }
 
     @Test
-    void read(){
+    void read() {
         int count = (int) userOrderDao.getCount();
         assertDoesNotThrow(() -> userOrderDao.getAll(1, count));
         assertEquals(count, userOrderDao.getAll(1, count + 1).size());

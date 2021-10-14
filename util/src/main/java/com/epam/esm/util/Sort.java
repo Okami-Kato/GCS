@@ -7,7 +7,7 @@ import java.util.List;
 public class Sort {
     private final List<Order> orders;
 
-    private Sort(List<Order> orders){
+    private Sort(List<Order> orders) {
         this.orders = new LinkedList<>(orders);
     }
 
@@ -23,6 +23,9 @@ public class Sort {
         return new LinkedList<>(orders);
     }
 
+    /**
+     * Object, encapsulating field to target in sorting and sort direction
+     */
     public static class Order {
         private final String field;
         private final SortDirection direction;

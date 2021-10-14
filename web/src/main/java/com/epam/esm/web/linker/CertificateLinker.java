@@ -3,6 +3,8 @@ package com.epam.esm.web.linker;
 import com.epam.esm.service.dto.response.CertificateItem;
 import com.epam.esm.web.controller.CertificateController;
 import com.epam.esm.web.controller.UserOrderController;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.github.fge.jsonpatch.JsonPatchException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -23,7 +25,11 @@ public class CertificateLinker implements RepresentationModelLinker<CertificateI
     @Override
     public void processEntity(CertificateItem entity) {
         entity.add(linkTo(methodOn(CertificateController.class).getCertificate(entity.getId())).withSelfRel());
-        entity.add(linkTo(methodOn(CertificateController.class).updateCertificate(entity.getId(), null)).withRel("update"));
+        try {
+            entity.add(linkTo(methodOn(CertificateController.class).updateCertificate(entity.getId(), null)).withRel("update"));
+        } catch (JsonPatchException | JsonProcessingException e) {
+            //
+        }
         entity.add(linkTo(methodOn(CertificateController.class).deleteCertificate(entity.getId())).withRel("delete"));
         entity.add(linkTo(methodOn(UserOrderController.class)
                 .getAllOrdersByCertificateId(null, null, entity.getId()))

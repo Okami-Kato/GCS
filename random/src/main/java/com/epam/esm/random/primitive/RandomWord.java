@@ -10,8 +10,15 @@ import java.util.TreeSet;
 public class RandomWord {
     private final String value;
 
+    /**
+     * Retrieves random word
+     * @param dictionary source of words
+     * @param minSize min size of result word
+     * @param maxSize max size of result word
+     * @throws IllegalArgumentException if !(0 < minSize <= maxSize), or if dictionary doesn't contain
+     */
     public RandomWord(Map<Integer, List<String>> dictionary, int minSize, int maxSize) {
-        if (minSize < 0) {
+        if (minSize <= 0) {
             throw new IllegalArgumentException("minSize must be positive");
         }
         if (minSize > maxSize) {

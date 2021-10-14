@@ -4,10 +4,9 @@ import com.epam.esm.service.UserOrderService;
 import com.epam.esm.service.dto.request.CreateUserOrderRequest;
 import com.epam.esm.service.dto.response.UserOrderItem;
 import com.epam.esm.service.dto.response.UserOrderResponse;
-import com.epam.esm.service.exception.ServiceException;
-import com.epam.esm.web.exception.BadRequestException;
-import com.epam.esm.web.exception.EntityNotFoundException;
-import com.epam.esm.web.exception.ErrorCode;
+import com.epam.esm.service.exception.EntityNotFoundException;
+import com.epam.esm.service.exception.ErrorCode;
+import com.epam.esm.service.exception.InvalidEntityException;
 import com.epam.esm.web.linker.UserOrderItemLinker;
 import com.epam.esm.web.linker.UserOrderResponseLinker;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,57 +47,51 @@ public class UserOrderController {
     }
 
     /**
-     * Retrieves all gift orders of user with given id.
+     * Retrieves all orders of user with given id.
      *
      * @param page   number of page.
      * @param size   size of page.
      * @param userId id of user.
      * @return list of found orders.
-     * @throws BadRequestException if given parameters are invalid.
+     * @throws IllegalArgumentException if pageNumber < 1, or pageSize < 0.
+     * @throws EntityNotFoundException  if user with given id wasn't found.
      */
     @GetMapping(value = "/users/{userId}/orders")
     public CollectionModel<? extends UserOrderItem> getAllOrdersByUserId(
             @RequestParam(defaultValue = "1")
-            @Positive(message = "Page number must be a positive number") Integer page,
+            @Positive(message = "Page must be a positive number") Integer page,
             @RequestParam(defaultValue = "5")
             @Positive(message = "Size must be a positive number") Integer size,
             @PathVariable Integer userId) {
-        try {
-            CollectionModel<? extends UserOrderItem> response = userOrderItemPostProcessor.processCollection(
-                    orderService.findAllByUserId(page, size, userId));
-            return response.add(linkTo(methodOn(UserOrderController.class)
-                    .getAllOrdersByUserId(page, size, userId))
-                    .withSelfRel());
-        } catch (ServiceException e) {
-            throw new BadRequestException(ErrorCode.USER_ORDER_BAD_REQUEST, e.getMessage());
-        }
+        CollectionModel<? extends UserOrderItem> response = userOrderItemPostProcessor.processCollection(
+                orderService.findAllByUserId(page, size, userId));
+        return response.add(linkTo(methodOn(UserOrderController.class)
+                .getAllOrdersByUserId(page, size, userId))
+                .withSelfRel());
     }
 
     /**
-     * Retrieves all gift orders on certificate with given id.
+     * Retrieves all orders on certificate with given id.
      *
      * @param page          number of page.
      * @param size          size of page.
      * @param certificateId id of certificate.
      * @return list of found orders.
-     * @throws BadRequestException if given parameters are invalid.
+     * @throws IllegalArgumentException if pageNumber < 1, or pageSize < 0.
+     * @throws EntityNotFoundException  if certificate with given id wasn't found.
      */
     @GetMapping(value = "/certificates/{certificateId}/orders")
     public CollectionModel<? extends UserOrderItem> getAllOrdersByCertificateId(
             @RequestParam(defaultValue = "1")
-            @Positive(message = "Page number must be a positive number") Integer page,
+            @Positive(message = "Page must be a positive number") Integer page,
             @RequestParam(defaultValue = "5")
             @Positive(message = "Size must be a positive number") Integer size,
             @PathVariable Integer certificateId) {
-        try {
-            CollectionModel<? extends UserOrderItem> response = userOrderItemPostProcessor.processCollection(
-                    orderService.findAllByCertificateId(page, size, certificateId));
-            return response.add(linkTo(methodOn(UserOrderController.class)
-                    .getAllOrdersByCertificateId(page, size, certificateId))
-                    .withSelfRel());
-        } catch (ServiceException e) {
-            throw new BadRequestException(ErrorCode.USER_ORDER_BAD_REQUEST, e.getMessage());
-        }
+        CollectionModel<? extends UserOrderItem> response = userOrderItemPostProcessor.processCollection(
+                orderService.findAllByCertificateId(page, size, certificateId));
+        return response.add(linkTo(methodOn(UserOrderController.class)
+                .getAllOrdersByCertificateId(page, size, certificateId))
+                .withSelfRel());
     }
 
     /**
@@ -112,7 +105,7 @@ public class UserOrderController {
     public UserOrderResponse getOrder(@PathVariable int id) {
         Optional<UserOrderResponse> response = orderService.get(id);
         response.ifPresent(userOrderResponsePostProcessor::processEntity);
-        return response.orElseThrow(() -> new EntityNotFoundException(ErrorCode.USER_ORDER_NOT_FOUND, "id=" + id));
+        return response.orElseThrow(() -> new EntityNotFoundException("id=" + id, ErrorCode.USER_ORDER_NOT_FOUND));
     }
 
     /**
@@ -120,17 +113,14 @@ public class UserOrderController {
      *
      * @param order order to be created.
      * @return created order, if order is valid and service call was successful.
-     * @throws BadRequestException if given order was invalid.
+     * @throws IllegalArgumentException if order is null.
+     * @throws InvalidEntityException   if order is invalid.
      */
     @PostMapping(value = "/orders")
     @ResponseStatus(HttpStatus.CREATED)
     public UserOrderResponse createUserOrder(@RequestBody CreateUserOrderRequest order) {
-        try {
-            UserOrderResponse response = orderService.create(order);
-            userOrderResponsePostProcessor.processEntity(response);
-            return response;
-        } catch (ServiceException e) {
-            throw new BadRequestException(ErrorCode.USER_ORDER_BAD_REQUEST, e.getMessage());
-        }
+        UserOrderResponse response = orderService.create(order);
+        userOrderResponsePostProcessor.processEntity(response);
+        return response;
     }
 }

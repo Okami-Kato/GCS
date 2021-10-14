@@ -11,7 +11,8 @@ import com.epam.esm.service.dto.request.UpdateCertificateRequest;
 import com.epam.esm.service.dto.response.CertificateItem;
 import com.epam.esm.service.dto.response.CertificateResponse;
 import com.epam.esm.service.dto.response.TagResponse;
-import com.epam.esm.service.exception.ServiceException;
+import com.epam.esm.service.exception.EntityNotFoundException;
+import com.epam.esm.service.exception.InvalidEntityException;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -20,6 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
+import org.springframework.orm.jpa.JpaObjectRetrievalFailureException;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -94,8 +96,6 @@ class CertificateServiceImplTest {
                         new TagResponse(secondTag.getId(), secondTag.getName()),
                         new TagResponse(thirdTag.getId(), thirdTag.getName()))));
 
-        doThrow(InvalidDataAccessApiUsageException.class).when(certificateDao).create(isNull());
-
         doAnswer(invocation -> {
             Object[] args = invocation.getArguments();
             ((Certificate) args[0]).setId(certificate.getId());
@@ -122,7 +122,7 @@ class CertificateServiceImplTest {
         createRequest.setName(null);
         doThrow(DataIntegrityViolationException.class).when(certificateDao).create(mapper.map(createRequest, Certificate.class));
 
-        assertThrows(ServiceException.class, () -> certificateService.create(createRequest));
+        assertThrows(InvalidEntityException.class, () -> certificateService.create(createRequest));
         assertThrows(IllegalArgumentException.class, () -> certificateService.create(null));
     }
 
@@ -145,7 +145,6 @@ class CertificateServiceImplTest {
 
         when(certificateDao.get(realId)).thenReturn(Optional.of(certificate));
         when(certificateDao.get(notRealId)).thenReturn(Optional.empty());
-        when(certificateDao.get(null)).thenThrow(InvalidDataAccessApiUsageException.class);
 
         Optional<CertificateResponse> actualResponse = certificateService.get(realId);
         assertTrue(actualResponse.isPresent());
@@ -190,7 +189,7 @@ class CertificateServiceImplTest {
 
         updateRequest.setName(null);
         doThrow(DataIntegrityViolationException.class).when(certificateDao).update(mapper.map(updateRequest, Certificate.class));
-        assertThrows(ServiceException.class, () -> certificateService.update(updateRequest));
+        assertThrows(InvalidEntityException.class, () -> certificateService.update(updateRequest));
         assertThrows(IllegalArgumentException.class, () -> certificateService.update(null));
     }
 
@@ -198,10 +197,9 @@ class CertificateServiceImplTest {
     void delete() {
         int realId = 1;
         int notRealId = 2;
-        doThrow(InvalidDataAccessApiUsageException.class).when(certificateDao).delete(notRealId);
-        doThrow(InvalidDataAccessApiUsageException.class).when(certificateDao).delete(isNull());
+        doThrow(JpaObjectRetrievalFailureException.class).when(certificateDao).delete(notRealId);
         assertDoesNotThrow(() -> certificateService.delete(realId));
-        assertThrows(ServiceException.class, () -> certificateService.delete(notRealId));
+        assertThrows(EntityNotFoundException.class, () -> certificateService.delete(notRealId));
     }
 
     @Test
@@ -242,7 +240,7 @@ class CertificateServiceImplTest {
         assertEquals(Arrays.asList(firstItem, secondItem), certificateService.getAll(1, 2));
         assertEquals(Collections.singletonList(thirdItem), certificateService.getAll(2, 2));
         assertEquals(Arrays.asList(firstItem, secondItem, thirdItem), certificateService.getAll(1, 3));
-        assertThrows(ServiceException.class, () -> certificateService.getAll(-1, 2));
-        assertThrows(ServiceException.class, () -> certificateService.getAll(1, -1));
+        assertThrows(IllegalArgumentException.class, () -> certificateService.getAll(-1, 2));
+        assertThrows(IllegalArgumentException.class, () -> certificateService.getAll(1, -1));
     }
 }

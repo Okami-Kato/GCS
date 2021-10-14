@@ -6,15 +6,14 @@ import com.epam.esm.service.dto.request.TagRequest;
 import com.epam.esm.service.dto.request.UpdateCertificateRequest;
 import com.epam.esm.service.dto.response.CertificateItem;
 import com.epam.esm.service.dto.response.CertificateResponse;
-import com.epam.esm.service.exception.ServiceException;
+import com.epam.esm.service.exception.EntityNotFoundException;
+import com.epam.esm.service.exception.ErrorCode;
+import com.epam.esm.service.exception.InvalidEntityException;
 import com.epam.esm.util.CertificateFilter;
 import com.epam.esm.util.CertificateFilter.CertificateFilterBuilder;
 import com.epam.esm.util.Sort;
 import com.epam.esm.util.Sort.Order;
 import com.epam.esm.util.SortDirection;
-import com.epam.esm.web.exception.BadRequestException;
-import com.epam.esm.web.exception.EntityNotFoundException;
-import com.epam.esm.web.exception.ErrorCode;
 import com.epam.esm.web.linker.CertificateLinker;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -76,19 +75,19 @@ public class CertificateController {
     /**
      * Retrieves all gift certificates, that match given properties.
      *
-     * @param page            number of page.
+     * @param page            number of page (starts from 1).
      * @param size            size of page.
      * @param namePart        part in name.
      * @param descriptionPart part in description.
-     * @param tagNames          array of tag ids.
+     * @param tagNames        array of tag names.
      * @param sort            sorting to be applied.
      * @return list of found certificates.
-     * @throws BadRequestException if given parameters are invalid.
+     * @throws IllegalArgumentException if sort contains invalid sorting properties.
      */
     @GetMapping(value = "/certificates")
     public CollectionModel<? extends CertificateItem> getAllCertificates(
             @RequestParam(defaultValue = "1")
-            @Positive(message = "Page number must be a positive number") Integer page,
+            @Positive(message = "Page must be a positive number") Integer page,
             @RequestParam(defaultValue = "5")
             @Positive(message = "Size must be a positive number") Integer size,
             @RequestParam Optional<String> namePart,
@@ -100,27 +99,25 @@ public class CertificateController {
                             message = "Sort property must be of pattern property.sortDirection (name.asc, price.desc)")
                             String>> sort
     ) {
-        try {
-            CertificateFilterBuilder filterBuilder = CertificateFilter.newBuilder();
-            namePart.ifPresent(filterBuilder::withPartInName);
-            descriptionPart.ifPresent(filterBuilder::withPartInDescription);
-            tagNames.ifPresent(filterBuilder::withTags);
-            if (sort.isPresent()) {
-                List<Order> orders = new LinkedList<>();
-                for (String s : sort.get()) {
-                    String[] split = s.split("\\.");
-                    orders.add(new Order(split[0], SortDirection.valueOf(split[1].toUpperCase())));
-                }
-                filterBuilder.withSort(Sort.by(orders));
+        CertificateFilterBuilder filterBuilder = CertificateFilter.newBuilder();
+        namePart.ifPresent(filterBuilder::withPartInName);
+        descriptionPart.ifPresent(filterBuilder::withPartInDescription);
+        tagNames.ifPresent(filterBuilder::withTags);
+        if (sort.isPresent()) {
+            List<Order> orders = new LinkedList<>();
+            for (String s : sort.get()) {
+                String[] split = s.split("\\.");
+                orders.add(new Order(split[0], SortDirection.valueOf(split[1].toUpperCase())));
             }
-            List<CertificateItem> certificateList = certificateService.findAllWithFilter(page, size, filterBuilder.build());
-            CollectionModel<? extends CertificateItem> response = certificateLinker.processCollection(certificateList);
-            return response.add(linkTo(methodOn(CertificateController.class)
-                    .getAllCertificates(page, size, namePart, descriptionPart, tagNames, sort))
-                    .withSelfRel());
-        } catch (ServiceException e) {
-            throw new BadRequestException(ErrorCode.CERTIFICATE_BAD_REQUEST, e.getMessage());
+            filterBuilder.withSort(Sort.by(orders));
         }
+        List<CertificateItem> certificateList;
+        certificateList = certificateService.findAllWithFilter(page, size, filterBuilder.build());
+        CollectionModel<? extends CertificateItem> response = certificateLinker.processCollection(certificateList);
+        return response.add(linkTo(methodOn(CertificateController.class)
+                .getAllCertificates(page, size, namePart, descriptionPart, tagNames, sort))
+                .withSelfRel());
+
     }
 
     /**
@@ -134,7 +131,7 @@ public class CertificateController {
     public CertificateResponse getCertificate(@PathVariable int id) {
         Optional<CertificateResponse> response = certificateService.get(id);
         response.ifPresent(certificateLinker::processEntity);
-        return response.orElseThrow(() -> new EntityNotFoundException(ErrorCode.CERTIFICATE_NOT_FOUND, "id=" + id));
+        return response.orElseThrow(() -> new EntityNotFoundException("id=" + id, ErrorCode.CERTIFICATE_NOT_FOUND));
     }
 
     /**
@@ -142,18 +139,15 @@ public class CertificateController {
      *
      * @param certificate certificate to be created.
      * @return created certificate, if certificate is valid and service call was successful.
-     * @throws BadRequestException if given certificate was invalid.
+     * @throws IllegalArgumentException if certificate is null.
+     * @throws InvalidEntityException   if certificate is invalid.
      */
     @PostMapping(value = "/certificates")
     @ResponseStatus(HttpStatus.CREATED)
     public CertificateResponse createCertificate(@Valid @RequestBody CreateCertificateRequest certificate) {
-        try {
-            CertificateResponse response = certificateService.create(certificate);
-            certificateLinker.processEntity(response);
-            return response;
-        } catch (ServiceException e) {
-            throw new BadRequestException(ErrorCode.CERTIFICATE_BAD_REQUEST, e.getMessage());
-        }
+        CertificateResponse response = certificateService.create(certificate);
+        certificateLinker.processEntity(response);
+        return response;
     }
 
     /**
@@ -165,39 +159,33 @@ public class CertificateController {
     @DeleteMapping(value = "/certificates/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public ResponseEntity<Void> deleteCertificate(@PathVariable int id) {
-        try {
-            certificateService.delete(id);
-            return ResponseEntity.noContent().build();
-        } catch (ServiceException e) {
-            throw new EntityNotFoundException(ErrorCode.CERTIFICATE_NOT_FOUND, "id=" + id);
-        }
+        certificateService.delete(id);
+        return ResponseEntity.noContent().build();
     }
 
     /**
-     * Updates certificate with given id. New values are taken from not null fields of given certificate.
+     * Updates certificate with given id.
      *
      * @param id    id of certificate to be updated
      * @param patch array of patch methods.
      * @return updated certificate.
      * @throws EntityNotFoundException if certificate wasn't found.
-     * @throws BadRequestException     if updated certificate isn't valid, or if failed to apply patch.
+     * @throws InvalidEntityException  if updated certificate isn't valid.
+     * @throws JsonPatchException      if failed to apply patch.
+     * @throws JsonProcessingException if structural conversion fails.
      */
     @PatchMapping(path = "/certificates/{id}", consumes = "application/json-patch+json")
-    public CertificateResponse updateCertificate(@PathVariable int id, @RequestBody JsonPatch patch) {
+    public CertificateResponse updateCertificate(@PathVariable int id, @RequestBody JsonPatch patch) throws JsonPatchException, JsonProcessingException {
         CertificateResponse certificate = certificateService.get(id)
-                .orElseThrow(() -> new EntityNotFoundException(ErrorCode.CERTIFICATE_NOT_FOUND, "id=" + id));
+                .orElseThrow(() -> new EntityNotFoundException("id=" + id, ErrorCode.CERTIFICATE_NOT_FOUND));
 
         UpdateCertificateRequest updateRequest = new UpdateCertificateRequest(certificate.getId(), certificate.getName(),
                 certificate.getDescription(), certificate.getPrice(), certificate.getDuration(),
                 certificate.getTags().stream().map(tag -> new TagRequest(tag.getName())).collect(Collectors.toSet()));
-        try {
-            UpdateCertificateRequest certificatePatched = applyPatchToCertificate(patch, updateRequest);
-            CertificateResponse response = updateCertificate(certificatePatched);
-            certificateLinker.processEntity(response);
-            return response;
-        } catch (ServiceException | JsonPatchException | JsonProcessingException e) {
-            throw new BadRequestException(ErrorCode.CERTIFICATE_BAD_REQUEST, e.getMessage());
-        }
+        UpdateCertificateRequest certificatePatched = applyPatchToCertificate(patch, updateRequest);
+        CertificateResponse response = updateCertificate(certificatePatched);
+        certificateLinker.processEntity(response);
+        return response;
     }
 
     private CertificateResponse updateCertificate(UpdateCertificateRequest updateRequest) {

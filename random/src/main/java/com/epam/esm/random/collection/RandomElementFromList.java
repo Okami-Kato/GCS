@@ -12,8 +12,9 @@ public class RandomElementFromList<T> extends RandomElementFromCollection<T> {
 
     @Override
     protected T extractValue(Collection<? extends T> list) {
-        if (list.isEmpty())
+        if (list.isEmpty()) {
             throw new IllegalArgumentException("List can't be empty");
+        }
         return ((List<? extends T>) list).get(new RandomInteger(0, list.size() - 1).getValue());
     }
 }

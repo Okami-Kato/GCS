@@ -11,14 +11,15 @@ public class RandomElementFromCollection<T> {
         this.value = extractValue(collection);
     }
 
-    protected T extractValue(Collection<? extends T> collection){
+    protected T extractValue(Collection<? extends T> collection) {
         int randomIndex = new RandomInteger(0, collection.size() - 1).getValue();
         T result = null;
         int currentIndex = 0;
         for (T element : collection) {
             result = element;
-            if (currentIndex++ == randomIndex)
+            if (currentIndex++ == randomIndex) {
                 break;
+            }
         }
         return result;
     }

@@ -8,12 +8,16 @@ import com.epam.esm.entity.Tag_;
 import com.epam.esm.util.CertificateFilter;
 import com.epam.esm.util.Sort;
 import com.epam.esm.util.SortDirection;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
+import org.springframework.orm.jpa.JpaObjectRetrievalFailureException;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.Assert;
 
 import javax.persistence.EntityGraph;
 import javax.persistence.EntityManager;
+import javax.persistence.EntityNotFoundException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
@@ -41,6 +45,13 @@ public class CertificateDaoImpl implements CertificateDao {
     @PersistenceContext
     private EntityManager manager;
 
+    /**
+     * Retrieves certificate with given id.
+     *
+     * @param id id of certificate.
+     * @return Optional with certificate, if it was found, otherwise an empty Optional.
+     * @throws InvalidDataAccessApiUsageException if id is null.
+     */
     @Override
     public Optional<Certificate> get(Integer id) {
         EntityGraph<?> graph = manager.getEntityGraph("graph.certificate.tags");
@@ -50,12 +61,30 @@ public class CertificateDaoImpl implements CertificateDao {
         return Optional.ofNullable(manager.find(Certificate.class, id, hints));
     }
 
+    /**
+     * Retrieves all certificates.
+     *
+     * @param pageNumber number of page (starts from 1).
+     * @param pageSize   size of page.
+     * @return list of certificates.
+     * @throws InvalidDataAccessApiUsageException if pageNumber < 1, or pageSize < 0.
+     */
     @Override
     public List<Certificate> getAll(int pageNumber, int pageSize) {
         TypedQuery<Integer> idQuery = manager.createQuery(GET_ALL_CERTIFICATES_IDS, Integer.class);
         return getCertificatesByIdQuery(pageNumber, pageSize, idQuery);
     }
 
+    /**
+     * Retrieves all certificates, that match given filter.
+     *
+     * @param pageNumber number of page (starts from 1).
+     * @param pageSize   size of page.
+     * @param filter     filter to be applied.
+     * @return list of found certificates.
+     * @throws InvalidDataAccessApiUsageException if pageNumber < 1, or pageSize < 0, or if filter
+     *                                            contains invalid sorting properties.
+     */
     @Override
     public List<Certificate> findAllWithFilter(int pageNumber, int pageSize, CertificateFilter filter) {
         CriteriaBuilder criteriaBuilder = manager.getCriteriaBuilder();
@@ -108,6 +137,15 @@ public class CertificateDaoImpl implements CertificateDao {
         return query.getResultList();
     }
 
+    /**
+     * Retrieves all certificates, that have tag with given id.
+     *
+     * @param pageNumber number of page (starts from 1).
+     * @param pageSize   size of page.
+     * @param tagId      id of tag.
+     * @return list of found certificates.
+     * @throws InvalidDataAccessApiUsageException if pageNumber < 1, or pageSize < 0.
+     */
     @Override
     public List<Certificate> findAllByTagId(int pageNumber, int pageSize, int tagId) {
         Query idQuery = manager.createNativeQuery(GET_ALL_CERTIFICATES_IDS_BY_TAG_ID);
@@ -115,23 +153,42 @@ public class CertificateDaoImpl implements CertificateDao {
         return getCertificatesByIdQuery(pageNumber, pageSize, idQuery);
     }
 
+    /**
+     * Returns count of certificates.
+     *
+     * @return count of certificates.
+     */
     @Override
     public long getCount() {
         return manager.createQuery(GET_COUNT, Long.class).getSingleResult();
     }
 
+    /**
+     * Creates certificate.
+     *
+     * @param certificate certificate to create.
+     * @throws InvalidDataAccessApiUsageException if given certificate already exists, or if given certificate is null.
+     * @throws DataIntegrityViolationException    if given certificate is invalid.
+     */
     @Override
     public void create(Certificate certificate) {
         manager.persist(certificate);
     }
 
+    /**
+     * Updates certificate.
+     *
+     * @param certificate updated certificate.
+     * @return updated certificate.
+     * @throws InvalidDataAccessApiUsageException if given certificate is null.
+     * @throws JpaObjectRetrievalFailureException if certificate with given id doesn't exist.
+     * @throws DataIntegrityViolationException    if given certificate is invalid.
+     */
     @Override
     public Certificate update(Certificate certificate) {
-        if (certificate == null) {
-            throw new IllegalArgumentException("Certificate can't be null");
-        }
+        Assert.notNull(certificate, "Certificate can't be null");
         if (!get(certificate.getId()).isPresent()) {
-            throw new IllegalArgumentException(String.format("Entity doesn't exist (%s)", "id=" + certificate.getId()));
+            throw new EntityNotFoundException(String.format("Certificate not found (id=%s)", certificate.getId()));
         }
         manager.merge(certificate);
         manager.flush();
@@ -140,6 +197,13 @@ public class CertificateDaoImpl implements CertificateDao {
         return result;
     }
 
+    /**
+     * Deletes certificate with given id.
+     *
+     * @param id id of certificate to delete.
+     * @throws InvalidDataAccessApiUsageException if given id is null.
+     * @throws JpaObjectRetrievalFailureException if certificate with given id doesn't exist.
+     */
     @Override
     public void delete(Integer id) {
         Optional<Certificate> certificate = get(id);
@@ -147,7 +211,7 @@ public class CertificateDaoImpl implements CertificateDao {
             setCertificateIdNullInOrders(id);
             manager.remove(certificate.get());
         } else {
-            throw new InvalidDataAccessApiUsageException(String.format("Entity wasn't found (%s)", "id=" + id));
+            throw new EntityNotFoundException(String.format("Certificate not found (id=%s)", id));
         }
     }
 

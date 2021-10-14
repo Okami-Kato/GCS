@@ -6,7 +6,7 @@ import com.epam.esm.service.exception.ServiceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class UserOrderCreator implements Creator{
+public abstract class UserOrderCreator implements Creator {
     Logger logger = LoggerFactory.getLogger(UserOrderCreator.class);
     private final UserOrderService userOrderService;
 
