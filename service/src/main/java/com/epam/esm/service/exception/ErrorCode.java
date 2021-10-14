@@ -10,7 +10,8 @@ public enum ErrorCode {
     INVALID_USER(30400),
     INVALID_USER_ORDER(40400),
     TAG_EXISTS(20409),
-    USER_EXISTS(30409);
+    USER_EXISTS(30409),
+    UNKNOWN_ERROR(500);
     private final int value;
 
     ErrorCode(int value) {

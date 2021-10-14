@@ -2,8 +2,11 @@ package com.epam.esm.web.handler;
 
 import com.epam.esm.service.exception.EntityExistsException;
 import com.epam.esm.service.exception.EntityNotFoundException;
+import com.epam.esm.service.exception.ErrorCode;
 import com.epam.esm.service.exception.InvalidEntityException;
 import com.epam.esm.service.exception.ServiceException;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.github.fge.jsonpatch.JsonPatchException;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,30 +26,28 @@ import java.util.stream.Collectors;
 public class CustomGlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     protected ResponseEntity<ErrorResponse> handleConflict(MethodArgumentNotValidException ex) {
-        Map<String, Object> details = new LinkedHashMap<>();
         List<String> errors = ex.getBindingResult().getFieldErrors()
                 .stream()
                 .map(DefaultMessageSourceResolvable::getDefaultMessage)
                 .collect(Collectors.toList());
-        details.put("errors", errors);
 
-        ErrorResponse errorResponse = new ErrorResponse(LocalDateTime.now(), HttpStatus.BAD_REQUEST.value(),
-                HttpStatus.BAD_REQUEST.value(), details);
-        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+        return getResponseEntityFromErrors(errors);
     }
 
     @ExceptionHandler(ConstraintViolationException.class)
     protected ResponseEntity<ErrorResponse> handleConflict(ConstraintViolationException ex) {
-        Map<String, Object> details = new LinkedHashMap<>();
         List<String> errors = ex.getConstraintViolations()
                 .stream()
                 .map(ConstraintViolation::getMessage)
                 .collect(Collectors.toList());
-        details.put("errors", errors);
 
-        ErrorResponse errorResponse = new ErrorResponse(LocalDateTime.now(), HttpStatus.BAD_REQUEST.value(),
-                HttpStatus.BAD_REQUEST.value(), details);
-        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+        return getResponseEntityFromErrors(errors);
+    }
+
+    @ExceptionHandler({JsonPatchException.class, JsonProcessingException.class})
+    protected ResponseEntity<ErrorResponse> handleConflict(Exception e) {
+        return getResponseEntityFromServiceException(
+                new ServiceException(e.getMessage(), ErrorCode.UNKNOWN_ERROR), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
@@ -79,5 +80,15 @@ public class CustomGlobalExceptionHandler {
         ErrorResponse errorResponse = new ErrorResponse(LocalDateTime.now(), ex.getErrorCode().getValue(),
                 httpStatus.value(), details);
         return new ResponseEntity<>(errorResponse, httpStatus);
+    }
+
+    private ResponseEntity<ErrorResponse> getResponseEntityFromErrors(List<String> errors) {
+        Map<String, Object> details = new LinkedHashMap<>();
+
+        details.put("errors", errors);
+
+        ErrorResponse errorResponse = new ErrorResponse(LocalDateTime.now(), HttpStatus.BAD_REQUEST.value(),
+                HttpStatus.BAD_REQUEST.value(), details);
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
 }

@@ -28,7 +28,7 @@ public class CertificateLinker implements RepresentationModelLinker<CertificateI
         try {
             entity.add(linkTo(methodOn(CertificateController.class).updateCertificate(entity.getId(), null)).withRel("update"));
         } catch (JsonPatchException | JsonProcessingException e) {
-            //
+            e.printStackTrace();
         }
         entity.add(linkTo(methodOn(CertificateController.class).deleteCertificate(entity.getId())).withRel("delete"));
         entity.add(linkTo(methodOn(UserOrderController.class)
