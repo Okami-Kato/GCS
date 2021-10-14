@@ -22,16 +22,16 @@ public class UserOrderResponseLinker implements RepresentationModelLinker<UserOr
 
     @Override
     public void processEntity(UserOrderResponse entity) {
-        entity.add(linkTo(methodOn(UserOrderController.class).getOrder(entity.getId())).withSelfRel());
+        entity.add(linkTo(methodOn(UserOrderController.class).findOrder(entity.getId())).withSelfRel());
         entity.add(linkTo(methodOn(UserOrderController.class)
-                .getAllOrdersByUserId(null, null, entity.getUserId()))
+                .findAllOrdersByUserId(null, null, entity.getUserId()))
                 .withRel("ordersOfUser"));
         entity.add(linkTo(methodOn(UserController.class)
-                .getUser(entity.getUserId()))
+                .findUser(entity.getUserId()))
                 .withRel("user"));
         if (entity.getCertificate() != null) {
             entity.add(linkTo(methodOn(UserOrderController.class)
-                    .getAllOrdersByCertificateId(null, null, entity.getCertificate().getId()))
+                    .findAllOrdersByCertificateId(null, null, entity.getCertificate().getId()))
                     .withRel("ordersOnCertificate"));
             certificateLinker.processEntity(entity.getCertificate());
         }

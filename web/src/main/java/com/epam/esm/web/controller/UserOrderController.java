@@ -57,7 +57,7 @@ public class UserOrderController {
      * @throws EntityNotFoundException  if user with given id wasn't found.
      */
     @GetMapping(value = "/users/{userId}/orders")
-    public CollectionModel<? extends UserOrderItem> getAllOrdersByUserId(
+    public CollectionModel<? extends UserOrderItem> findAllOrdersByUserId(
             @RequestParam(defaultValue = "1")
             @Positive(message = "Page must be a positive number") Integer page,
             @RequestParam(defaultValue = "5")
@@ -66,7 +66,7 @@ public class UserOrderController {
         CollectionModel<? extends UserOrderItem> response = userOrderItemPostProcessor.processCollection(
                 orderService.findAllByUserId(page, size, userId));
         return response.add(linkTo(methodOn(UserOrderController.class)
-                .getAllOrdersByUserId(page, size, userId))
+                .findAllOrdersByUserId(page, size, userId))
                 .withSelfRel());
     }
 
@@ -81,7 +81,7 @@ public class UserOrderController {
      * @throws EntityNotFoundException  if certificate with given id wasn't found.
      */
     @GetMapping(value = "/certificates/{certificateId}/orders")
-    public CollectionModel<? extends UserOrderItem> getAllOrdersByCertificateId(
+    public CollectionModel<? extends UserOrderItem> findAllOrdersByCertificateId(
             @RequestParam(defaultValue = "1")
             @Positive(message = "Page must be a positive number") Integer page,
             @RequestParam(defaultValue = "5")
@@ -90,7 +90,7 @@ public class UserOrderController {
         CollectionModel<? extends UserOrderItem> response = userOrderItemPostProcessor.processCollection(
                 orderService.findAllByCertificateId(page, size, certificateId));
         return response.add(linkTo(methodOn(UserOrderController.class)
-                .getAllOrdersByCertificateId(page, size, certificateId))
+                .findAllOrdersByCertificateId(page, size, certificateId))
                 .withSelfRel());
     }
 
@@ -102,8 +102,8 @@ public class UserOrderController {
      * @throws EntityNotFoundException if order wasn't found.
      */
     @GetMapping(value = "/orders/{id}")
-    public UserOrderResponse getOrder(@PathVariable int id) {
-        Optional<UserOrderResponse> response = orderService.get(id);
+    public UserOrderResponse findOrder(@PathVariable int id) {
+        Optional<UserOrderResponse> response = orderService.find(id);
         response.ifPresent(userOrderResponsePostProcessor::processEntity);
         return response.orElseThrow(() -> new EntityNotFoundException("id=" + id, ErrorCode.USER_ORDER_NOT_FOUND));
     }

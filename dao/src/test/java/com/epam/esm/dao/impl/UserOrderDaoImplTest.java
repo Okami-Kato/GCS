@@ -109,10 +109,10 @@ class UserOrderDaoImplTest {
     void create() {
         UserOrder order = new UserOrder(thirdUser, thirdCertificate, thirdCertificate.getPrice());
         assertDoesNotThrow(() -> userOrderDao.create(order));
-        assertThrows(InvalidDataAccessApiUsageException.class, () -> userOrderDao.get(null));
-        Optional<UserOrder> persisted = userOrderDao.get(order.getId());
+        assertThrows(InvalidDataAccessApiUsageException.class, () -> userOrderDao.find(null));
+        Optional<UserOrder> persisted = userOrderDao.find(order.getId());
         assertTrue(persisted.isPresent());
-        assertFalse(userOrderDao.get(order.getId() * (-1)).isPresent());
+        assertFalse(userOrderDao.find(order.getId() * (-1)).isPresent());
         assertEquals(thirdUser, persisted.get().getUser());
         assertEquals(thirdCertificate, persisted.get().getCertificate());
     }
@@ -120,15 +120,15 @@ class UserOrderDaoImplTest {
     @Test
     void read() {
         int count = (int) userOrderDao.getCount();
-        assertDoesNotThrow(() -> userOrderDao.getAll(1, count));
-        assertEquals(count, userOrderDao.getAll(1, count + 1).size());
-        assertThrows(InvalidDataAccessApiUsageException.class, () -> userOrderDao.getAll(-1, 10));
-        assertThrows(InvalidDataAccessApiUsageException.class, () -> userOrderDao.getAll(1, -10));
+        assertDoesNotThrow(() -> userOrderDao.findAll(1, count));
+        assertEquals(count, userOrderDao.findAll(1, count + 1).size());
+        assertThrows(InvalidDataAccessApiUsageException.class, () -> userOrderDao.findAll(-1, 10));
+        assertThrows(InvalidDataAccessApiUsageException.class, () -> userOrderDao.findAll(1, -10));
 
-        assertDoesNotThrow(() -> userOrderDao.get(firstOrder.getId()));
-        assertTrue(userOrderDao.get(firstOrder.getId()).isPresent());
-        assertFalse(userOrderDao.get(firstOrder.getId() * (-1)).isPresent());
-        assertThrows(InvalidDataAccessApiUsageException.class, () -> userOrderDao.get(null));
+        assertDoesNotThrow(() -> userOrderDao.find(firstOrder.getId()));
+        assertTrue(userOrderDao.find(firstOrder.getId()).isPresent());
+        assertFalse(userOrderDao.find(firstOrder.getId() * (-1)).isPresent());
+        assertThrows(InvalidDataAccessApiUsageException.class, () -> userOrderDao.find(null));
 
         assertEquals(Arrays.asList(firstOrder, secondOrder), userOrderDao.findAllByUserId(1, count, firstUser.getId()));
         assertEquals(Arrays.asList(thirdOrder, forthOrder), userOrderDao.findAllByUserId(1, count, secondUser.getId()));

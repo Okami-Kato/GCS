@@ -51,9 +51,9 @@ public class CertificateServiceImpl implements CertificateService {
      * @throws IllegalArgumentException if pageNumber < 1, or pageSize < 0.
      */
     @Override
-    public List<CertificateItem> getAll(int pageNumber, int pageSize) {
+    public List<CertificateItem> findAll(int pageNumber, int pageSize) {
         try {
-            return certificateDao.getAll(pageNumber, pageSize).stream()
+            return certificateDao.findAll(pageNumber, pageSize).stream()
                     .map(c -> mapper.map(c, CertificateItem.class))
                     .collect(Collectors.toList());
         } catch (InvalidDataAccessApiUsageException e) {
@@ -94,7 +94,7 @@ public class CertificateServiceImpl implements CertificateService {
      */
     @Override
     public List<CertificateItem> findAllByTagId(int pageNumber, int pageSize, int tagId) {
-        if (!tagDao.get(tagId).isPresent()) {
+        if (!tagDao.find(tagId).isPresent()) {
             throw new EntityNotFoundException("id=" + tagId, ErrorCode.TAG_NOT_FOUND);
         }
         try {
@@ -113,8 +113,8 @@ public class CertificateServiceImpl implements CertificateService {
      * @return Optional with certificate, if it was found, otherwise an empty Optional.
      */
     @Override
-    public Optional<CertificateResponse> get(int id) {
-        return certificateDao.get(id).map(o -> mapper.map(o, CertificateResponse.class));
+    public Optional<CertificateResponse> find(int id) {
+        return certificateDao.find(id).map(o -> mapper.map(o, CertificateResponse.class));
     }
 
     /**

@@ -50,9 +50,9 @@ public class UserOrderServiceImpl implements UserOrderService {
      * @throws IllegalArgumentException if pageNumber < 1, or pageSize < 0.
      */
     @Override
-    public List<UserOrderItem> getAll(int pageNumber, int pageSize) {
+    public List<UserOrderItem> findAll(int pageNumber, int pageSize) {
         try {
-            return userOrderDao.getAll(pageNumber, pageSize).stream()
+            return userOrderDao.findAll(pageNumber, pageSize).stream()
                     .map(order -> mapper.map(order, UserOrderItem.class))
                     .collect(Collectors.toList());
         } catch (InvalidDataAccessApiUsageException e) {
@@ -72,7 +72,7 @@ public class UserOrderServiceImpl implements UserOrderService {
      */
     @Override
     public List<UserOrderItem> findAllByUserId(int pageNumber, int pageSize, int userId) {
-        if (!userDao.get(userId).isPresent()) {
+        if (!userDao.find(userId).isPresent()) {
             throw new EntityNotFoundException("id=" + userId, ErrorCode.USER_NOT_FOUND);
         }
         try {
@@ -96,7 +96,7 @@ public class UserOrderServiceImpl implements UserOrderService {
      */
     @Override
     public List<UserOrderItem> findAllByCertificateId(int pageNumber, int pageSize, int certificateId) {
-        if (!certificateDao.get(certificateId).isPresent()) {
+        if (!certificateDao.find(certificateId).isPresent()) {
             throw new EntityNotFoundException("id=" + certificateId, ErrorCode.CERTIFICATE_NOT_FOUND);
         }
         try {
@@ -115,8 +115,8 @@ public class UserOrderServiceImpl implements UserOrderService {
      * @return Optional with certificate, if it was found, otherwise an empty Optional.
      */
     @Override
-    public Optional<UserOrderResponse> get(int id) {
-        return userOrderDao.get(id).map(order -> mapper.map(order, UserOrderResponse.class));
+    public Optional<UserOrderResponse> find(int id) {
+        return userOrderDao.find(id).map(order -> mapper.map(order, UserOrderResponse.class));
     }
 
     /**
@@ -140,8 +140,8 @@ public class UserOrderServiceImpl implements UserOrderService {
     @Override
     public UserOrderResponse create(CreateUserOrderRequest userOrder) {
         Assert.notNull(userOrder, "userOrder can't be null");
-        Optional<User> user = userDao.get(userOrder.getUserId());
-        Optional<Certificate> certificate = certificateDao.get(userOrder.getCertificateId());
+        Optional<User> user = userDao.find(userOrder.getUserId());
+        Optional<Certificate> certificate = certificateDao.find(userOrder.getCertificateId());
 
         UserOrder orderToCreate = new UserOrder(
                 user.orElseThrow(() -> new EntityNotFoundException("id=" + userOrder.getUserId(),

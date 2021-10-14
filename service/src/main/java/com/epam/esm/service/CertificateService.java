@@ -10,13 +10,13 @@ import java.util.List;
 import java.util.Optional;
 
 public interface CertificateService {
-    List<CertificateItem> getAll(int pageNumber, int pageSize);
+    List<CertificateItem> findAll(int pageNumber, int pageSize);
 
     List<CertificateItem> findAllWithFilter(int pageNumber, int pageSize, CertificateFilter certificateFilter);
 
     List<CertificateItem> findAllByTagId(int pageNumber, int pageSize, int tagId);
 
-    Optional<CertificateResponse> get(int id);
+    Optional<CertificateResponse> find(int id);
 
     long getCount();
 

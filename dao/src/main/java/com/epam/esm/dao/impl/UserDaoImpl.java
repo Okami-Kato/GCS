@@ -34,7 +34,7 @@ public class UserDaoImpl implements UserDao {
      * @throws InvalidDataAccessApiUsageException if id is null.
      */
     @Override
-    public Optional<User> get(Integer id) {
+    public Optional<User> find(Integer id) {
         return Optional.ofNullable(manager.find(User.class, id));
     }
 
@@ -67,7 +67,7 @@ public class UserDaoImpl implements UserDao {
      * @throws InvalidDataAccessApiUsageException if pageNumber < 1, or pageSize < 0.
      */
     @Override
-    public List<User> getAll(int pageNumber, int pageSize) {
+    public List<User> findAll(int pageNumber, int pageSize) {
         TypedQuery<User> query = manager.createQuery(GET_ALL_USERS, User.class);
         return query.setFirstResult((pageNumber - 1) * pageSize)
                 .setMaxResults(pageSize)
@@ -112,7 +112,7 @@ public class UserDaoImpl implements UserDao {
      */
     @Override
     public void delete(Integer id) {
-        Optional<User> user = get(id);
+        Optional<User> user = find(id);
         if (user.isPresent()) {
             manager.remove(user.get());
         } else {

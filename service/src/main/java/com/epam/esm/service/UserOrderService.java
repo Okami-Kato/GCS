@@ -8,13 +8,13 @@ import java.util.List;
 import java.util.Optional;
 
 public interface UserOrderService {
-    List<UserOrderItem> getAll(int pageNumber, int pageSize);
+    List<UserOrderItem> findAll(int pageNumber, int pageSize);
 
     List<UserOrderItem> findAllByUserId(int pageNumber, int pageSize, int userId);
 
     List<UserOrderItem> findAllByCertificateId(int pageNumber, int pageSize, int certificateId);
 
-    Optional<UserOrderResponse> get(int id);
+    Optional<UserOrderResponse> find(int id);
 
     long getCount();
 

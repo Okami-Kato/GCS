@@ -77,7 +77,7 @@ public class CertificateConfig {
     }
 
     private Set<String> getAvailableTagNames(TagService tagService) {
-        return tagService.getAll(1, Math.toIntExact(tagService.getCount()))
+        return tagService.findAll(1, Math.toIntExact(tagService.getCount()))
                 .stream()
                 .map(TagResponse::getName)
                 .collect(Collectors.toSet());

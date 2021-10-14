@@ -73,7 +73,7 @@ class TagServiceImplTest {
         assertEquals(expectedResponse, actualResponse);
 
         when(tagDao.get(firstTag.getName())).thenReturn(Optional.of(firstTag));
-        assertTrue(tagService.get(firstTag.getName()).isPresent());
+        assertTrue(tagService.find(firstTag.getName()).isPresent());
         assertThrows(EntityExistsException.class, () -> tagService.create(new TagRequest(thirdTag.getName())));
         assertThrows(IllegalArgumentException.class, () -> tagService.create(null));
     }
@@ -96,36 +96,36 @@ class TagServiceImplTest {
 
         TagResponse expectedResponse = new TagResponse(realId, firstTag.getName());
 
-        when(tagDao.get(realId)).thenReturn(Optional.of(firstTag));
-        when(tagDao.get(notRealId)).thenReturn(Optional.empty());
+        when(tagDao.find(realId)).thenReturn(Optional.of(firstTag));
+        when(tagDao.find(notRealId)).thenReturn(Optional.empty());
         when(tagDao.get(realName)).thenReturn(Optional.of(firstTag));
         when(tagDao.get(notRealName)).thenReturn(Optional.empty());
         when(tagDao.get((String) isNull())).thenThrow(InvalidDataAccessApiUsageException.class);
 
-        Optional<TagResponse> actualResponse = tagService.get(realId);
+        Optional<TagResponse> actualResponse = tagService.find(realId);
         assertTrue(actualResponse.isPresent());
         assertEquals(expectedResponse, actualResponse.get());
 
-        actualResponse = tagService.get(realName);
+        actualResponse = tagService.find(realName);
         assertTrue(actualResponse.isPresent());
         assertEquals(expectedResponse, actualResponse.get());
 
-        assertFalse(tagService.get(notRealId).isPresent());
-        assertFalse(tagService.get(notRealName).isPresent());
-        assertThrows(IllegalArgumentException.class, () -> tagService.get(null));
+        assertFalse(tagService.find(notRealId).isPresent());
+        assertFalse(tagService.find(notRealName).isPresent());
+        assertThrows(IllegalArgumentException.class, () -> tagService.find(null));
     }
 
     @Test
     void read() {
         int certificateId = 1;
-        when(certificateDao.get(certificateId)).thenReturn(Optional.of(
+        when(certificateDao.find(certificateId)).thenReturn(Optional.of(
                 new Certificate("name", "description", 10, 12)));
-        when(tagDao.getAll(1, 2)).thenReturn(Arrays.asList(firstTag, secondTag));
-        when(tagDao.getAll(2, 2)).thenReturn(Collections.singletonList(thirdTag));
-        when(tagDao.getAll(1, 3)).thenReturn(Arrays.asList(firstTag, secondTag, thirdTag));
+        when(tagDao.findAll(1, 2)).thenReturn(Arrays.asList(firstTag, secondTag));
+        when(tagDao.findAll(2, 2)).thenReturn(Collections.singletonList(thirdTag));
+        when(tagDao.findAll(1, 3)).thenReturn(Arrays.asList(firstTag, secondTag, thirdTag));
         when(tagDao.findAllByCertificateId(1, 2, certificateId)).thenReturn(Arrays.asList(firstTag, thirdTag));
-        when(tagDao.getAll(intThat(i -> i < 0), anyInt())).thenThrow(InvalidDataAccessApiUsageException.class);
-        when(tagDao.getAll(anyInt(), intThat(i -> i < 0))).thenThrow(InvalidDataAccessApiUsageException.class);
+        when(tagDao.findAll(intThat(i -> i < 0), anyInt())).thenThrow(InvalidDataAccessApiUsageException.class);
+        when(tagDao.findAll(anyInt(), intThat(i -> i < 0))).thenThrow(InvalidDataAccessApiUsageException.class);
         when(tagDao.findAllByCertificateId(intThat(i -> i < 0), anyInt(), anyInt())).thenThrow(InvalidDataAccessApiUsageException.class);
         when(tagDao.findAllByCertificateId(anyInt(), intThat(i -> i < 0), anyInt())).thenThrow(InvalidDataAccessApiUsageException.class);
 
@@ -133,14 +133,14 @@ class TagServiceImplTest {
         TagResponse secondResponse = new TagResponse(secondTag.getId(), secondTag.getName());
         TagResponse thirdResponse = new TagResponse(thirdTag.getId(), thirdTag.getName());
 
-        assertEquals(Arrays.asList(firstResponse, secondResponse), tagService.getAll(1, 2));
-        assertEquals(Collections.singletonList(thirdResponse), tagService.getAll(2, 2));
-        assertEquals(Arrays.asList(firstResponse, secondResponse, thirdResponse), tagService.getAll(1, 3));
+        assertEquals(Arrays.asList(firstResponse, secondResponse), tagService.findAll(1, 2));
+        assertEquals(Collections.singletonList(thirdResponse), tagService.findAll(2, 2));
+        assertEquals(Arrays.asList(firstResponse, secondResponse, thirdResponse), tagService.findAll(1, 3));
 
         assertEquals(Arrays.asList(firstResponse, thirdResponse), tagService.findAllByCertificateId(1, 2, certificateId));
 
-        assertThrows(IllegalArgumentException.class, () -> tagService.getAll(-1, 2));
-        assertThrows(IllegalArgumentException.class, () -> tagService.getAll(1, -1));
+        assertThrows(IllegalArgumentException.class, () -> tagService.findAll(-1, 2));
+        assertThrows(IllegalArgumentException.class, () -> tagService.findAll(1, -1));
         assertThrows(IllegalArgumentException.class, () -> tagService.findAllByCertificateId(-1, 2, certificateId));
         assertThrows(IllegalArgumentException.class, () -> tagService.findAllByCertificateId(1, -1, certificateId));
     }

@@ -143,14 +143,14 @@ class CertificateServiceImplTest {
                         new TagResponse(secondTag.getId(), secondTag.getName()),
                         new TagResponse(thirdTag.getId(), thirdTag.getName()))));
 
-        when(certificateDao.get(realId)).thenReturn(Optional.of(certificate));
-        when(certificateDao.get(notRealId)).thenReturn(Optional.empty());
+        when(certificateDao.find(realId)).thenReturn(Optional.of(certificate));
+        when(certificateDao.find(notRealId)).thenReturn(Optional.empty());
 
-        Optional<CertificateResponse> actualResponse = certificateService.get(realId);
+        Optional<CertificateResponse> actualResponse = certificateService.find(realId);
         assertTrue(actualResponse.isPresent());
         assertEquals(expectedResponse, actualResponse.get());
 
-        assertFalse(certificateService.get(notRealId).isPresent());
+        assertFalse(certificateService.find(notRealId).isPresent());
     }
 
     @Test
@@ -213,11 +213,11 @@ class CertificateServiceImplTest {
         firstCertificate.setId(1);
         secondCertificate.setId(2);
         thirdCertificate.setId(3);
-        when(certificateDao.getAll(1, 2)).thenReturn(Arrays.asList(firstCertificate, secondCertificate));
-        when(certificateDao.getAll(2, 2)).thenReturn(Collections.singletonList(thirdCertificate));
-        when(certificateDao.getAll(1, 3)).thenReturn(Arrays.asList(firstCertificate, secondCertificate, thirdCertificate));
-        when(certificateDao.getAll(intThat(i -> i < 0), anyInt())).thenThrow(InvalidDataAccessApiUsageException.class);
-        when(certificateDao.getAll(anyInt(), intThat(i -> i < 0))).thenThrow(InvalidDataAccessApiUsageException.class);
+        when(certificateDao.findAll(1, 2)).thenReturn(Arrays.asList(firstCertificate, secondCertificate));
+        when(certificateDao.findAll(2, 2)).thenReturn(Collections.singletonList(thirdCertificate));
+        when(certificateDao.findAll(1, 3)).thenReturn(Arrays.asList(firstCertificate, secondCertificate, thirdCertificate));
+        when(certificateDao.findAll(intThat(i -> i < 0), anyInt())).thenThrow(InvalidDataAccessApiUsageException.class);
+        when(certificateDao.findAll(anyInt(), intThat(i -> i < 0))).thenThrow(InvalidDataAccessApiUsageException.class);
         CertificateItem firstItem = new CertificateItem(
                 firstCertificate.getId(), firstCertificate.getName(), firstCertificate.getPrice(),
                 new HashSet<>(
@@ -237,10 +237,10 @@ class CertificateServiceImplTest {
                                 new TagResponse(secondTag.getId(), secondTag.getName()),
                                 new TagResponse(thirdTag.getId(), thirdTag.getName()))));
 
-        assertEquals(Arrays.asList(firstItem, secondItem), certificateService.getAll(1, 2));
-        assertEquals(Collections.singletonList(thirdItem), certificateService.getAll(2, 2));
-        assertEquals(Arrays.asList(firstItem, secondItem, thirdItem), certificateService.getAll(1, 3));
-        assertThrows(IllegalArgumentException.class, () -> certificateService.getAll(-1, 2));
-        assertThrows(IllegalArgumentException.class, () -> certificateService.getAll(1, -1));
+        assertEquals(Arrays.asList(firstItem, secondItem), certificateService.findAll(1, 2));
+        assertEquals(Collections.singletonList(thirdItem), certificateService.findAll(2, 2));
+        assertEquals(Arrays.asList(firstItem, secondItem, thirdItem), certificateService.findAll(1, 3));
+        assertThrows(IllegalArgumentException.class, () -> certificateService.findAll(-1, 2));
+        assertThrows(IllegalArgumentException.class, () -> certificateService.findAll(1, -1));
     }
 }

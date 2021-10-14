@@ -11,9 +11,9 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 public class TagLinker implements RepresentationModelLinker<TagResponse> {
     @Override
     public void processEntity(TagResponse entity) {
-        entity.add(linkTo(methodOn(TagController.class).getTag(entity.getId())).withSelfRel());
+        entity.add(linkTo(methodOn(TagController.class).findTag(entity.getId())).withSelfRel());
         entity.add(linkTo(methodOn(TagController.class).deleteTag(entity.getId())).withRel("delete"));
-        entity.add(linkTo(methodOn(TagController.class).getCertificates(null, null, entity.getId())).withRel("certificatesAssignedToTag"));
-        entity.add(linkTo(methodOn(TagController.class).getAllTags(null, null)).withRel("allTags"));
+        entity.add(linkTo(methodOn(TagController.class).findCertificates(null, null, entity.getId())).withRel("certificatesAssignedToTag"));
+        entity.add(linkTo(methodOn(TagController.class).findAllTags(null, null)).withRel("allTags"));
     }
 }

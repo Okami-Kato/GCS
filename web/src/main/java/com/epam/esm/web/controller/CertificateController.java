@@ -85,7 +85,7 @@ public class CertificateController {
      * @throws IllegalArgumentException if sort contains invalid sorting properties.
      */
     @GetMapping(value = "/certificates")
-    public CollectionModel<? extends CertificateItem> getAllCertificates(
+    public CollectionModel<? extends CertificateItem> findAllCertificates(
             @RequestParam(defaultValue = "1")
             @Positive(message = "Page must be a positive number") Integer page,
             @RequestParam(defaultValue = "5")
@@ -115,7 +115,7 @@ public class CertificateController {
         certificateList = certificateService.findAllWithFilter(page, size, filterBuilder.build());
         CollectionModel<? extends CertificateItem> response = certificateLinker.processCollection(certificateList);
         return response.add(linkTo(methodOn(CertificateController.class)
-                .getAllCertificates(page, size, namePart, descriptionPart, tagNames, sort))
+                .findAllCertificates(page, size, namePart, descriptionPart, tagNames, sort))
                 .withSelfRel());
 
     }
@@ -128,8 +128,8 @@ public class CertificateController {
      * @throws EntityNotFoundException if certificate wasn't found.
      */
     @GetMapping(value = "/certificates/{id}")
-    public CertificateResponse getCertificate(@PathVariable int id) {
-        Optional<CertificateResponse> response = certificateService.get(id);
+    public CertificateResponse findCertificate(@PathVariable int id) {
+        Optional<CertificateResponse> response = certificateService.find(id);
         response.ifPresent(certificateLinker::processEntity);
         return response.orElseThrow(() -> new EntityNotFoundException("id=" + id, ErrorCode.CERTIFICATE_NOT_FOUND));
     }
@@ -176,7 +176,7 @@ public class CertificateController {
      */
     @PatchMapping(path = "/certificates/{id}", consumes = "application/json-patch+json")
     public CertificateResponse updateCertificate(@PathVariable int id, @RequestBody JsonPatch patch) throws JsonPatchException, JsonProcessingException {
-        CertificateResponse certificate = certificateService.get(id)
+        CertificateResponse certificate = certificateService.find(id)
                 .orElseThrow(() -> new EntityNotFoundException("id=" + id, ErrorCode.CERTIFICATE_NOT_FOUND));
 
         UpdateCertificateRequest updateRequest = new UpdateCertificateRequest(certificate.getId(), certificate.getName(),

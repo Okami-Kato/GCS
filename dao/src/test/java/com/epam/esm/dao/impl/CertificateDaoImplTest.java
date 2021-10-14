@@ -88,21 +88,21 @@ class CertificateDaoImplTest {
     void create() {
         assertThrows(InvalidDataAccessApiUsageException.class, () -> certificateDao.create(firstCertificate));
         assertThrows(InvalidDataAccessApiUsageException.class, () -> certificateDao.create(null));
-        Optional<Certificate> persisted = certificateDao.get(firstCertificate.getId());
+        Optional<Certificate> persisted = certificateDao.find(firstCertificate.getId());
         assertTrue(persisted.isPresent());
         assertTrue(persisted.get().getTags().containsAll(Arrays.asList(firstTag, secondTag)));
-        assertFalse(certificateDao.get(firstCertificate.getId() + 1000).isPresent());
-        assertThrows(InvalidDataAccessApiUsageException.class, () -> certificateDao.get(null));
+        assertFalse(certificateDao.find(firstCertificate.getId() + 1000).isPresent());
+        assertThrows(InvalidDataAccessApiUsageException.class, () -> certificateDao.find(null));
     }
 
     @Test
     void update() {
-        Certificate certificate = certificateDao.get(thirdCertificate.getId()).get();
+        Certificate certificate = certificateDao.find(thirdCertificate.getId()).get();
         certificate.setName("new name");
         certificate.setDescription("new description");
         certificate.addTag(firstTag);
         assertDoesNotThrow(() -> certificateDao.update(certificate));
-        Optional<Certificate> persisted = certificateDao.get(thirdCertificate.getId());
+        Optional<Certificate> persisted = certificateDao.find(thirdCertificate.getId());
         assertTrue(persisted.isPresent());
         assertNotNull(persisted.get().getLastUpdateDate());
         assertEquals(certificate.getName(), persisted.get().getName());
@@ -121,21 +121,21 @@ class CertificateDaoImplTest {
     void createAndDelete() {
         Certificate certificate = new Certificate("certificate", "description", 1, 3);
         assertDoesNotThrow(() -> certificateDao.create(certificate));
-        Optional<Certificate> persisted = certificateDao.get(certificate.getId());
+        Optional<Certificate> persisted = certificateDao.find(certificate.getId());
         assertTrue(persisted.isPresent());
         assertDoesNotThrow(() -> certificateDao.delete(certificate.getId()));
-        assertFalse(certificateDao.get(certificate.getId()).isPresent());
+        assertFalse(certificateDao.find(certificate.getId()).isPresent());
         assertThrows(JpaObjectRetrievalFailureException.class, () -> certificateDao.delete(certificate.getId()));
         assertThrows(InvalidDataAccessApiUsageException.class, () -> certificateDao.delete(null));
     }
 
     @Test
     void read() {
-        assertEquals(3, certificateDao.getAll(1, 3).size());
-        assertEquals(2, certificateDao.getAll(1, 2).size());
-        assertDoesNotThrow(() -> certificateDao.getAll(1, 0));
-        assertThrows(InvalidDataAccessApiUsageException.class, () -> certificateDao.getAll(-1, 10));
-        assertThrows(InvalidDataAccessApiUsageException.class, () -> certificateDao.getAll(1, -10));
+        assertEquals(3, certificateDao.findAll(1, 3).size());
+        assertEquals(2, certificateDao.findAll(1, 2).size());
+        assertDoesNotThrow(() -> certificateDao.findAll(1, 0));
+        assertThrows(InvalidDataAccessApiUsageException.class, () -> certificateDao.findAll(-1, 10));
+        assertThrows(InvalidDataAccessApiUsageException.class, () -> certificateDao.findAll(1, -10));
 
         int count = (int) certificateDao.getCount();
         assertEquals(3, certificateDao.findAllWithFilter(1, count,

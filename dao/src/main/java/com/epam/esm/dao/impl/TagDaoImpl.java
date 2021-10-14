@@ -73,7 +73,7 @@ public class TagDaoImpl implements TagDao {
      * @throws InvalidDataAccessApiUsageException if id is null.
      */
     @Override
-    public Optional<Tag> get(Integer id) {
+    public Optional<Tag> find(Integer id) {
         return Optional.ofNullable(manager.find(Tag.class, id));
     }
 
@@ -125,7 +125,7 @@ public class TagDaoImpl implements TagDao {
      * @throws InvalidDataAccessApiUsageException if pageNumber < 1, or pageSize < 0.
      */
     @Override
-    public List<Tag> getAll(int pageNumber, int pageSize) {
+    public List<Tag> findAll(int pageNumber, int pageSize) {
         TypedQuery<Tag> query = manager.createQuery(GET_ALL_TAGS, Tag.class);
         return query.setFirstResult((pageNumber - 1) * pageSize)
                 .setMaxResults(pageSize)
@@ -178,7 +178,7 @@ public class TagDaoImpl implements TagDao {
      */
     @Override
     public void delete(Integer id) {
-        Optional<Tag> tag = get(id);
+        Optional<Tag> tag = find(id);
         if (tag.isPresent()) {
             manager.remove(tag.get());
         } else {

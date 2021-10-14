@@ -68,14 +68,14 @@ public class TagController {
      * @throws IllegalArgumentException if pageNumber < 1, or pageSize < 0.
      */
     @GetMapping(value = "/tags")
-    public CollectionModel<? extends TagResponse> getAllTags(
+    public CollectionModel<? extends TagResponse> findAllTags(
             @RequestParam(defaultValue = "1")
             @Positive(message = "Page must be a positive number") Integer page,
             @RequestParam(defaultValue = "5")
             @Positive(message = "Size must be a positive number") Integer size) {
-        List<TagResponse> response = tagService.getAll(page, size);
+        List<TagResponse> response = tagService.findAll(page, size);
         CollectionModel<? extends TagResponse> result = tagPostProcessor.processCollection(response);
-        return result.add(linkTo(methodOn(TagController.class).getAllTags(page, size)).withSelfRel());
+        return result.add(linkTo(methodOn(TagController.class).findAllTags(page, size)).withSelfRel());
     }
 
     /**
@@ -89,7 +89,7 @@ public class TagController {
      * @throws EntityNotFoundException  if tag with given id wasn't found.
      */
     @GetMapping(value = "/tags/{id}/certificates")
-    public CollectionModel<? extends CertificateItem> getCertificates(
+    public CollectionModel<? extends CertificateItem> findCertificates(
             @RequestParam(defaultValue = "1")
             @Positive(message = "Page must be a positive number") Integer page,
             @RequestParam(defaultValue = "5")
@@ -97,7 +97,7 @@ public class TagController {
             @PathVariable int id) {
         List<CertificateItem> response = certificateService.findAllByTagId(page, size, id);
         CollectionModel<? extends CertificateItem> certificates = certificateLinker.processCollection(response);
-        return certificates.add(linkTo(methodOn(TagController.class).getCertificates(page, size, id)).withSelfRel());
+        return certificates.add(linkTo(methodOn(TagController.class).findCertificates(page, size, id)).withSelfRel());
     }
 
     /**
@@ -106,11 +106,11 @@ public class TagController {
      * @return found users and corresponding tags.
      */
     @GetMapping(value = "/tags/theMostUsedTagsOfUsersWithTheHighestCost")
-    public CollectionModel<? extends UserWithTags> getTheMostUsedTagsOfUsersWithTheHighestCost() {
+    public CollectionModel<? extends UserWithTags> findTheMostUsedTagsOfUsersWithTheHighestCost() {
         CollectionModel<? extends UserWithTags> response = userWithTagsPostProcessor.processCollection(
-                tagService.getTheMostUsedTagsOfUsersWithTheHighestCost());
+                tagService.findTheMostUsedTagsOfUsersWithTheHighestCost());
         return response.add(linkTo(methodOn(TagController.class)
-                .getTheMostUsedTagsOfUsersWithTheHighestCost())
+                .findTheMostUsedTagsOfUsersWithTheHighestCost())
                 .withSelfRel());
     }
 
@@ -122,8 +122,8 @@ public class TagController {
      * @throws EntityNotFoundException if tag wasn't found.
      */
     @GetMapping(value = "/tags/{id}")
-    public TagResponse getTag(@PathVariable int id) {
-        Optional<TagResponse> response = tagService.get(id);
+    public TagResponse findTag(@PathVariable int id) {
+        Optional<TagResponse> response = tagService.find(id);
         response.ifPresent(tagPostProcessor::processEntity);
         return response.orElseThrow(() -> new EntityNotFoundException("id=" + id, ErrorCode.TAG_NOT_FOUND));
     }

@@ -41,9 +41,9 @@ public class UserServiceImpl implements UserService {
      * @throws IllegalArgumentException if pageNumber < 1, or pageSize < 0.
      */
     @Override
-    public List<UserResponse> getAll(int pageNumber, int pageSize) {
+    public List<UserResponse> findAll(int pageNumber, int pageSize) {
         try {
-            return userDao.getAll(pageNumber, pageSize).stream()
+            return userDao.findAll(pageNumber, pageSize).stream()
                     .map(user -> mapper.map(user, UserResponse.class))
                     .collect(Collectors.toList());
         } catch (InvalidDataAccessApiUsageException e) {
@@ -58,8 +58,8 @@ public class UserServiceImpl implements UserService {
      * @return Optional with user, if it was found, otherwise an empty Optional.
      */
     @Override
-    public Optional<UserResponse> get(int id) {
-        return userDao.get(id).map(user -> mapper.map(user, UserResponse.class));
+    public Optional<UserResponse> find(int id) {
+        return userDao.find(id).map(user -> mapper.map(user, UserResponse.class));
     }
 
     /**
@@ -70,7 +70,7 @@ public class UserServiceImpl implements UserService {
      * @throws IllegalArgumentException if login is null.
      */
     @Override
-    public Optional<UserResponse> get(String login) {
+    public Optional<UserResponse> find(String login) {
         Assert.notNull(login, "User login can't be null");
         return userDao.get(login).map(user -> mapper.map(user, UserResponse.class));
     }

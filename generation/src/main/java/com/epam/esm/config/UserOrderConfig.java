@@ -39,13 +39,13 @@ public class UserOrderConfig {
     }
 
     private Set<Integer> getAvailableUsersIds(UserService userService) {
-        return userService.getAll(1, Math.toIntExact(userService.getCount())).stream()
+        return userService.findAll(1, Math.toIntExact(userService.getCount())).stream()
                 .map(UserResponse::getId)
                 .collect(Collectors.toSet());
     }
 
     private Set<Integer> getAvailableCertificatesIds(CertificateService certificateService) {
-        return certificateService.getAll(1, Math.toIntExact(certificateService.getCount()))
+        return certificateService.findAll(1, Math.toIntExact(certificateService.getCount()))
                 .stream()
                 .map(CertificateItem::getId)
                 .collect(Collectors.toSet());

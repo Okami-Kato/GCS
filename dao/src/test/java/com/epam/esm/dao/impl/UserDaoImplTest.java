@@ -54,10 +54,10 @@ class UserDaoImplTest {
         assertThrows(DataIntegrityViolationException.class, () -> userDao.create(
                 new User("first name", "last name", user.getLogin(), "password")
         ));
-        Optional<User> persisted = userDao.get(user.getId());
+        Optional<User> persisted = userDao.find(user.getId());
         assertTrue(persisted.isPresent());
         assertDoesNotThrow(() -> userDao.delete(user.getId()));
-        assertFalse(userDao.get(user.getId()).isPresent());
+        assertFalse(userDao.find(user.getId()).isPresent());
         assertThrows(JpaObjectRetrievalFailureException.class, () -> userDao.delete(user.getId()));
         assertThrows(InvalidDataAccessApiUsageException.class, () -> userDao.delete(null));
     }
@@ -65,15 +65,15 @@ class UserDaoImplTest {
     @Test
     void read() {
         int count = (int) userDao.getCount();
-        assertDoesNotThrow(() -> userDao.getAll(1, count));
-        assertEquals(count, userDao.getAll(1, count + 1).size());
-        assertThrows(InvalidDataAccessApiUsageException.class, () -> userDao.getAll(-1, 10));
-        assertThrows(InvalidDataAccessApiUsageException.class, () -> userDao.getAll(1, -10));
+        assertDoesNotThrow(() -> userDao.findAll(1, count));
+        assertEquals(count, userDao.findAll(1, count + 1).size());
+        assertThrows(InvalidDataAccessApiUsageException.class, () -> userDao.findAll(-1, 10));
+        assertThrows(InvalidDataAccessApiUsageException.class, () -> userDao.findAll(1, -10));
 
-        assertDoesNotThrow(() -> userDao.get(firstUser.getId()));
-        assertTrue(userDao.get(firstUser.getId()).isPresent());
-        assertFalse(userDao.get(firstUser.getId() * (-1)).isPresent());
-        assertThrows(InvalidDataAccessApiUsageException.class, () -> userDao.get((Integer) null));
+        assertDoesNotThrow(() -> userDao.find(firstUser.getId()));
+        assertTrue(userDao.find(firstUser.getId()).isPresent());
+        assertFalse(userDao.find(firstUser.getId() * (-1)).isPresent());
+        assertThrows(InvalidDataAccessApiUsageException.class, () -> userDao.find((Integer) null));
         assertThrows(InvalidDataAccessApiUsageException.class, () -> userDao.get((String) null));
     }
 

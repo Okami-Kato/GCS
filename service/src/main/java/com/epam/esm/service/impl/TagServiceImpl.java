@@ -49,9 +49,9 @@ public class TagServiceImpl implements TagService {
      * @throws IllegalArgumentException if pageNumber < 1, or pageSize < 0.
      */
     @Override
-    public List<TagResponse> getAll(int pageNumber, int pageSize) {
+    public List<TagResponse> findAll(int pageNumber, int pageSize) {
         try {
-            return tagDao.getAll(pageNumber, pageSize).stream()
+            return tagDao.findAll(pageNumber, pageSize).stream()
                     .map(tag -> mapper.map(tag, TagResponse.class))
                     .collect(Collectors.toList());
         } catch (InvalidDataAccessApiUsageException e) {
@@ -71,7 +71,7 @@ public class TagServiceImpl implements TagService {
      */
     @Override
     public List<TagResponse> findAllByCertificateId(int pageNumber, int pageSize, int certificateId) {
-        if (!certificateDao.get(certificateId).isPresent()) {
+        if (!certificateDao.find(certificateId).isPresent()) {
             throw new EntityNotFoundException("id=" + certificateId, ErrorCode.CERTIFICATE_NOT_FOUND);
         }
         try {
@@ -90,8 +90,8 @@ public class TagServiceImpl implements TagService {
      * @return Optional with tag, if it was found, otherwise an empty Optional.
      */
     @Override
-    public Optional<TagResponse> get(int id) {
-        return tagDao.get(id).map(tag -> mapper.map(tag, TagResponse.class));
+    public Optional<TagResponse> find(int id) {
+        return tagDao.find(id).map(tag -> mapper.map(tag, TagResponse.class));
     }
 
     /**
@@ -102,7 +102,7 @@ public class TagServiceImpl implements TagService {
      * @throws IllegalArgumentException if name is null.
      */
     @Override
-    public Optional<TagResponse> get(String name) {
+    public Optional<TagResponse> find(String name) {
         Assert.notNull(name, "Tag name can't be null");
         return tagDao.get(name).map(tag -> mapper.map(tag, TagResponse.class));
     }
@@ -113,7 +113,7 @@ public class TagServiceImpl implements TagService {
      * @return found users and corresponding tags.
      */
     @Override
-    public List<UserWithTags> getTheMostUsedTagsOfUsersWithTheHighestCost() {
+    public List<UserWithTags> findTheMostUsedTagsOfUsersWithTheHighestCost() {
         List<UserWithTags> result = new LinkedList<>();
         tagDao.getTheMostUsedTagsOfUsersWithTheHighestCost().forEach(((user, tags) ->
                 result.add(new UserWithTags(

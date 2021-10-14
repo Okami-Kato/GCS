@@ -83,14 +83,14 @@ class TagDaoImplTest {
     void create() {
         assertThrows(InvalidDataAccessApiUsageException.class, () -> tagDao.create(firstTag));
         assertThrows(DataIntegrityViolationException.class, () -> tagDao.create(new Tag(firstTag.getName())));
-        Optional<Tag> persisted = tagDao.get(firstTag.getId());
+        Optional<Tag> persisted = tagDao.find(firstTag.getId());
         assertTrue(persisted.isPresent());
         assertEquals(Arrays.asList(firstCertificate, secondCertificate),
                 certificateDao.findAllByTagId(1, 2, persisted.get().getId())
         );
         assertEquals(persisted, tagDao.get(firstTag.getName()));
-        assertFalse(tagDao.get(firstTag.getId() + 1000).isPresent());
-        assertThrows(InvalidDataAccessApiUsageException.class, () -> tagDao.get((Integer) null));
+        assertFalse(tagDao.find(firstTag.getId() + 1000).isPresent());
+        assertThrows(InvalidDataAccessApiUsageException.class, () -> tagDao.find((Integer) null));
         assertThrows(InvalidDataAccessApiUsageException.class, () -> tagDao.get((String) null));
     }
 
@@ -103,10 +103,10 @@ class TagDaoImplTest {
     void createAndDelete() {
         Tag tag = new Tag("tag", new HashSet<>());
         assertDoesNotThrow(() -> tagDao.create(tag));
-        Optional<Tag> persisted = tagDao.get(tag.getId());
+        Optional<Tag> persisted = tagDao.find(tag.getId());
         assertTrue(persisted.isPresent());
         assertDoesNotThrow(() -> tagDao.delete(tag.getId()));
-        assertFalse(tagDao.get(tag.getId()).isPresent());
+        assertFalse(tagDao.find(tag.getId()).isPresent());
         assertThrows(JpaObjectRetrievalFailureException.class, () -> tagDao.delete(tag.getId()));
         assertThrows(InvalidDataAccessApiUsageException.class, () -> tagDao.delete(null));
     }
@@ -148,11 +148,11 @@ class TagDaoImplTest {
     @Test
     void read() {
         int count = (int) tagDao.getCount();
-        assertEquals(3, tagDao.getAll(1, 3).size());
-        assertEquals(count, tagDao.getAll(1, count + 1).size());
-        assertEquals(2, tagDao.getAll(1, 2).size());
-        assertThrows(InvalidDataAccessApiUsageException.class, () -> tagDao.getAll(-1, 10));
-        assertThrows(InvalidDataAccessApiUsageException.class, () -> tagDao.getAll(1, -10));
+        assertEquals(3, tagDao.findAll(1, 3).size());
+        assertEquals(count, tagDao.findAll(1, count + 1).size());
+        assertEquals(2, tagDao.findAll(1, 2).size());
+        assertThrows(InvalidDataAccessApiUsageException.class, () -> tagDao.findAll(-1, 10));
+        assertThrows(InvalidDataAccessApiUsageException.class, () -> tagDao.findAll(1, -10));
 
         assertEquals(Arrays.asList(firstTag, secondTag), tagDao.findAllByCertificateId(1, count, firstCertificate.getId()));
         assertEquals(Arrays.asList(firstTag, thirdTag), tagDao.findAllByCertificateId(1, count, secondCertificate.getId()));

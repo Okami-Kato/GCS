@@ -4,9 +4,9 @@ import java.util.List;
 import java.util.Optional;
 
 public interface Dao<T, K> {
-    Optional<T> get(K id);
+    Optional<T> find(K id);
 
-    List<T> getAll(int pageNumber, int pageSize);
+    List<T> findAll(int pageNumber, int pageSize);
 
     long getCount();
 

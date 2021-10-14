@@ -12,10 +12,10 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 public class UserLinker implements RepresentationModelLinker<UserResponse> {
     @Override
     public void processEntity(UserResponse entity) {
-        entity.add(linkTo(methodOn(UserController.class).getUser(entity.getId())).withSelfRel());
+        entity.add(linkTo(methodOn(UserController.class).findUser(entity.getId())).withSelfRel());
         entity.add(linkTo(methodOn(UserOrderController.class)
-                .getAllOrdersByUserId(null, null, entity.getId()))
+                .findAllOrdersByUserId(null, null, entity.getId()))
                 .withRel("ordersOfUser"));
-        entity.add(linkTo(methodOn(UserController.class).getAllUsers(null, null)).withRel("allUsers"));
+        entity.add(linkTo(methodOn(UserController.class).findAllUsers(null, null)).withRel("allUsers"));
     }
 }

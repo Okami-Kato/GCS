@@ -24,7 +24,7 @@ public class CertificateLinker implements RepresentationModelLinker<CertificateI
 
     @Override
     public void processEntity(CertificateItem entity) {
-        entity.add(linkTo(methodOn(CertificateController.class).getCertificate(entity.getId())).withSelfRel());
+        entity.add(linkTo(methodOn(CertificateController.class).findCertificate(entity.getId())).withSelfRel());
         try {
             entity.add(linkTo(methodOn(CertificateController.class).updateCertificate(entity.getId(), null)).withRel("update"));
         } catch (JsonPatchException | JsonProcessingException e) {
@@ -32,10 +32,10 @@ public class CertificateLinker implements RepresentationModelLinker<CertificateI
         }
         entity.add(linkTo(methodOn(CertificateController.class).deleteCertificate(entity.getId())).withRel("delete"));
         entity.add(linkTo(methodOn(UserOrderController.class)
-                .getAllOrdersByCertificateId(null, null, entity.getId()))
+                .findAllOrdersByCertificateId(null, null, entity.getId()))
                 .withRel("ordersOnCertificate"));
         entity.add(linkTo(methodOn(CertificateController.class)
-                .getAllCertificates(null, null, Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty()))
+                .findAllCertificates(null, null, Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty()))
                 .withRel("allCertificates"));
         entity.getTags().forEach(tagPostProcessor::processEntity);
     }

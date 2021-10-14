@@ -44,13 +44,13 @@ public class UserController {
      * @throws IllegalArgumentException if pageNumber < 1, or pageSize < 0.
      */
     @GetMapping(value = "/users")
-    public CollectionModel<? extends UserResponse> getAllUsers(
+    public CollectionModel<? extends UserResponse> findAllUsers(
             @RequestParam(defaultValue = "1")
             @Positive(message = "Page must be a positive number") Integer page,
             @RequestParam(defaultValue = "5")
             @Positive(message = "Size must be a positive number") Integer size) {
-        CollectionModel<? extends UserResponse> response = userPostProcessor.processCollection(userService.getAll(page, size));
-        return response.add(linkTo(methodOn(UserController.class).getAllUsers(page, size)).withSelfRel());
+        CollectionModel<? extends UserResponse> response = userPostProcessor.processCollection(userService.findAll(page, size));
+        return response.add(linkTo(methodOn(UserController.class).findAllUsers(page, size)).withSelfRel());
     }
 
     /**
@@ -61,8 +61,8 @@ public class UserController {
      * @throws EntityNotFoundException if user wasn't found.
      */
     @GetMapping(value = "/users/{id}")
-    public UserResponse getUser(@PathVariable int id) {
-        Optional<UserResponse> response = userService.get(id);
+    public UserResponse findUser(@PathVariable int id) {
+        Optional<UserResponse> response = userService.find(id);
         response.ifPresent(userPostProcessor::processEntity);
         return response.orElseThrow(() -> new EntityNotFoundException("id=" + id, ErrorCode.USER_NOT_FOUND));
     }

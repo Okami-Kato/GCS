@@ -36,7 +36,7 @@ public class UserOrderDaoImpl implements UserOrderDao {
      * @throws InvalidDataAccessApiUsageException if id is null.
      */
     @Override
-    public Optional<UserOrder> get(Integer id) {
+    public Optional<UserOrder> find(Integer id) {
         if (id == null) {
             throw new IllegalArgumentException("UserOrder id can't be null");
         }
@@ -57,7 +57,7 @@ public class UserOrderDaoImpl implements UserOrderDao {
      * @throws InvalidDataAccessApiUsageException if pageNumber < 1, or pageSize < 0.
      */
     @Override
-    public List<UserOrder> getAll(int pageNumber, int pageSize) {
+    public List<UserOrder> findAll(int pageNumber, int pageSize) {
         TypedQuery<UserOrder> query = manager.createQuery(GET_ALL_USER_ORDERS, UserOrder.class);
         return query.setFirstResult((pageNumber - 1) * pageSize)
                 .setMaxResults(pageSize)
@@ -135,7 +135,7 @@ public class UserOrderDaoImpl implements UserOrderDao {
      */
     @Override
     public void delete(Integer id) {
-        Optional<UserOrder> order = get(id);
+        Optional<UserOrder> order = find(id);
         if (order.isPresent()) {
             manager.remove(order.get());
         } else {

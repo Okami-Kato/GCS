@@ -7,11 +7,11 @@ import java.util.List;
 import java.util.Optional;
 
 public interface UserService {
-    List<UserResponse> getAll(int pageNumber, int pageSize);
+    List<UserResponse> findAll(int pageNumber, int pageSize);
 
-    Optional<UserResponse> get(int id);
+    Optional<UserResponse> find(int id);
 
-    Optional<UserResponse> get(String login);
+    Optional<UserResponse> find(String login);
 
     long getCount();
 

@@ -25,7 +25,7 @@ public abstract class UserCreator implements Creator {
                 do {
                     user = getUser();
                 }
-                while (userService.get(user.getLogin()).isPresent());
+                while (userService.find(user.getLogin()).isPresent());
                 userService.create(user);
                 counter++;
             } catch (ServiceException e) {

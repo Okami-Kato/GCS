@@ -12,7 +12,6 @@ import org.junit.jupiter.api.TestInstance;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 
 import java.util.Arrays;
@@ -24,7 +23,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.intThat;
 import static org.mockito.Mockito.doAnswer;
@@ -84,40 +82,40 @@ class UserServiceImplTest {
 
         UserResponse expectedResponse = new UserResponse(realId, firstUser.getFirstName(), firstUser.getLastName());
 
-        when(userDao.get(realId)).thenReturn(Optional.of(firstUser));
-        when(userDao.get(notRealId)).thenReturn(Optional.empty());
+        when(userDao.find(realId)).thenReturn(Optional.of(firstUser));
+        when(userDao.find(notRealId)).thenReturn(Optional.empty());
         when(userDao.get(realLogin)).thenReturn(Optional.of(firstUser));
         when(userDao.get(notRealLogin)).thenReturn(Optional.empty());
 
-        Optional<UserResponse> actualResponse = userService.get(realId);
+        Optional<UserResponse> actualResponse = userService.find(realId);
         assertTrue(actualResponse.isPresent());
         assertEquals(expectedResponse, actualResponse.get());
-        assertFalse(userService.get(notRealId).isPresent());
+        assertFalse(userService.find(notRealId).isPresent());
 
-        actualResponse = userService.get(realLogin);
+        actualResponse = userService.find(realLogin);
         assertTrue(actualResponse.isPresent());
         assertEquals(expectedResponse, actualResponse.get());
 
-        assertFalse(userService.get(notRealLogin).isPresent());
+        assertFalse(userService.find(notRealLogin).isPresent());
     }
 
     @Test
     void read() {
-        when(userDao.getAll(1, 2)).thenReturn(Arrays.asList(firstUser, secondUser));
-        when(userDao.getAll(2, 2)).thenReturn(Collections.singletonList(thirdUser));
-        when(userDao.getAll(1, 3)).thenReturn(Arrays.asList(firstUser, secondUser, thirdUser));
-        when(userDao.getAll(intThat(i -> i < 0), anyInt())).thenThrow(InvalidDataAccessApiUsageException.class);
-        when(userDao.getAll(anyInt(), intThat(i -> i < 0))).thenThrow(InvalidDataAccessApiUsageException.class);
+        when(userDao.findAll(1, 2)).thenReturn(Arrays.asList(firstUser, secondUser));
+        when(userDao.findAll(2, 2)).thenReturn(Collections.singletonList(thirdUser));
+        when(userDao.findAll(1, 3)).thenReturn(Arrays.asList(firstUser, secondUser, thirdUser));
+        when(userDao.findAll(intThat(i -> i < 0), anyInt())).thenThrow(InvalidDataAccessApiUsageException.class);
+        when(userDao.findAll(anyInt(), intThat(i -> i < 0))).thenThrow(InvalidDataAccessApiUsageException.class);
 
         UserResponse firstResponse = new UserResponse(firstUser.getId(), firstUser.getFirstName(), firstUser.getLastName());
         UserResponse secondResponse = new UserResponse(secondUser.getId(), secondUser.getFirstName(), secondUser.getLastName());
         UserResponse thirdResponse = new UserResponse(thirdUser.getId(), thirdUser.getFirstName(), thirdUser.getLastName());
 
-        assertEquals(Arrays.asList(firstResponse, secondResponse), userService.getAll(1, 2));
-        assertEquals(Collections.singletonList(thirdResponse), userService.getAll(2, 2));
-        assertEquals(Arrays.asList(firstResponse, secondResponse, thirdResponse), userService.getAll(1, 3));
+        assertEquals(Arrays.asList(firstResponse, secondResponse), userService.findAll(1, 2));
+        assertEquals(Collections.singletonList(thirdResponse), userService.findAll(2, 2));
+        assertEquals(Arrays.asList(firstResponse, secondResponse, thirdResponse), userService.findAll(1, 3));
 
-        assertThrows(IllegalArgumentException.class, () -> userService.getAll(-1, 2));
-        assertThrows(IllegalArgumentException.class, () -> userService.getAll(1, -1));
+        assertThrows(IllegalArgumentException.class, () -> userService.findAll(-1, 2));
+        assertThrows(IllegalArgumentException.class, () -> userService.findAll(1, -1));
     }
 }

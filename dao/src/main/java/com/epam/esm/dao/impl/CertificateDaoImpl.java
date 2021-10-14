@@ -53,7 +53,7 @@ public class CertificateDaoImpl implements CertificateDao {
      * @throws InvalidDataAccessApiUsageException if id is null.
      */
     @Override
-    public Optional<Certificate> get(Integer id) {
+    public Optional<Certificate> find(Integer id) {
         EntityGraph<?> graph = manager.getEntityGraph("graph.certificate.tags");
         Map<String, Object> hints = new HashMap<>();
         hints.put("javax.persistence.fetchgraph", graph);
@@ -70,7 +70,7 @@ public class CertificateDaoImpl implements CertificateDao {
      * @throws InvalidDataAccessApiUsageException if pageNumber < 1, or pageSize < 0.
      */
     @Override
-    public List<Certificate> getAll(int pageNumber, int pageSize) {
+    public List<Certificate> findAll(int pageNumber, int pageSize) {
         TypedQuery<Integer> idQuery = manager.createQuery(GET_ALL_CERTIFICATES_IDS, Integer.class);
         return getCertificatesByIdQuery(pageNumber, pageSize, idQuery);
     }
@@ -187,7 +187,7 @@ public class CertificateDaoImpl implements CertificateDao {
     @Override
     public Certificate update(Certificate certificate) {
         Assert.notNull(certificate, "Certificate can't be null");
-        if (!get(certificate.getId()).isPresent()) {
+        if (!find(certificate.getId()).isPresent()) {
             throw new EntityNotFoundException(String.format("Certificate not found (id=%s)", certificate.getId()));
         }
         manager.merge(certificate);
@@ -206,7 +206,7 @@ public class CertificateDaoImpl implements CertificateDao {
      */
     @Override
     public void delete(Integer id) {
-        Optional<Certificate> certificate = get(id);
+        Optional<Certificate> certificate = find(id);
         if (certificate.isPresent()) {
             setCertificateIdNullInOrders(id);
             manager.remove(certificate.get());

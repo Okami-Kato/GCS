@@ -88,10 +88,10 @@ class UserOrderServiceImplTest {
         }).when(userOrderDao).create(new UserOrder(firstUser, firstCertificate, firstCertificate.getPrice()));
 
         int notRealId = 10;
-        when(userDao.get(firstUser.getId())).thenReturn(Optional.of(firstUser));
-        when(userDao.get(notRealId)).thenReturn(Optional.empty());
-        when(certificateDao.get(firstCertificate.getId())).thenReturn(Optional.of(firstCertificate));
-        when(certificateDao.get(notRealId)).thenReturn(Optional.empty());
+        when(userDao.find(firstUser.getId())).thenReturn(Optional.of(firstUser));
+        when(userDao.find(notRealId)).thenReturn(Optional.empty());
+        when(certificateDao.find(firstCertificate.getId())).thenReturn(Optional.of(firstCertificate));
+        when(certificateDao.find(notRealId)).thenReturn(Optional.empty());
 
         UserOrderResponse actualResponse = userOrderService.create(new CreateUserOrderRequest(firstUser.getId(), firstCertificate.getId()));
         UserOrderResponse expectedResponse = new UserOrderResponse(
@@ -116,23 +116,23 @@ class UserOrderServiceImplTest {
                 new CertificateItem(firstCertificate.getId(), firstCertificate.getName(), firstCertificate.getPrice(), new HashSet<>()),
                 firstCertificate.getPrice(), null);
 
-        when(userOrderDao.get(realId)).thenReturn(Optional.of(firstOrder));
-        when(userOrderDao.get(notRealId)).thenReturn(Optional.empty());
+        when(userOrderDao.find(realId)).thenReturn(Optional.of(firstOrder));
+        when(userOrderDao.find(notRealId)).thenReturn(Optional.empty());
 
-        Optional<UserOrderResponse> actualResponse = userOrderService.get(realId);
+        Optional<UserOrderResponse> actualResponse = userOrderService.find(realId);
         assertTrue(actualResponse.isPresent());
         assertEquals(expectedResponse, actualResponse.get());
 
-        assertFalse(userOrderService.get(notRealId).isPresent());
+        assertFalse(userOrderService.find(notRealId).isPresent());
     }
 
     @Test
     void read() {
-        when(userOrderDao.getAll(1, 2)).thenReturn(Arrays.asList(firstOrder, secondOrder));
-        when(userOrderDao.getAll(2, 2)).thenReturn(Arrays.asList(thirdOrder, forthOrder));
-        when(userOrderDao.getAll(1, 3)).thenReturn(Arrays.asList(firstOrder, secondOrder, thirdOrder));
-        when(userOrderDao.getAll(intThat(i -> i < 0), anyInt())).thenThrow(InvalidDataAccessApiUsageException.class);
-        when(userOrderDao.getAll(anyInt(), intThat(i -> i < 0))).thenThrow(InvalidDataAccessApiUsageException.class);
+        when(userOrderDao.findAll(1, 2)).thenReturn(Arrays.asList(firstOrder, secondOrder));
+        when(userOrderDao.findAll(2, 2)).thenReturn(Arrays.asList(thirdOrder, forthOrder));
+        when(userOrderDao.findAll(1, 3)).thenReturn(Arrays.asList(firstOrder, secondOrder, thirdOrder));
+        when(userOrderDao.findAll(intThat(i -> i < 0), anyInt())).thenThrow(InvalidDataAccessApiUsageException.class);
+        when(userOrderDao.findAll(anyInt(), intThat(i -> i < 0))).thenThrow(InvalidDataAccessApiUsageException.class);
 
         when(userOrderDao.findAllByUserId(1, 2, firstUser.getId())).thenReturn(Arrays.asList(firstOrder, secondOrder));
         when(userOrderDao.findAllByUserId(1, 2, secondUser.getId())).thenReturn(Arrays.asList(thirdOrder, forthOrder));
@@ -153,21 +153,21 @@ class UserOrderServiceImplTest {
         UserOrderItem forthItem = new UserOrderItem(
                 forthOrder.getId(), forthOrder.getUser().getId(), forthOrder.getCertificate().getId(), forthOrder.getCost());
 
-        assertEquals(Arrays.asList(firstItem, secondItem), userOrderService.getAll(1, 2));
-        assertEquals(Arrays.asList(thirdItem, forthItem), userOrderService.getAll(2, 2));
-        assertEquals(Arrays.asList(firstItem, secondItem, thirdItem), userOrderService.getAll(1, 3));
-        assertThrows(IllegalArgumentException.class, () -> userOrderService.getAll(-1, 2));
-        assertThrows(IllegalArgumentException.class, () -> userOrderService.getAll(1, -1));
+        assertEquals(Arrays.asList(firstItem, secondItem), userOrderService.findAll(1, 2));
+        assertEquals(Arrays.asList(thirdItem, forthItem), userOrderService.findAll(2, 2));
+        assertEquals(Arrays.asList(firstItem, secondItem, thirdItem), userOrderService.findAll(1, 3));
+        assertThrows(IllegalArgumentException.class, () -> userOrderService.findAll(-1, 2));
+        assertThrows(IllegalArgumentException.class, () -> userOrderService.findAll(1, -1));
 
-        when(userDao.get(firstUser.getId())).thenReturn(Optional.of(firstUser));
-        when(userDao.get(secondUser.getId())).thenReturn(Optional.of(secondUser));
+        when(userDao.find(firstUser.getId())).thenReturn(Optional.of(firstUser));
+        when(userDao.find(secondUser.getId())).thenReturn(Optional.of(secondUser));
         assertEquals(Arrays.asList(firstItem, secondItem), userOrderService.findAllByUserId(1, 2, firstUser.getId()));
         assertEquals(Arrays.asList(thirdItem, forthItem), userOrderService.findAllByUserId(1, 2, secondUser.getId()));
         assertThrows(IllegalArgumentException.class, () -> userOrderService.findAllByUserId(-1, 2, firstUser.getId()));
         assertThrows(IllegalArgumentException.class, () -> userOrderService.findAllByUserId(1, -1, firstUser.getId()));
 
-        when(certificateDao.get(firstCertificate.getId())).thenReturn(Optional.of(firstCertificate));
-        when(certificateDao.get(thirdCertificate.getId())).thenReturn(Optional.of(thirdCertificate));
+        when(certificateDao.find(firstCertificate.getId())).thenReturn(Optional.of(firstCertificate));
+        when(certificateDao.find(thirdCertificate.getId())).thenReturn(Optional.of(thirdCertificate));
         assertEquals(Collections.singletonList(firstItem), userOrderService.findAllByCertificateId(1, 2, firstCertificate.getId()));
         assertEquals(Arrays.asList(secondItem, forthItem), userOrderService.findAllByCertificateId(1, 2, thirdCertificate.getId()));
         assertThrows(IllegalArgumentException.class, () -> userOrderService.findAllByCertificateId(-1, 2, firstCertificate.getId()));
