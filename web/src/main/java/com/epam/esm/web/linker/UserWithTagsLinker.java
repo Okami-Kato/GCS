@@ -17,7 +17,6 @@ public class UserWithTagsLinker implements RepresentationModelLinker<UserWithTag
 
     @Override
     public void processEntity(UserWithTags entity) {
-        userPostProcessor.processEntity(entity.getUser());
         tagPostProcessor.processCollection(entity.getTags());
     }
 }

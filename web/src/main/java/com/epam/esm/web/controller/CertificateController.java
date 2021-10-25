@@ -1,5 +1,6 @@
 package com.epam.esm.web.controller;
 
+import com.epam.esm.entity.Certificate;
 import com.epam.esm.service.CertificateService;
 import com.epam.esm.service.dto.request.CreateCertificateRequest;
 import com.epam.esm.service.dto.request.TagRequest;
@@ -9,11 +10,6 @@ import com.epam.esm.service.dto.response.CertificateResponse;
 import com.epam.esm.service.exception.EntityNotFoundException;
 import com.epam.esm.service.exception.ErrorCode;
 import com.epam.esm.service.exception.InvalidEntityException;
-import com.epam.esm.util.CertificateFilter;
-import com.epam.esm.util.CertificateFilter.CertificateFilterBuilder;
-import com.epam.esm.util.Sort;
-import com.epam.esm.util.Sort.Order;
-import com.epam.esm.util.SortDirection;
 import com.epam.esm.web.linker.CertificateLinker;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -21,7 +17,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.fge.jsonpatch.JsonPatch;
 import com.github.fge.jsonpatch.JsonPatchException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.hateoas.CollectionModel;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.web.PagedResourcesAssembler;
+import org.springframework.hateoas.PagedModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -42,82 +42,59 @@ import javax.validation.ConstraintViolationException;
 import javax.validation.Valid;
 import javax.validation.Validation;
 import javax.validation.Validator;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Pattern;
-import javax.validation.constraints.Positive;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
+import static com.epam.esm.service.specification.CertificateSpecifications.descriptionLike;
+import static com.epam.esm.service.specification.CertificateSpecifications.nameLike;
+import static com.epam.esm.service.specification.CertificateSpecifications.withTags;
 
 @RestController
 @Validated
 @RequestMapping(produces = MediaType.APPLICATION_JSON_VALUE)
 public class CertificateController {
     private final CertificateService certificateService;
-
     private final CertificateLinker certificateLinker;
-
     private final ObjectMapper objectMapper;
+    private final PagedResourcesAssembler pagedResourcesAssembler;
 
     @Autowired
     public CertificateController(CertificateLinker certificateLinker, CertificateService certificateService,
-                                 ObjectMapper objectMapper) {
+                                 ObjectMapper objectMapper, PagedResourcesAssembler pagedResourcesAssembler) {
         this.certificateLinker = certificateLinker;
         this.certificateService = certificateService;
         this.objectMapper = objectMapper;
+        this.pagedResourcesAssembler = pagedResourcesAssembler;
     }
 
     /**
      * Retrieves all gift certificates, that match given properties.
      *
-     * @param page            number of page (starts from 1).
-     * @param size            size of page.
+     * @param pageable        pagination restrictions.
      * @param namePart        part in name.
      * @param descriptionPart part in description.
      * @param tagNames        array of tag names.
-     * @param sort            sorting to be applied.
-     * @return list of found certificates.
-     * @throws IllegalArgumentException if sort contains invalid sorting properties.
+     * @return page of found certificates.
      */
     @GetMapping(value = "/certificates")
-    public CollectionModel<? extends CertificateItem> findAllCertificates(
-            @RequestParam(defaultValue = "1")
-            @Positive(message = "Page must be a positive number") Integer page,
-            @RequestParam(defaultValue = "5")
-            @Positive(message = "Size must be a positive number") Integer size,
-            @RequestParam Optional<String> namePart,
-            @RequestParam Optional<String> descriptionPart,
-            @RequestParam Optional<String[]> tagNames,
-            @RequestParam Optional<List<
-                    @NotBlank
-                    @Pattern(regexp = "^[\\w]+[.](asc|desc)$",
-                            message = "Sort property must be of pattern property.sortDirection (name.asc, price.desc)")
-                            String>> sort
-    ) {
-        CertificateFilterBuilder filterBuilder = CertificateFilter.newBuilder();
-        namePart.ifPresent(filterBuilder::withPartInName);
-        descriptionPart.ifPresent(filterBuilder::withPartInDescription);
-        tagNames.ifPresent(filterBuilder::withTags);
-        if (sort.isPresent()) {
-            List<Order> orders = new LinkedList<>();
-            for (String s : sort.get()) {
-                String[] split = s.split("\\.");
-                orders.add(new Order(split[0], SortDirection.valueOf(split[1].toUpperCase())));
-            }
-            filterBuilder.withSort(Sort.by(orders));
+    public PagedModel<CertificateItem> findAllCertificates(Pageable pageable,
+                                                           @RequestParam Optional<String> namePart,
+                                                           @RequestParam Optional<String> descriptionPart,
+                                                           @RequestParam Optional<String[]> tagNames) {
+        Specification<Certificate> specification = Specification.where(null);
+        if (namePart.isPresent()) {
+            specification = specification.and(nameLike(namePart.get()));
         }
-        List<CertificateItem> certificateList;
-        certificateList = certificateService.findAllWithFilter(page, size, filterBuilder.build());
-        CollectionModel<? extends CertificateItem> response = certificateLinker.processCollection(certificateList);
-        return response.add(linkTo(methodOn(CertificateController.class)
-                .findAllCertificates(page, size, namePart, descriptionPart, tagNames, sort))
-                .withSelfRel());
-
+        if (descriptionPart.isPresent()) {
+            specification = specification.and(descriptionLike(descriptionPart.get()));
+        }
+        if (tagNames.isPresent()) {
+            specification = specification.and(withTags(tagNames.get()));
+        }
+        Page<CertificateItem> certificatePage = certificateService.findAll(specification, pageable);
+        certificateLinker.processCollection(certificatePage.getContent());
+        return pagedResourcesAssembler.toModel(certificatePage);
     }
 
     /**
@@ -129,7 +106,7 @@ public class CertificateController {
      */
     @GetMapping(value = "/certificates/{id}")
     public CertificateResponse findCertificate(@PathVariable int id) {
-        Optional<CertificateResponse> response = certificateService.find(id);
+        Optional<CertificateResponse> response = certificateService.findById(id);
         response.ifPresent(certificateLinker::processEntity);
         return response.orElseThrow(() -> new EntityNotFoundException("id=" + id, ErrorCode.CERTIFICATE_NOT_FOUND));
     }
@@ -176,7 +153,7 @@ public class CertificateController {
      */
     @PatchMapping(path = "/certificates/{id}", consumes = "application/json-patch+json")
     public CertificateResponse updateCertificate(@PathVariable int id, @RequestBody JsonPatch patch) throws JsonPatchException, JsonProcessingException {
-        CertificateResponse certificate = certificateService.find(id)
+        CertificateResponse certificate = certificateService.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("id=" + id, ErrorCode.CERTIFICATE_NOT_FOUND));
 
         UpdateCertificateRequest updateRequest = new UpdateCertificateRequest(certificate.getId(), certificate.getName(),

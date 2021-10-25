@@ -14,8 +14,8 @@ public class UserLinker implements RepresentationModelLinker<UserResponse> {
     public void processEntity(UserResponse entity) {
         entity.add(linkTo(methodOn(UserController.class).findUser(entity.getId())).withSelfRel());
         entity.add(linkTo(methodOn(UserOrderController.class)
-                .findAllOrdersByUserId(null, null, entity.getId()))
+                .findAllOrdersByUserId(entity.getId(), null))
                 .withRel("ordersOfUser"));
-        entity.add(linkTo(methodOn(UserController.class).findAllUsers(null, null)).withRel("allUsers"));
+        entity.add(linkTo(methodOn(UserController.class).findAllUsers(null)).withRel("allUsers"));
     }
 }

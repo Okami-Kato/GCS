@@ -12,26 +12,24 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 @Component
 public class UserOrderResponseLinker implements RepresentationModelLinker<UserOrderResponse> {
     private final CertificateLinker certificateLinker;
-    private final UserLinker userPostProcessor;
 
     @Autowired
-    public UserOrderResponseLinker(CertificateLinker certificateLinker, UserLinker userPostProcessor) {
+    public UserOrderResponseLinker(CertificateLinker certificateLinker) {
         this.certificateLinker = certificateLinker;
-        this.userPostProcessor = userPostProcessor;
     }
 
     @Override
     public void processEntity(UserOrderResponse entity) {
         entity.add(linkTo(methodOn(UserOrderController.class).findOrder(entity.getId())).withSelfRel());
         entity.add(linkTo(methodOn(UserOrderController.class)
-                .findAllOrdersByUserId(null, null, entity.getUserId()))
+                .findAllOrdersByUserId(entity.getUserId(), null))
                 .withRel("ordersOfUser"));
         entity.add(linkTo(methodOn(UserController.class)
                 .findUser(entity.getUserId()))
                 .withRel("user"));
         if (entity.getCertificate() != null) {
             entity.add(linkTo(methodOn(UserOrderController.class)
-                    .findAllOrdersByCertificateId(null, null, entity.getCertificate().getId()))
+                    .findAllOrdersByCertificateId(entity.getCertificate().getId(), null))
                     .withRel("ordersOnCertificate"));
             certificateLinker.processEntity(entity.getCertificate());
         }

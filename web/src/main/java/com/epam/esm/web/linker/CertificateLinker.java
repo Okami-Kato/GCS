@@ -6,6 +6,7 @@ import com.epam.esm.web.controller.UserOrderController;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.github.fge.jsonpatch.JsonPatchException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.stereotype.Component;
 
 import java.util.Optional;
@@ -32,11 +33,8 @@ public class CertificateLinker implements RepresentationModelLinker<CertificateI
         }
         entity.add(linkTo(methodOn(CertificateController.class).deleteCertificate(entity.getId())).withRel("delete"));
         entity.add(linkTo(methodOn(UserOrderController.class)
-                .findAllOrdersByCertificateId(null, null, entity.getId()))
+                .findAllOrdersByCertificateId(entity.getId(), null))
                 .withRel("ordersOnCertificate"));
-        entity.add(linkTo(methodOn(CertificateController.class)
-                .findAllCertificates(null, null, Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty()))
-                .withRel("allCertificates"));
         entity.getTags().forEach(tagPostProcessor::processEntity);
     }
 }

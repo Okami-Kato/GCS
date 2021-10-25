@@ -13,10 +13,10 @@ public class UserOrderItemLinker implements RepresentationModelLinker<UserOrderI
     public void processEntity(UserOrderItem entity) {
         entity.add(linkTo(methodOn(UserOrderController.class).findOrder(entity.getId())).withSelfRel());
         entity.add(linkTo(methodOn(UserOrderController.class)
-                .findAllOrdersByUserId(null, null, entity.getUserId()))
+                .findAllOrdersByUserId(entity.getUserId(), null))
                 .withRel("ordersOfUser"));
         entity.add(linkTo(methodOn(UserOrderController.class)
-                .findAllOrdersByCertificateId(null, null, entity.getCertificateId()))
+                .findAllOrdersByCertificateId(entity.getCertificateId(), null))
                 .withRel("ordersOnCertificate"));
     }
 }

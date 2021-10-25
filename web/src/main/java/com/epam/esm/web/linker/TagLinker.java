@@ -13,7 +13,7 @@ public class TagLinker implements RepresentationModelLinker<TagResponse> {
     public void processEntity(TagResponse entity) {
         entity.add(linkTo(methodOn(TagController.class).findTag(entity.getId())).withSelfRel());
         entity.add(linkTo(methodOn(TagController.class).deleteTag(entity.getId())).withRel("delete"));
-        entity.add(linkTo(methodOn(TagController.class).findCertificates(null, null, entity.getId())).withRel("certificatesAssignedToTag"));
-        entity.add(linkTo(methodOn(TagController.class).findAllTags(null, null)).withRel("allTags"));
+        entity.add(linkTo(methodOn(TagController.class).findCertificates(null, entity.getId())).withRel("certificatesAssignedToTag"));
+        entity.add(linkTo(methodOn(TagController.class).findAllTags(null)).withRel("allTags"));
     }
 }
