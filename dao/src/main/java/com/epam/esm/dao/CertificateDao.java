@@ -1,12 +1,11 @@
 package com.epam.esm.dao;
 
 import com.epam.esm.entity.Certificate;
-import com.epam.esm.util.CertificateFilter;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
-import java.util.List;
-
-public interface CertificateDao extends Dao<Certificate, Integer> {
-    List<Certificate> findAllWithFilter(int pageNumber, int pageSize, CertificateFilter filter);
-
-    List<Certificate> findAllByTagId(int pageNumber, int pageSize, int tagId);
+public interface CertificateDao extends JpaRepository<Certificate, Integer>, JpaSpecificationExecutor<Certificate> {
+    Page<Certificate> findAllByTagsId(int tagId, Pageable pageable);
 }

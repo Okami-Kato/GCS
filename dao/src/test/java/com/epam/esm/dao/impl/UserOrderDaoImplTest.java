@@ -2,8 +2,8 @@ package com.epam.esm.dao.impl;
 
 import com.epam.esm.dao.CertificateDao;
 import com.epam.esm.dao.TagDao;
-import com.epam.esm.dao.UserDao;
 import com.epam.esm.dao.UserOrderDao;
+import com.epam.esm.dao.UserDao;
 import com.epam.esm.entity.Certificate;
 import com.epam.esm.entity.Tag;
 import com.epam.esm.entity.User;
@@ -14,8 +14,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -24,7 +24,6 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
@@ -62,83 +61,35 @@ class UserOrderDaoImplTest {
 
     @BeforeAll
     void init() {
-        userDao.create(firstUser);
-        userDao.create(secondUser);
-        userDao.create(thirdUser);
-
-        tagDao.create(firstTag);
-        tagDao.create(secondTag);
-        tagDao.create(thirdTag);
+        userDao.saveAll(Arrays.asList(firstUser, secondUser, thirdUser));
+        tagDao.saveAll(Arrays.asList(firstTag, secondTag, thirdTag));
 
         firstTag.addCertificate(firstCertificate);
         firstTag.addCertificate(secondCertificate);
         secondTag.addCertificate(firstCertificate);
         thirdTag.addCertificate(secondCertificate);
 
-        certificateDao.create(firstCertificate);
-        certificateDao.create(secondCertificate);
-        certificateDao.create(thirdCertificate);
-
-        userOrderDao.create(firstOrder);
-        userOrderDao.create(secondOrder);
-        userOrderDao.create(thirdOrder);
-        userOrderDao.create(forthOrder);
+        certificateDao.saveAll(Arrays.asList(firstCertificate, secondCertificate, thirdCertificate));
+        userOrderDao.saveAll(Arrays.asList(firstOrder, secondOrder, thirdOrder, forthOrder));
     }
 
     @AfterAll
     void destroy() {
-        userDao.delete(firstUser.getId());
-        userDao.delete(secondUser.getId());
-        userDao.delete(thirdUser.getId());
-
-        tagDao.delete(firstTag.getId());
-        tagDao.delete(secondTag.getId());
-        tagDao.delete(thirdTag.getId());
-
-        certificateDao.delete(firstCertificate.getId());
-        certificateDao.delete(secondCertificate.getId());
-        certificateDao.delete(thirdCertificate.getId());
-
-        userOrderDao.delete(firstOrder.getId());
-        userOrderDao.delete(secondOrder.getId());
-        userOrderDao.delete(thirdOrder.getId());
-        userOrderDao.delete(forthOrder.getId());
+        userOrderDao.deleteAllByIdInBatch(Arrays.asList(firstOrder.getId(), secondOrder.getId(), thirdOrder.getId(), forthOrder.getId()));
+        userDao.deleteAllByIdInBatch(Arrays.asList(firstUser.getId(), secondUser.getId(), thirdUser.getId()));
+        tagDao.deleteAllByIdInBatch(Arrays.asList(firstTag.getId(), secondTag.getId(), thirdTag.getId()));
+        certificateDao.deleteAllByIdInBatch(Arrays.asList(firstCertificate.getId(), secondCertificate.getId(), thirdCertificate.getId()));
     }
 
     @Test
+    @Transactional
     void create() {
         UserOrder order = new UserOrder(thirdUser, thirdCertificate, thirdCertificate.getPrice());
-        assertDoesNotThrow(() -> userOrderDao.create(order));
-        assertThrows(InvalidDataAccessApiUsageException.class, () -> userOrderDao.find(null));
-        Optional<UserOrder> persisted = userOrderDao.find(order.getId());
+        assertDoesNotThrow(() -> userOrderDao.save(order));
+        Optional<UserOrder> persisted = userOrderDao.findById(order.getId());
         assertTrue(persisted.isPresent());
-        assertFalse(userOrderDao.find(order.getId() * (-1)).isPresent());
+        assertFalse(userOrderDao.findById(order.getId() * (-1)).isPresent());
         assertEquals(thirdUser, persisted.get().getUser());
         assertEquals(thirdCertificate, persisted.get().getCertificate());
-    }
-
-    @Test
-    void read() {
-        int count = (int) userOrderDao.getCount();
-        assertDoesNotThrow(() -> userOrderDao.findAll(1, count));
-        assertEquals(count, userOrderDao.findAll(1, count + 1).size());
-        assertThrows(InvalidDataAccessApiUsageException.class, () -> userOrderDao.findAll(-1, 10));
-        assertThrows(InvalidDataAccessApiUsageException.class, () -> userOrderDao.findAll(1, -10));
-
-        assertDoesNotThrow(() -> userOrderDao.find(firstOrder.getId()));
-        assertTrue(userOrderDao.find(firstOrder.getId()).isPresent());
-        assertFalse(userOrderDao.find(firstOrder.getId() * (-1)).isPresent());
-        assertThrows(InvalidDataAccessApiUsageException.class, () -> userOrderDao.find(null));
-
-        assertEquals(Arrays.asList(firstOrder, secondOrder), userOrderDao.findAllByUserId(1, count, firstUser.getId()));
-        assertEquals(Arrays.asList(thirdOrder, forthOrder), userOrderDao.findAllByUserId(1, count, secondUser.getId()));
-
-        assertEquals(Arrays.asList(firstOrder, thirdOrder), userOrderDao.findAllByCertificateId(1, count, firstCertificate.getId()));
-        assertEquals(Arrays.asList(secondOrder, forthOrder), userOrderDao.findAllByCertificateId(1, count, secondCertificate.getId()));
-    }
-
-    @Test
-    void update() {
-        assertThrows(UnsupportedOperationException.class, () -> userOrderDao.update(firstOrder));
     }
 }

@@ -3,6 +3,7 @@ package com.epam.esm.entity;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -21,7 +22,6 @@ import java.util.Set;
 
 @Entity
 @Table(name = "certificate")
-@NamedEntityGraph(name = "graph.certificate.tags", attributeNodes = @NamedAttributeNode("tags"))
 public class Certificate {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -46,7 +46,7 @@ public class Certificate {
     @Column(name = "create_date", nullable = false, updatable = false)
     private Instant createDate;
 
-    @ManyToMany(cascade = CascadeType.MERGE)
+    @ManyToMany(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
     @JoinTable(
             name = "certificate_tag",
             joinColumns = @JoinColumn(name = "certificate_id"),

@@ -15,8 +15,8 @@ import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.dao.InvalidDataAccessApiUsageException;
-import org.springframework.orm.jpa.JpaObjectRetrievalFailureException;
+import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,8 +24,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -57,58 +57,43 @@ class TagDaoImplTest {
 
     @BeforeAll
     void init() {
-        tagDao.create(firstTag);
-        tagDao.create(secondTag);
-        tagDao.create(thirdTag);
+        tagDao.saveAll(Arrays.asList(firstTag, secondTag, thirdTag));
 
         firstTag.addCertificate(firstCertificate);
         firstTag.addCertificate(secondCertificate);
         secondTag.addCertificate(firstCertificate);
         thirdTag.addCertificate(secondCertificate);
 
-        certificateDao.create(firstCertificate);
-        certificateDao.create(secondCertificate);
+        certificateDao.saveAll(Arrays.asList(firstCertificate, secondCertificate));
     }
 
     @AfterAll
     void destroy() {
-        tagDao.delete(firstTag.getId());
-        tagDao.delete(secondTag.getId());
-        tagDao.delete(thirdTag.getId());
-        certificateDao.delete(firstCertificate.getId());
-        certificateDao.delete(secondCertificate.getId());
+        tagDao.deleteAllByIdInBatch(Arrays.asList(firstTag.getId(), secondTag.getId(), thirdTag.getId()));
+        certificateDao.deleteAllByIdInBatch(Arrays.asList(firstCertificate.getId(), secondCertificate.getId()));
     }
 
     @Test
     void create() {
-        assertThrows(InvalidDataAccessApiUsageException.class, () -> tagDao.create(firstTag));
-        assertThrows(DataIntegrityViolationException.class, () -> tagDao.create(new Tag(firstTag.getName())));
-        Optional<Tag> persisted = tagDao.find(firstTag.getId());
+        assertThrows(DataIntegrityViolationException.class, () -> tagDao.save(new Tag(firstTag.getName())));
+        Optional<Tag> persisted = tagDao.findById(firstTag.getId());
         assertTrue(persisted.isPresent());
         assertEquals(Arrays.asList(firstCertificate, secondCertificate),
-                certificateDao.findAllByTagId(1, 2, persisted.get().getId())
+                certificateDao.findAllByTagsId(persisted.get().getId(), Pageable.unpaged()).stream().collect(Collectors.toList())
         );
-        assertEquals(persisted, tagDao.get(firstTag.getName()));
-        assertFalse(tagDao.find(firstTag.getId() + 1000).isPresent());
-        assertThrows(InvalidDataAccessApiUsageException.class, () -> tagDao.find((Integer) null));
-        assertThrows(InvalidDataAccessApiUsageException.class, () -> tagDao.get((String) null));
-    }
-
-    @Test
-    void update() {
-        assertThrows(UnsupportedOperationException.class, () -> tagDao.update(firstTag));
+        assertEquals(persisted, tagDao.findByName(firstTag.getName()));
+        assertFalse(tagDao.findById(firstTag.getId() + 1000).isPresent());
     }
 
     @Test
     void createAndDelete() {
         Tag tag = new Tag("tag", new HashSet<>());
-        assertDoesNotThrow(() -> tagDao.create(tag));
-        Optional<Tag> persisted = tagDao.find(tag.getId());
+        assertDoesNotThrow(() -> tagDao.save(tag));
+        Optional<Tag> persisted = tagDao.findById(tag.getId());
         assertTrue(persisted.isPresent());
-        assertDoesNotThrow(() -> tagDao.delete(tag.getId()));
-        assertFalse(tagDao.find(tag.getId()).isPresent());
-        assertThrows(JpaObjectRetrievalFailureException.class, () -> tagDao.delete(tag.getId()));
-        assertThrows(InvalidDataAccessApiUsageException.class, () -> tagDao.delete(null));
+        assertDoesNotThrow(() -> tagDao.deleteById(tag.getId()));
+        assertFalse(tagDao.findById(tag.getId()).isPresent());
+        assertThrows(EmptyResultDataAccessException.class, () -> tagDao.deleteById(tag.getId()));
     }
 
     @Test
@@ -122,39 +107,26 @@ class TagDaoImplTest {
         thirdCertificate.addTag(thirdTag);
         forthCertificate.addTag(thirdTag);
 
-        certificateDao.create(thirdCertificate);
-        certificateDao.create(forthCertificate);
+        certificateDao.save(thirdCertificate);
+        certificateDao.save(forthCertificate);
 
         User firstUser = new User("first", "user", "login1", "password");
         User secondUser = new User("second", "user", "login2", "password");
 
-        userDao.create(firstUser);
-        userDao.create(secondUser);
+        userDao.save(firstUser);
+        userDao.save(secondUser);
 
-        userOrderDao.create(new UserOrder(firstUser, firstCertificate, 10));
-        userOrderDao.create(new UserOrder(firstUser, secondCertificate, 10));
-        userOrderDao.create(new UserOrder(firstUser, thirdCertificate, 10));
+        userOrderDao.save(new UserOrder(firstUser, firstCertificate, 10));
+        userOrderDao.save(new UserOrder(firstUser, secondCertificate, 10));
+        userOrderDao.save(new UserOrder(firstUser, thirdCertificate, 10));
 
-        userOrderDao.create(new UserOrder(secondUser, secondCertificate, 5));
-        userOrderDao.create(new UserOrder(secondUser, thirdCertificate, 5));
-        userOrderDao.create(new UserOrder(secondUser, forthCertificate, 5));
-        Map<User, List<Tag>> map = tagDao.getTheMostUsedTagsOfUsersWithTheHighestCost();
-        assertFalse(map.isEmpty());
-        assertEquals(1, map.size());
-        assertTrue(map.containsKey(firstUser));
-        assertEquals(Collections.singletonList(firstTag), map.get(firstUser));
-    }
+        userOrderDao.save(new UserOrder(secondUser, secondCertificate, 5));
+        userOrderDao.save(new UserOrder(secondUser, thirdCertificate, 5));
 
-    @Test
-    void read() {
-        int count = (int) tagDao.getCount();
-        assertEquals(3, tagDao.findAll(1, 3).size());
-        assertEquals(count, tagDao.findAll(1, count + 1).size());
-        assertEquals(2, tagDao.findAll(1, 2).size());
-        assertThrows(InvalidDataAccessApiUsageException.class, () -> tagDao.findAll(-1, 10));
-        assertThrows(InvalidDataAccessApiUsageException.class, () -> tagDao.findAll(1, -10));
+        List<Tag> theMostUsedTagsOfFirstUser = tagDao.findTheMostUsedTagsOfUser(firstUser.getId());
+        assertEquals(Collections.singletonList(firstTag), theMostUsedTagsOfFirstUser);
 
-        assertEquals(Arrays.asList(firstTag, secondTag), tagDao.findAllByCertificateId(1, count, firstCertificate.getId()));
-        assertEquals(Arrays.asList(firstTag, thirdTag), tagDao.findAllByCertificateId(1, count, secondCertificate.getId()));
+        List<Tag> theMostUsedTagsOfSecondUser = tagDao.findTheMostUsedTagsOfUser(secondUser.getId());
+        assertEquals(Arrays.asList(firstTag, thirdTag), theMostUsedTagsOfSecondUser);
     }
 }
