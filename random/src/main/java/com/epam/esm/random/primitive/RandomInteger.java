@@ -7,6 +7,7 @@ public class RandomInteger {
 
     /**
      * Constructs random integer in given bounds
+     *
      * @param min min value for result integer
      * @param max max value for result integer
      * @throws IllegalArgumentException if !(min <= max)

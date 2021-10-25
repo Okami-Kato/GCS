@@ -13,7 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedResourcesAssembler;
-import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -27,9 +26,6 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Optional;
-
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @RestController
 @Validated
@@ -76,7 +72,7 @@ public class UserOrderController {
      */
     @GetMapping(value = "/certificates/{certificateId}/orders")
     public PagedModel<UserOrderItem> findAllOrdersByCertificateId(@PathVariable Integer certificateId,
-                                                                                 Pageable pageable) {
+                                                                  Pageable pageable) {
         Page<UserOrderItem> ordersPage = orderService.findAllByCertificateId(certificateId, pageable);
         orderItemLinker.processCollection(ordersPage.getContent());
         return pagedResourcesAssembler.toModel(ordersPage);

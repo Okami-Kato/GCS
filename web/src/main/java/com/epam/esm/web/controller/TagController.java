@@ -87,7 +87,7 @@ public class TagController {
      * @param pageable pagination restrictions.
      * @param id       id of tag.
      * @return list of found certificates.
-     * @throws EntityNotFoundException  if tag with given id wasn't found.
+     * @throws EntityNotFoundException if tag with given id wasn't found.
      */
     @GetMapping(value = "/tags/{id}/certificates")
     public PagedModel<CertificateItem> findCertificates(Pageable pageable, @PathVariable int id) {

@@ -6,9 +6,10 @@ import java.util.Map;
 public class RandomSentence extends RandomWord {
     /**
      * Constructs random sentence
+     *
      * @param dictionary source of words
-     * @param minSize min size of result sentence
-     * @param maxSize max size of result sentence
+     * @param minSize    min size of result sentence
+     * @param maxSize    max size of result sentence
      */
     public RandomSentence(Map<Integer, List<String>> dictionary, int minSize, int maxSize) {
         super(dictionary, minSize, maxSize);

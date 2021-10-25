@@ -1,9 +1,7 @@
 package com.epam.esm.service;
 
-import com.epam.esm.entity.Tag;
 import com.epam.esm.service.dto.request.TagRequest;
 import com.epam.esm.service.dto.response.TagResponse;
-import com.epam.esm.service.dto.response.UserWithTags;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 

@@ -75,7 +75,7 @@ public class UserOrderServiceImpl implements UserOrderService {
      * @param pageable      pagination restrictions.
      * @param certificateId id of certificate.
      * @return page of found orders.
-     * @throws EntityNotFoundException  if certificate with given id wasn't found.
+     * @throws EntityNotFoundException if certificate with given id wasn't found.
      */
     @Override
     public Page<UserOrderItem> findAllByCertificateId(int certificateId, Pageable pageable) {
