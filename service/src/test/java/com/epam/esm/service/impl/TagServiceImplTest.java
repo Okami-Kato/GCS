@@ -2,6 +2,7 @@ package com.epam.esm.service.impl;
 
 import com.epam.esm.dao.CertificateDao;
 import com.epam.esm.dao.TagDao;
+import com.epam.esm.dao.UserDao;
 import com.epam.esm.entity.Certificate;
 import com.epam.esm.entity.Tag;
 import com.epam.esm.service.TagService;
@@ -15,8 +16,10 @@ import org.junit.jupiter.api.TestInstance;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
-import org.springframework.orm.jpa.JpaObjectRetrievalFailureException;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -27,10 +30,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.intThat;
-import static org.mockito.ArgumentMatchers.isNull;
-import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -42,6 +44,8 @@ class TagServiceImplTest {
     @Autowired
     private ModelMapper mapper;
     private TagDao tagDao;
+    private UserDao userDao;
+
     private CertificateDao certificateDao;
 
     private TagService tagService;
@@ -54,7 +58,8 @@ class TagServiceImplTest {
     void init() {
         tagDao = mock(TagDao.class);
         certificateDao = mock(CertificateDao.class);
-        tagService = new TagServiceImpl(tagDao, certificateDao, mapper);
+        userDao = mock(UserDao.class);
+        tagService = new TagServiceImpl(tagDao, certificateDao, mapper, userDao);
         firstTag.setId(1);
         secondTag.setId(2);
         thirdTag.setId(3);
@@ -62,18 +67,14 @@ class TagServiceImplTest {
 
     @Test
     void create() {
-        when(tagDao.get(thirdTag.getName())).thenReturn(Optional.of(thirdTag));
-        doAnswer(invocation -> {
-            Object[] args = invocation.getArguments();
-            ((Tag) args[0]).setId(firstTag.getId());
-            return null;
-        }).when(tagDao).create(new Tag(firstTag.getName()));
+        when(tagDao.existsByName(thirdTag.getName())).thenReturn(true);
+        when(tagDao.save(new Tag(firstTag.getName()))).thenReturn(firstTag);
         TagResponse expectedResponse = new TagResponse(firstTag.getId(), firstTag.getName());
         TagResponse actualResponse = tagService.create(new TagRequest(firstTag.getName()));
         assertEquals(expectedResponse, actualResponse);
 
-        when(tagDao.get(firstTag.getName())).thenReturn(Optional.of(firstTag));
-        assertTrue(tagService.find(firstTag.getName()).isPresent());
+        when(tagDao.findByName(firstTag.getName())).thenReturn(Optional.of(firstTag));
+        assertTrue(tagService.findByName(firstTag.getName()).isPresent());
         assertThrows(EntityExistsException.class, () -> tagService.create(new TagRequest(thirdTag.getName())));
         assertThrows(IllegalArgumentException.class, () -> tagService.create(null));
     }
@@ -82,7 +83,7 @@ class TagServiceImplTest {
     void delete() {
         int realId = firstTag.getId();
         int notRealId = 2;
-        doThrow(JpaObjectRetrievalFailureException.class).when(tagDao).delete(notRealId);
+        doThrow(EmptyResultDataAccessException.class).when(tagDao).deleteById(notRealId);
         assertDoesNotThrow(() -> tagService.delete(realId));
         assertThrows(EntityNotFoundException.class, () -> tagService.delete(notRealId));
     }
@@ -96,52 +97,50 @@ class TagServiceImplTest {
 
         TagResponse expectedResponse = new TagResponse(realId, firstTag.getName());
 
-        when(tagDao.find(realId)).thenReturn(Optional.of(firstTag));
-        when(tagDao.find(notRealId)).thenReturn(Optional.empty());
-        when(tagDao.get(realName)).thenReturn(Optional.of(firstTag));
-        when(tagDao.get(notRealName)).thenReturn(Optional.empty());
-        when(tagDao.get((String) isNull())).thenThrow(InvalidDataAccessApiUsageException.class);
+        when(tagDao.findById(realId)).thenReturn(Optional.of(firstTag));
+        when(tagDao.findById(notRealId)).thenReturn(Optional.empty());
+        when(tagDao.findByName(realName)).thenReturn(Optional.of(firstTag));
+        when(tagDao.findByName(notRealName)).thenReturn(Optional.empty());
 
-        Optional<TagResponse> actualResponse = tagService.find(realId);
+        Optional<TagResponse> actualResponse = tagService.findById(realId);
         assertTrue(actualResponse.isPresent());
         assertEquals(expectedResponse, actualResponse.get());
 
-        actualResponse = tagService.find(realName);
+        actualResponse = tagService.findByName(realName);
         assertTrue(actualResponse.isPresent());
         assertEquals(expectedResponse, actualResponse.get());
 
-        assertFalse(tagService.find(notRealId).isPresent());
-        assertFalse(tagService.find(notRealName).isPresent());
-        assertThrows(IllegalArgumentException.class, () -> tagService.find(null));
+        assertFalse(tagService.findById(notRealId).isPresent());
+        assertFalse(tagService.findByName(notRealName).isPresent());
+        assertThrows(IllegalArgumentException.class, () -> tagService.findByName(null));
     }
 
     @Test
     void read() {
         int certificateId = 1;
-        when(certificateDao.find(certificateId)).thenReturn(Optional.of(
+        when(certificateDao.findById(certificateId)).thenReturn(Optional.of(
                 new Certificate("name", "description", 10, 12)));
-        when(tagDao.findAll(1, 2)).thenReturn(Arrays.asList(firstTag, secondTag));
-        when(tagDao.findAll(2, 2)).thenReturn(Collections.singletonList(thirdTag));
-        when(tagDao.findAll(1, 3)).thenReturn(Arrays.asList(firstTag, secondTag, thirdTag));
-        when(tagDao.findAllByCertificateId(1, 2, certificateId)).thenReturn(Arrays.asList(firstTag, thirdTag));
-        when(tagDao.findAll(intThat(i -> i < 0), anyInt())).thenThrow(InvalidDataAccessApiUsageException.class);
-        when(tagDao.findAll(anyInt(), intThat(i -> i < 0))).thenThrow(InvalidDataAccessApiUsageException.class);
-        when(tagDao.findAllByCertificateId(intThat(i -> i < 0), anyInt(), anyInt())).thenThrow(InvalidDataAccessApiUsageException.class);
-        when(tagDao.findAllByCertificateId(anyInt(), intThat(i -> i < 0), anyInt())).thenThrow(InvalidDataAccessApiUsageException.class);
+
+        PageRequest firstPageRequest = PageRequest.of(0, 2);
+        PageRequest secondPageRequest = PageRequest.of(1, 2);
+        PageRequest thirdPageRequest = PageRequest.of(0, 3);
+
+        when(tagDao.findAll(firstPageRequest)).thenReturn(
+                new PageImpl<>(Arrays.asList(firstTag, secondTag), firstPageRequest, 3));
+        when(tagDao.findAll(secondPageRequest)).thenReturn(
+                new PageImpl<>(Collections.singletonList(thirdTag), secondPageRequest, 3));
+        when(tagDao.findAll(thirdPageRequest)).thenReturn(
+                new PageImpl<>(Arrays.asList(firstTag, secondTag, thirdTag), thirdPageRequest, 3));
+        when(tagDao.findAllByCertificatesId(certificateId, firstPageRequest)).thenReturn(
+                new PageImpl<>(Arrays.asList(firstTag, thirdTag), firstPageRequest, 2));
 
         TagResponse firstResponse = new TagResponse(firstTag.getId(), firstTag.getName());
         TagResponse secondResponse = new TagResponse(secondTag.getId(), secondTag.getName());
         TagResponse thirdResponse = new TagResponse(thirdTag.getId(), thirdTag.getName());
 
-        assertEquals(Arrays.asList(firstResponse, secondResponse), tagService.findAll(1, 2));
-        assertEquals(Collections.singletonList(thirdResponse), tagService.findAll(2, 2));
-        assertEquals(Arrays.asList(firstResponse, secondResponse, thirdResponse), tagService.findAll(1, 3));
+        assertEquals(Arrays.asList(firstResponse, secondResponse), tagService.findAll(firstPageRequest).getContent());
+        assertEquals(Collections.singletonList(thirdResponse), tagService.findAll(secondPageRequest).getContent());
+        assertEquals(Arrays.asList(firstResponse, secondResponse, thirdResponse), tagService.findAll(thirdPageRequest).getContent());
 
-        assertEquals(Arrays.asList(firstResponse, thirdResponse), tagService.findAllByCertificateId(1, 2, certificateId));
-
-        assertThrows(IllegalArgumentException.class, () -> tagService.findAll(-1, 2));
-        assertThrows(IllegalArgumentException.class, () -> tagService.findAll(1, -1));
-        assertThrows(IllegalArgumentException.class, () -> tagService.findAllByCertificateId(-1, 2, certificateId));
-        assertThrows(IllegalArgumentException.class, () -> tagService.findAllByCertificateId(1, -1, certificateId));
     }
 }

@@ -15,17 +15,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 import java.util.Optional;
 
-import static com.epam.esm.dao.specification.CertificateSpecifications.descriptionLike;
-import static com.epam.esm.dao.specification.CertificateSpecifications.nameLike;
-import static com.epam.esm.dao.specification.CertificateSpecifications.withTags;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -36,7 +30,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @SpringBootTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ActiveProfiles("test")
-class CertificateDaoImplTest {
+class CertificateDaoTest {
     private final Certificate firstCertificate = new Certificate(
             "first certificate", "first description", 1, 3);
     private final Certificate secondCertificate = new Certificate(
@@ -118,30 +112,5 @@ class CertificateDaoImplTest {
         assertFalse(certificateDao.findById(certificate.getId()).isPresent());
         assertThrows(EmptyResultDataAccessException.class, () -> certificateDao.deleteById(certificate.getId()));
         assertThrows(InvalidDataAccessApiUsageException.class, () -> certificateDao.deleteById(null));
-    }
-
-    @Test
-    void read() {
-        assertThrows(IllegalArgumentException.class, () -> certificateDao.findAll(PageRequest.of(0, -10)));
-        assertThrows(IllegalArgumentException.class, () -> certificateDao.findAll(PageRequest.of(-10, 1)));
-
-        assertEquals(Arrays.asList(firstCertificate, secondCertificate, thirdCertificate),
-                certificateDao.findAll(nameLike("certificate")));
-        assertEquals(Collections.singletonList(firstCertificate), certificateDao.findAll(nameLike("first")));
-        assertEquals(Collections.emptyList(), certificateDao.findAll(nameLike("certificatee")));
-
-        assertEquals(Arrays.asList(firstCertificate, secondCertificate, thirdCertificate),
-                certificateDao.findAll(descriptionLike("description")));
-        assertEquals(Collections.singletonList(firstCertificate), certificateDao.findAll(descriptionLike("first")));
-        assertEquals(Collections.emptyList(), certificateDao.findAll(descriptionLike("descriptionn")));
-
-        List<Certificate> certificatesWithFirstTag = certificateDao.findAll(withTags(firstTag.getName()));
-        assertEquals(Arrays.asList(firstCertificate, secondCertificate), certificatesWithFirstTag);
-
-        List<Certificate> certificatesWithSecondTag = certificateDao.findAll(withTags(secondTag.getName()));
-        assertEquals(Arrays.asList(firstCertificate, thirdCertificate), certificatesWithSecondTag);
-
-        List<Certificate> certificatesWithFirstAndSecondTag = certificateDao.findAll(withTags(firstTag.getName(), secondTag.getName()));
-        assertEquals(Collections.singletonList(firstCertificate), certificatesWithFirstAndSecondTag);
     }
 }

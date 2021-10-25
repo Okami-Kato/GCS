@@ -36,7 +36,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @SpringBootTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ActiveProfiles("test")
-class TagDaoImplTest {
+class TagDaoTest {
     private final Certificate firstCertificate = new Certificate(
             "first certificate", "first description", 1, 3);
     private final Certificate secondCertificate = new Certificate(

@@ -1,4 +1,4 @@
-package com.epam.esm.dao.specification;
+package com.epam.esm.service.specification;
 
 import com.epam.esm.entity.Certificate;
 import com.epam.esm.entity.Certificate_;

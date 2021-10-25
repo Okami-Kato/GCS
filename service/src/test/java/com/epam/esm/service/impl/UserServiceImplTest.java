@@ -13,6 +13,8 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -23,10 +25,8 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.intThat;
 import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -55,18 +55,16 @@ class UserServiceImplTest {
 
     @Test
     void create() {
-        doAnswer(invocation -> {
-            Object[] args = invocation.getArguments();
-            ((User) args[0]).setId(firstUser.getId());
-            return null;
-        }).when(userDao).create(new User(firstUser.getFirstName(), firstUser.getLastName(), firstUser.getLogin(), firstUser.getPassword()));
+        when(userDao.save(
+                new User(firstUser.getFirstName(), firstUser.getLastName(), firstUser.getLogin(), firstUser.getPassword())))
+                .thenReturn(firstUser);
 
         UserResponse actualResponse = userService.create(
                 new CreateUserRequest(firstUser.getFirstName(), firstUser.getLastName(), firstUser.getLogin(), firstUser.getPassword()));
         UserResponse expectedResponse = new UserResponse(firstUser.getId(), firstUser.getFirstName(), firstUser.getLastName());
         assertEquals(expectedResponse, actualResponse);
 
-        when(userDao.get(firstUser.getLogin())).thenReturn(Optional.of(firstUser));
+        when(userDao.existsByLogin(firstUser.getLogin())).thenReturn(true);
         assertThrows(EntityExistsException.class, () -> userService.create(
                 new CreateUserRequest(secondUser.getFirstName(), thirdUser.getLastName(), firstUser.getLogin(), firstUser.getPassword())));
         assertThrows(IllegalArgumentException.class, () -> userService.create(null));
@@ -82,40 +80,46 @@ class UserServiceImplTest {
 
         UserResponse expectedResponse = new UserResponse(realId, firstUser.getFirstName(), firstUser.getLastName());
 
-        when(userDao.find(realId)).thenReturn(Optional.of(firstUser));
-        when(userDao.find(notRealId)).thenReturn(Optional.empty());
-        when(userDao.get(realLogin)).thenReturn(Optional.of(firstUser));
-        when(userDao.get(notRealLogin)).thenReturn(Optional.empty());
+        when(userDao.findById(realId)).thenReturn(Optional.of(firstUser));
+        when(userDao.findById(notRealId)).thenReturn(Optional.empty());
+        when(userDao.findByLogin(realLogin)).thenReturn(Optional.of(firstUser));
+        when(userDao.findByLogin(notRealLogin)).thenReturn(Optional.empty());
 
-        Optional<UserResponse> actualResponse = userService.find(realId);
+        Optional<UserResponse> actualResponse = userService.findById(realId);
         assertTrue(actualResponse.isPresent());
         assertEquals(expectedResponse, actualResponse.get());
-        assertFalse(userService.find(notRealId).isPresent());
+        assertFalse(userService.findById(notRealId).isPresent());
 
-        actualResponse = userService.find(realLogin);
+        actualResponse = userService.findByLogin(realLogin);
         assertTrue(actualResponse.isPresent());
         assertEquals(expectedResponse, actualResponse.get());
 
-        assertFalse(userService.find(notRealLogin).isPresent());
+        assertFalse(userService.findByLogin(notRealLogin).isPresent());
     }
 
     @Test
     void read() {
-        when(userDao.findAll(1, 2)).thenReturn(Arrays.asList(firstUser, secondUser));
-        when(userDao.findAll(2, 2)).thenReturn(Collections.singletonList(thirdUser));
-        when(userDao.findAll(1, 3)).thenReturn(Arrays.asList(firstUser, secondUser, thirdUser));
-        when(userDao.findAll(intThat(i -> i < 0), anyInt())).thenThrow(InvalidDataAccessApiUsageException.class);
-        when(userDao.findAll(anyInt(), intThat(i -> i < 0))).thenThrow(InvalidDataAccessApiUsageException.class);
+        PageRequest firstPageRequest = PageRequest.of(0, 2);
+        PageRequest secondPageRequest = PageRequest.of(1, 2);
+        PageRequest thirdPageRequest = PageRequest.of(0, 3);
+
+        when(userDao.findAll(firstPageRequest)).thenReturn(
+                new PageImpl<>(Arrays.asList(firstUser, secondUser), firstPageRequest, 3));
+        when(userDao.findAll(secondPageRequest)).thenReturn(
+                new PageImpl<>(Collections.singletonList(thirdUser), secondPageRequest, 3));
+        when(userDao.findAll(thirdPageRequest)).thenReturn(
+                new PageImpl<>(Arrays.asList(firstUser, secondUser, thirdUser), thirdPageRequest, 3)
+        );
 
         UserResponse firstResponse = new UserResponse(firstUser.getId(), firstUser.getFirstName(), firstUser.getLastName());
         UserResponse secondResponse = new UserResponse(secondUser.getId(), secondUser.getFirstName(), secondUser.getLastName());
         UserResponse thirdResponse = new UserResponse(thirdUser.getId(), thirdUser.getFirstName(), thirdUser.getLastName());
 
-        assertEquals(Arrays.asList(firstResponse, secondResponse), userService.findAll(1, 2));
-        assertEquals(Collections.singletonList(thirdResponse), userService.findAll(2, 2));
-        assertEquals(Arrays.asList(firstResponse, secondResponse, thirdResponse), userService.findAll(1, 3));
+        assertEquals(Arrays.asList(firstResponse, secondResponse), userService.findAll(firstPageRequest).getContent());
+        assertEquals(Collections.singletonList(thirdResponse), userService.findAll(secondPageRequest).getContent());
+        assertEquals(Arrays.asList(firstResponse, secondResponse, thirdResponse), userService.findAll(thirdPageRequest).getContent());
 
-        assertThrows(IllegalArgumentException.class, () -> userService.findAll(-1, 2));
-        assertThrows(IllegalArgumentException.class, () -> userService.findAll(1, -1));
+        assertThrows(IllegalArgumentException.class, () -> userService.findAll(PageRequest.of(-1, 2)));
+        assertThrows(IllegalArgumentException.class, () -> userService.findAll(PageRequest.of(1, -1)));
     }
 }

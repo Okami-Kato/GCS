@@ -1,17 +1,22 @@
 package com.epam.esm.service;
 
+import com.epam.esm.entity.User;
 import com.epam.esm.service.dto.request.CreateUserRequest;
 import com.epam.esm.service.dto.response.UserResponse;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 import java.util.Optional;
 
 public interface UserService {
-    List<UserResponse> findAll(int pageNumber, int pageSize);
+    Page<UserResponse> findAll(Pageable pageable);
 
-    Optional<UserResponse> find(int id);
+    Optional<UserResponse> findById(int id);
 
-    Optional<UserResponse> find(String login);
+    Optional<UserResponse> findByLogin(String login);
+
+    List<UserResponse> findUsersWithTheHighestCost();
 
     long getCount();
 

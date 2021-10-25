@@ -20,8 +20,9 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.dao.InvalidDataAccessApiUsageException;
-import org.springframework.orm.jpa.JpaObjectRetrievalFailureException;
+import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -34,11 +35,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.intThat;
-import static org.mockito.ArgumentMatchers.isNull;
-import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -96,31 +93,26 @@ class CertificateServiceImplTest {
                         new TagResponse(secondTag.getId(), secondTag.getName()),
                         new TagResponse(thirdTag.getId(), thirdTag.getName()))));
 
-        doAnswer(invocation -> {
-            Object[] args = invocation.getArguments();
-            ((Certificate) args[0]).setId(certificate.getId());
-            return null;
-        }).when(certificateDao).create(new Certificate("name", "description", 5, 10,
-                new HashSet<>(Arrays.asList(firstTag, secondTag, thirdTag))));
+        when(certificateDao.save(
+                new Certificate(certificate.getName(), certificate.getDescription(),
+                        certificate.getPrice(), certificate.getDuration(),
+                        new HashSet<>(Arrays.asList(firstTag, secondTag, thirdTag))))
+        ).thenReturn(certificate);
 
-        doAnswer(invocation -> {
-            Object[] args = invocation.getArguments();
-            ((Tag) args[0]).setId(thirdTag.getId());
-            return null;
-        }).when(tagDao).create(new Tag("third"));
 
-        when(tagDao.get("first")).thenReturn(Optional.of(firstTag));
-        when(tagDao.get("second")).thenReturn(Optional.of(secondTag));
-        when(tagDao.get("third")).thenReturn(Optional.empty());
+        when(tagDao.findByName("first")).thenReturn(Optional.of(firstTag));
+        when(tagDao.findByName("second")).thenReturn(Optional.of(secondTag));
+        when(tagDao.findByName("third")).thenReturn(Optional.empty());
+        when(tagDao.save(new Tag("third"))).thenReturn(thirdTag);
 
         CertificateResponse actualResponse = certificateService.create(createRequest);
-        verify(certificateDao, times(1)).create(any());
-        verify(tagDao, times(3)).get(anyString());
-        verify(tagDao, times(1)).create(any());
+        verify(certificateDao, times(1)).save(any());
+        verify(tagDao, times(3)).findByName(anyString());
+        verify(tagDao, times(1)).save(any());
         assertEquals(expectedResponse, actualResponse);
 
         createRequest.setName(null);
-        doThrow(DataIntegrityViolationException.class).when(certificateDao).create(mapper.map(createRequest, Certificate.class));
+        doThrow(DataIntegrityViolationException.class).when(certificateDao).save(mapper.map(createRequest, Certificate.class));
 
         assertThrows(InvalidEntityException.class, () -> certificateService.create(createRequest));
         assertThrows(IllegalArgumentException.class, () -> certificateService.create(null));
@@ -143,14 +135,14 @@ class CertificateServiceImplTest {
                         new TagResponse(secondTag.getId(), secondTag.getName()),
                         new TagResponse(thirdTag.getId(), thirdTag.getName()))));
 
-        when(certificateDao.find(realId)).thenReturn(Optional.of(certificate));
-        when(certificateDao.find(notRealId)).thenReturn(Optional.empty());
+        when(certificateDao.findById(realId)).thenReturn(Optional.of(certificate));
+        when(certificateDao.findById(notRealId)).thenReturn(Optional.empty());
 
-        Optional<CertificateResponse> actualResponse = certificateService.find(realId);
+        Optional<CertificateResponse> actualResponse = certificateService.findById(realId);
         assertTrue(actualResponse.isPresent());
         assertEquals(expectedResponse, actualResponse.get());
 
-        assertFalse(certificateService.find(notRealId).isPresent());
+        assertFalse(certificateService.findById(notRealId).isPresent());
     }
 
     @Test
@@ -180,15 +172,16 @@ class CertificateServiceImplTest {
                         new TagResponse(firstTag.getId(), firstTag.getName()),
                         new TagResponse(thirdTag.getId(), thirdTag.getName()))));
 
-        when(tagDao.get(firstTag.getName())).thenReturn(Optional.of(firstTag));
-        when(tagDao.get(thirdTag.getName())).thenReturn(Optional.of(thirdTag));
-        when(certificateDao.update(updated)).thenReturn(updated);
+        when(tagDao.findByName(firstTag.getName())).thenReturn(Optional.of(firstTag));
+        when(tagDao.findByName(thirdTag.getName())).thenReturn(Optional.of(thirdTag));
+        when(certificateDao.save(updated)).thenReturn(updated);
+        when(certificateDao.existsById(updated.getId())).thenReturn(true);
 
         CertificateResponse actualResponse = certificateService.update(updateRequest);
         assertEquals(expectedResponse, actualResponse);
 
         updateRequest.setName(null);
-        doThrow(DataIntegrityViolationException.class).when(certificateDao).update(mapper.map(updateRequest, Certificate.class));
+        doThrow(DataIntegrityViolationException.class).when(certificateDao).save(mapper.map(updateRequest, Certificate.class));
         assertThrows(InvalidEntityException.class, () -> certificateService.update(updateRequest));
         assertThrows(IllegalArgumentException.class, () -> certificateService.update(null));
     }
@@ -197,7 +190,7 @@ class CertificateServiceImplTest {
     void delete() {
         int realId = 1;
         int notRealId = 2;
-        doThrow(JpaObjectRetrievalFailureException.class).when(certificateDao).delete(notRealId);
+        doThrow(EmptyResultDataAccessException.class).when(certificateDao).deleteById(notRealId);
         assertDoesNotThrow(() -> certificateService.delete(realId));
         assertThrows(EntityNotFoundException.class, () -> certificateService.delete(notRealId));
     }
@@ -213,11 +206,17 @@ class CertificateServiceImplTest {
         firstCertificate.setId(1);
         secondCertificate.setId(2);
         thirdCertificate.setId(3);
-        when(certificateDao.findAll(1, 2)).thenReturn(Arrays.asList(firstCertificate, secondCertificate));
-        when(certificateDao.findAll(2, 2)).thenReturn(Collections.singletonList(thirdCertificate));
-        when(certificateDao.findAll(1, 3)).thenReturn(Arrays.asList(firstCertificate, secondCertificate, thirdCertificate));
-        when(certificateDao.findAll(intThat(i -> i < 0), anyInt())).thenThrow(InvalidDataAccessApiUsageException.class);
-        when(certificateDao.findAll(anyInt(), intThat(i -> i < 0))).thenThrow(InvalidDataAccessApiUsageException.class);
+
+        PageRequest firstPageRequest = PageRequest.of(0, 2);
+        PageRequest secondPageRequest = PageRequest.of(1, 2);
+        PageRequest thirdPageRequest = PageRequest.of(0, 3);
+
+        when(certificateDao.findAll(firstPageRequest)).thenReturn(
+                new PageImpl<>(Arrays.asList(firstCertificate, secondCertificate), firstPageRequest, 3));
+        when(certificateDao.findAll(secondPageRequest)).thenReturn(
+                new PageImpl<>(Collections.singletonList(thirdCertificate), secondPageRequest, 3));
+        when(certificateDao.findAll(thirdPageRequest)).thenReturn(
+                new PageImpl<>(Arrays.asList(firstCertificate, secondCertificate, thirdCertificate), thirdPageRequest, 3));
         CertificateItem firstItem = new CertificateItem(
                 firstCertificate.getId(), firstCertificate.getName(), firstCertificate.getPrice(),
                 new HashSet<>(
@@ -237,10 +236,15 @@ class CertificateServiceImplTest {
                                 new TagResponse(secondTag.getId(), secondTag.getName()),
                                 new TagResponse(thirdTag.getId(), thirdTag.getName()))));
 
-        assertEquals(Arrays.asList(firstItem, secondItem), certificateService.findAll(1, 2));
-        assertEquals(Collections.singletonList(thirdItem), certificateService.findAll(2, 2));
-        assertEquals(Arrays.asList(firstItem, secondItem, thirdItem), certificateService.findAll(1, 3));
-        assertThrows(IllegalArgumentException.class, () -> certificateService.findAll(-1, 2));
-        assertThrows(IllegalArgumentException.class, () -> certificateService.findAll(1, -1));
+        assertEquals(Arrays.asList(firstItem, secondItem),
+                certificateService.findAll(PageRequest.of(0, 2)).getContent());
+        assertEquals(Collections.singletonList(thirdItem),
+                certificateService.findAll(PageRequest.of(1, 2)).getContent());
+        assertEquals(Arrays.asList(firstItem, secondItem, thirdItem),
+                certificateService.findAll(PageRequest.of(0, 3)).getContent());
+        assertThrows(IllegalArgumentException.class,
+                () -> certificateService.findAll(PageRequest.of(-10, 2)).getContent());
+        assertThrows(IllegalArgumentException.class,
+                () -> certificateService.findAll(PageRequest.of(0, -10)).getContent());
     }
 }

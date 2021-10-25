@@ -11,7 +11,8 @@ import com.epam.esm.service.exception.InvalidEntityException;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.dao.InvalidDataAccessApiUsageException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
@@ -35,20 +36,13 @@ public class UserServiceImpl implements UserService {
     /**
      * Retrieves all users.
      *
-     * @param pageNumber number of page (starts from 1).
-     * @param pageSize   size of page.
-     * @return list of users.
-     * @throws IllegalArgumentException if pageNumber < 1, or pageSize < 0.
+     * @param pageable pagination restrictions.
+     * @return page of users.
      */
     @Override
-    public List<UserResponse> findAll(int pageNumber, int pageSize) {
-        try {
-            return userDao.findAll(pageNumber, pageSize).stream()
-                    .map(user -> mapper.map(user, UserResponse.class))
-                    .collect(Collectors.toList());
-        } catch (InvalidDataAccessApiUsageException e) {
-            throw new IllegalArgumentException(e);
-        }
+    public Page<UserResponse> findAll(Pageable pageable) {
+        return userDao.findAll(pageable)
+                .map(user -> mapper.map(user, UserResponse.class));
     }
 
     /**
@@ -58,8 +52,8 @@ public class UserServiceImpl implements UserService {
      * @return Optional with user, if it was found, otherwise an empty Optional.
      */
     @Override
-    public Optional<UserResponse> find(int id) {
-        return userDao.find(id).map(user -> mapper.map(user, UserResponse.class));
+    public Optional<UserResponse> findById(int id) {
+        return userDao.findById(id).map(user -> mapper.map(user, UserResponse.class));
     }
 
     /**
@@ -70,9 +64,21 @@ public class UserServiceImpl implements UserService {
      * @throws IllegalArgumentException if login is null.
      */
     @Override
-    public Optional<UserResponse> find(String login) {
+    public Optional<UserResponse> findByLogin(String login) {
         Assert.notNull(login, "User login can't be null");
-        return userDao.get(login).map(user -> mapper.map(user, UserResponse.class));
+        return userDao.findByLogin(login).map(user -> mapper.map(user, UserResponse.class));
+    }
+
+    /**
+     * Retrieves users with the highest cost.
+     *
+     * @return list of users with the highest cost.
+     */
+    @Override
+    public List<UserResponse> findUsersWithTheHighestCost() {
+        return userDao.findUsersWithTheHighestCost().stream()
+                .map(user -> mapper.map(user, UserResponse.class))
+                .collect(Collectors.toList());
     }
 
     /**
@@ -82,7 +88,7 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public long getCount() {
-        return userDao.getCount();
+        return userDao.count();
     }
 
     /**
@@ -97,14 +103,14 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserResponse create(CreateUserRequest user) {
         User userToCreate = mapper.map(user, User.class);
-        if (userDao.get(userToCreate.getLogin()).isPresent()) {
+        if (userDao.existsByLogin(userToCreate.getLogin())) {
             throw new EntityExistsException("login=" + userToCreate.getLogin(), ErrorCode.USER_EXISTS);
         }
         try {
-            userDao.create(userToCreate);
+            User created = userDao.save(userToCreate);
+            return mapper.map(created, UserResponse.class);
         } catch (DataIntegrityViolationException e) {
             throw new InvalidEntityException(e.getMessage(), ErrorCode.INVALID_USER);
         }
-        return mapper.map(userToCreate, UserResponse.class);
     }
 }

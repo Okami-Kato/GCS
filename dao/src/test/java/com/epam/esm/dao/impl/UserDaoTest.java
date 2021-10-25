@@ -30,7 +30,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @SpringBootTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ActiveProfiles("test")
-class UserDaoImplTest {
+class UserDaoTest {
     private final User firstUser = new User("first", "user", "login1", "password");
     private final User secondUser = new User("second", "user", "login2", "password");
     private final User thirdUser = new User("third", "user", "login3", "password");

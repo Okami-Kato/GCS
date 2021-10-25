@@ -8,23 +8,23 @@ import java.util.Objects;
 
 @Relation(collectionRelation = "usersAndTags")
 public class UserWithTags extends RepresentationModel<UserWithTags> {
-    private UserResponse user;
+    private Integer userId;
     private List<TagResponse> tags;
 
     public UserWithTags() {
     }
 
-    public UserWithTags(UserResponse user, List<TagResponse> tags) {
-        this.user = user;
+    public UserWithTags(Integer userId, List<TagResponse> tags) {
+        this.userId = userId;
         this.tags = tags;
     }
 
-    public UserResponse getUser() {
-        return user;
+    public Integer getUserId() {
+        return userId;
     }
 
-    public void setUser(UserResponse user) {
-        this.user = user;
+    public void setUserId(Integer userId) {
+        this.userId = userId;
     }
 
     public List<TagResponse> getTags() {
@@ -40,11 +40,11 @@ public class UserWithTags extends RepresentationModel<UserWithTags> {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         UserWithTags that = (UserWithTags) o;
-        return user.equals(that.user) && tags.equals(that.tags);
+        return userId.equals(that.userId) && tags.equals(that.tags);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(user, tags);
+        return Objects.hash(userId, tags);
     }
 }

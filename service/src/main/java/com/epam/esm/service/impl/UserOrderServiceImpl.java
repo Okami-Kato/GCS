@@ -16,14 +16,13 @@ import com.epam.esm.service.exception.InvalidEntityException;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.dao.InvalidDataAccessApiUsageException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
-import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -44,68 +43,47 @@ public class UserOrderServiceImpl implements UserOrderService {
     /**
      * Retrieves all orders.
      *
-     * @param pageNumber number of page (starts from 1).
-     * @param pageSize   size of page.
-     * @return list of orders.
-     * @throws IllegalArgumentException if pageNumber < 1, or pageSize < 0.
+     * @param pageable pagination restrictions.
+     * @return page of orders.
      */
     @Override
-    public List<UserOrderItem> findAll(int pageNumber, int pageSize) {
-        try {
-            return userOrderDao.findAll(pageNumber, pageSize).stream()
-                    .map(order -> mapper.map(order, UserOrderItem.class))
-                    .collect(Collectors.toList());
-        } catch (InvalidDataAccessApiUsageException e) {
-            throw new IllegalArgumentException(e);
-        }
+    public Page<UserOrderItem> findAll(Pageable pageable) {
+        return userOrderDao.findAll(pageable)
+                .map(order -> mapper.map(order, UserOrderItem.class));
     }
 
     /**
      * Retrieves all orders of user with given id.
      *
-     * @param pageNumber number of page (starts from 1).
-     * @param pageSize   size of page.
-     * @param userId     id of user.
-     * @return list of found orders.
-     * @throws EntityNotFoundException  if user with given id wasn't found.
-     * @throws IllegalArgumentException if pageNumber < 1, or pageSize < 0.
+     * @param pageable pagination restrictions.
+     * @param userId   id of user.
+     * @return page of found orders.
+     * @throws EntityNotFoundException if user with given id wasn't found.
      */
     @Override
-    public List<UserOrderItem> findAllByUserId(int pageNumber, int pageSize, int userId) {
-        if (!userDao.find(userId).isPresent()) {
+    public Page<UserOrderItem> findAllByUserId(int userId, Pageable pageable) {
+        if (!userDao.existsById(userId)) {
             throw new EntityNotFoundException("id=" + userId, ErrorCode.USER_NOT_FOUND);
         }
-        try {
-            return userOrderDao.findAllByUserId(pageNumber, pageSize, userId).stream()
-                    .map(order -> mapper.map(order, UserOrderItem.class))
-                    .collect(Collectors.toList());
-        } catch (InvalidDataAccessApiUsageException e) {
-            throw new IllegalArgumentException(e);
-        }
+        return userOrderDao.findAllByUserId(userId, pageable)
+                .map(order -> mapper.map(order, UserOrderItem.class));
     }
 
     /**
      * Retrieves all orders on certificate with given id.
      *
-     * @param pageNumber    number of page (starts from 1).
-     * @param pageSize      size of page.
+     * @param pageable      pagination restrictions.
      * @param certificateId id of certificate.
-     * @return list of found orders.
+     * @return page of found orders.
      * @throws EntityNotFoundException  if certificate with given id wasn't found.
-     * @throws IllegalArgumentException if pageNumber < 1, or pageSize < 0.
      */
     @Override
-    public List<UserOrderItem> findAllByCertificateId(int pageNumber, int pageSize, int certificateId) {
-        if (!certificateDao.find(certificateId).isPresent()) {
+    public Page<UserOrderItem> findAllByCertificateId(int certificateId, Pageable pageable) {
+        if (!certificateDao.existsById(certificateId)) {
             throw new EntityNotFoundException("id=" + certificateId, ErrorCode.CERTIFICATE_NOT_FOUND);
         }
-        try {
-            return userOrderDao.findAllByCertificateId(pageNumber, pageSize, certificateId).stream()
-                    .map(order -> mapper.map(order, UserOrderItem.class))
-                    .collect(Collectors.toList());
-        } catch (InvalidDataAccessApiUsageException e) {
-            throw new IllegalArgumentException(e);
-        }
+        return userOrderDao.findAllByCertificateId(certificateId, pageable)
+                .map(order -> mapper.map(order, UserOrderItem.class));
     }
 
     /**
@@ -115,8 +93,8 @@ public class UserOrderServiceImpl implements UserOrderService {
      * @return Optional with certificate, if it was found, otherwise an empty Optional.
      */
     @Override
-    public Optional<UserOrderResponse> find(int id) {
-        return userOrderDao.find(id).map(order -> mapper.map(order, UserOrderResponse.class));
+    public Optional<UserOrderResponse> findById(int id) {
+        return userOrderDao.findById(id).map(order -> mapper.map(order, UserOrderResponse.class));
     }
 
     /**
@@ -126,7 +104,7 @@ public class UserOrderServiceImpl implements UserOrderService {
      */
     @Override
     public long getCount() {
-        return userOrderDao.getCount();
+        return userOrderDao.count();
     }
 
     /**
@@ -140,8 +118,8 @@ public class UserOrderServiceImpl implements UserOrderService {
     @Override
     public UserOrderResponse create(CreateUserOrderRequest userOrder) {
         Assert.notNull(userOrder, "userOrder can't be null");
-        Optional<User> user = userDao.find(userOrder.getUserId());
-        Optional<Certificate> certificate = certificateDao.find(userOrder.getCertificateId());
+        Optional<User> user = userDao.findById(userOrder.getUserId());
+        Optional<Certificate> certificate = certificateDao.findById(userOrder.getCertificateId());
 
         UserOrder orderToCreate = new UserOrder(
                 user.orElseThrow(() -> new EntityNotFoundException("id=" + userOrder.getUserId(),
@@ -151,10 +129,10 @@ public class UserOrderServiceImpl implements UserOrderService {
                 certificate.get().getPrice()
         );
         try {
-            userOrderDao.create(orderToCreate);
+            UserOrder created = userOrderDao.save(orderToCreate);
+            return mapper.map(created, UserOrderResponse.class);
         } catch (DataIntegrityViolationException e) {
             throw new InvalidEntityException(e.getMessage(), ErrorCode.INVALID_USER_ORDER);
         }
-        return mapper.map(orderToCreate, UserOrderResponse.class);
     }
 }

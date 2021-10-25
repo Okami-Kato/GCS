@@ -13,20 +13,20 @@ import com.epam.esm.service.dto.response.CertificateResponse;
 import com.epam.esm.service.exception.EntityNotFoundException;
 import com.epam.esm.service.exception.ErrorCode;
 import com.epam.esm.service.exception.InvalidEntityException;
-import com.epam.esm.util.CertificateFilter;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.dao.InvalidDataAccessApiUsageException;
+import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.orm.jpa.JpaObjectRetrievalFailureException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -45,65 +45,44 @@ public class CertificateServiceImpl implements CertificateService {
     /**
      * Retrieves all certificates.
      *
-     * @param pageNumber number of page (starts from 1).
-     * @param pageSize   size of page.
-     * @return list of certificates.
-     * @throws IllegalArgumentException if pageNumber < 1, or pageSize < 0.
+     * @param pageable pagination restrictions.
+     * @return page of certificates.
      */
     @Override
-    public List<CertificateItem> findAll(int pageNumber, int pageSize) {
-        try {
-            return certificateDao.findAll(pageNumber, pageSize).stream()
-                    .map(c -> mapper.map(c, CertificateItem.class))
-                    .collect(Collectors.toList());
-        } catch (InvalidDataAccessApiUsageException e) {
-            throw new IllegalArgumentException(e);
-        }
+    public Page<CertificateItem> findAll(Pageable pageable) {
+        return certificateDao.findAll(pageable)
+                .map(c -> mapper.map(c, CertificateItem.class));
     }
 
     /**
      * Retrieves all certificates, that match filter.
      *
-     * @param filter     filter details.
-     * @param pageNumber number of page (starts from 1).
-     * @param pageSize   size of page.
-     * @return list of found certificates.
-     * @throws IllegalArgumentException if pageNumber < 1, or pageSize < 0, or if filter
-     *                                  contains invalid sorting properties.
+     * @param specification certificate restrictions.
+     * @param pageable      pagination restrictions.
+     * @return page of found certificates.
      */
     @Override
-    public List<CertificateItem> findAllWithFilter(int pageNumber, int pageSize, CertificateFilter filter) {
-        try {
-            return certificateDao.findAllWithFilter(pageNumber, pageSize, filter).stream()
-                    .map(c -> mapper.map(c, CertificateItem.class))
-                    .collect(Collectors.toList());
-        } catch (InvalidDataAccessApiUsageException e) {
-            throw new IllegalArgumentException(e);
-        }
+    public Page<CertificateItem> findAll(Specification<Certificate> specification, Pageable pageable) {
+        return certificateDao.findAll(specification, pageable)
+                .map(c -> mapper.map(c, CertificateItem.class));
     }
 
     /**
      * Retrieves all certificates, that have tag with given id.
      *
-     * @param pageNumber number of page (starts from 1).
-     * @param pageSize   size of page.
-     * @param tagId      id of tag.
-     * @return list of found certificates.
+     * @param pageable pagination restrictions.
+     * @param tagId    id of tag.
+     * @return page of found certificates.
      * @throws EntityNotFoundException  if tag with given tagId wasn't found.
      * @throws IllegalArgumentException if pageNumber < 1, or pageSize < 0.
      */
     @Override
-    public List<CertificateItem> findAllByTagId(int pageNumber, int pageSize, int tagId) {
-        if (!tagDao.find(tagId).isPresent()) {
+    public Page<CertificateItem> findAllByTagId(int tagId, Pageable pageable) {
+        if (!tagDao.existsById(tagId)) {
             throw new EntityNotFoundException("id=" + tagId, ErrorCode.TAG_NOT_FOUND);
         }
-        try {
-            return certificateDao.findAllByTagId(pageNumber, pageSize, tagId).stream()
-                    .map(c -> mapper.map(c, CertificateItem.class))
-                    .collect(Collectors.toList());
-        } catch (InvalidDataAccessApiUsageException e) {
-            throw new IllegalArgumentException(e);
-        }
+        return certificateDao.findAllByTagsId(tagId, pageable)
+                .map(c -> mapper.map(c, CertificateItem.class));
     }
 
     /**
@@ -113,8 +92,8 @@ public class CertificateServiceImpl implements CertificateService {
      * @return Optional with certificate, if it was found, otherwise an empty Optional.
      */
     @Override
-    public Optional<CertificateResponse> find(int id) {
-        return certificateDao.find(id).map(o -> mapper.map(o, CertificateResponse.class));
+    public Optional<CertificateResponse> findById(int id) {
+        return certificateDao.findById(id).map(o -> mapper.map(o, CertificateResponse.class));
     }
 
     /**
@@ -124,7 +103,7 @@ public class CertificateServiceImpl implements CertificateService {
      */
     @Override
     public long getCount() {
-        return certificateDao.getCount();
+        return certificateDao.count();
     }
 
     /**
@@ -142,11 +121,11 @@ public class CertificateServiceImpl implements CertificateService {
             if (certificate.getTags() != null) {
                 extractTags(certificateToCreate, certificate.getTags());
             }
-            certificateDao.create(certificateToCreate);
+            Certificate created = certificateDao.saveAndFlush(certificateToCreate);
+            return mapper.map(created, CertificateResponse.class);
         } catch (DataIntegrityViolationException e) {
-            throw new InvalidEntityException(e.getMessage(), ErrorCode.INVALID_TAG);
+            throw new InvalidEntityException(e.getMessage(), ErrorCode.INVALID_CERTIFICATE);
         }
-        return mapper.map(certificateToCreate, CertificateResponse.class);
     }
 
     /**
@@ -162,13 +141,15 @@ public class CertificateServiceImpl implements CertificateService {
     public CertificateResponse update(UpdateCertificateRequest certificate) {
         Certificate certificateToUpdate = mapper.map(certificate, Certificate.class);
         try {
+            if (!certificateDao.existsById(certificate.getId())) {
+                throw new EntityNotFoundException("id=" + certificate.getId(), ErrorCode.CERTIFICATE_NOT_FOUND);
+            }
             if (certificate.getTags() != null) {
                 extractTags(certificateToUpdate, certificate.getTags());
             }
-            Certificate updatedCertificate = certificateDao.update(certificateToUpdate);
+            Certificate updatedCertificate = certificateDao.saveAndFlush(certificateToUpdate);
+            certificateDao.refresh(updatedCertificate);
             return mapper.map(updatedCertificate, CertificateResponse.class);
-        } catch (JpaObjectRetrievalFailureException e) {
-            throw new EntityNotFoundException("id=" + certificate.getId(), ErrorCode.CERTIFICATE_NOT_FOUND);
         } catch (DataIntegrityViolationException e) {
             throw new InvalidEntityException(e.getMessage(), ErrorCode.INVALID_CERTIFICATE);
         }
@@ -183,8 +164,8 @@ public class CertificateServiceImpl implements CertificateService {
     @Override
     public void delete(int id) {
         try {
-            certificateDao.delete(id);
-        } catch (JpaObjectRetrievalFailureException e) {
+            certificateDao.deleteById(id);
+        } catch (EmptyResultDataAccessException e) {
             throw new EntityNotFoundException("id=" + id, ErrorCode.CERTIFICATE_NOT_FOUND);
         }
     }
@@ -192,16 +173,15 @@ public class CertificateServiceImpl implements CertificateService {
     private void extractTags(Certificate certificateToCreate, Set<TagRequest> tagRequests) {
         for (TagRequest tagRequest : tagRequests) {
             Assert.notNull(tagRequest, "Tag can't be null");
-            Optional<Tag> tag = tagDao.get(tagRequest.getName());
+            Optional<Tag> tag = tagDao.findByName(tagRequest.getName());
             certificateToCreate.addTag(
                     tag.orElseGet(() -> {
                         Tag tagToCreate = new Tag(tagRequest.getName());
                         try {
-                            tagDao.create(tagToCreate);
+                            return tagDao.save(tagToCreate);
                         } catch (DataIntegrityViolationException e) {
                             throw new InvalidEntityException(e.getMessage(), ErrorCode.INVALID_TAG);
                         }
-                        return tagToCreate;
                     })
             );
         }
