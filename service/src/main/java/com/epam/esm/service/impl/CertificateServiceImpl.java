@@ -30,9 +30,9 @@ import java.util.Set;
 @Service
 @Transactional
 public class CertificateServiceImpl implements CertificateService {
-    private ModelMapper mapper;
-    private CertificateDao certificateDao;
-    private TagDao tagDao;
+    private final ModelMapper mapper;
+    private final CertificateDao certificateDao;
+    private final TagDao tagDao;
 
     @Autowired
     public CertificateServiceImpl(CertificateDao certificateDao, TagDao tagDao, ModelMapper mapper) {
@@ -175,7 +175,9 @@ public class CertificateServiceImpl implements CertificateService {
             Optional<Tag> tag = tagDao.findByName(tagRequest.getName());
             certificateToCreate.addTag(
                     tag.orElseGet(() -> {
-                        Tag tagToCreate = new Tag(tagRequest.getName());
+                        Tag tagToCreate = Tag.builder()
+                                .name(tagRequest.getName())
+                                .build();
                         try {
                             return tagDao.save(tagToCreate);
                         } catch (DataIntegrityViolationException e) {

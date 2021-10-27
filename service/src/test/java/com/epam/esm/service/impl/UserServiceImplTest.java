@@ -36,33 +36,46 @@ class UserServiceImplTest {
     private UserDao userDao;
     private UserService userService;
 
-    private User firstUser = new User("first", "test", "first", "test");
-    private User secondUser = new User("second", "test", "second", "test");
-    private User thirdUser = new User("third", "test", "third", "test");
+    private final User firstUser = User.builder()
+            .id(1)
+            .fullName("first user")
+            .username("first")
+            .password("password")
+            .build();
+    private final User secondUser = User.builder()
+            .id(2)
+            .fullName("second user")
+            .username("second")
+            .password("password")
+            .build();
+    private final User thirdUser = User.builder()
+            .id(3)
+            .fullName("third user")
+            .username("third")
+            .password("password")
+            .build();
 
     @BeforeAll
     void init() {
         userDao = mock(UserDao.class);
         userService = new UserServiceImpl(userDao, mapper);
-        firstUser.setId(1);
-        secondUser.setId(2);
-        thirdUser.setId(3);
     }
 
     @Test
     void create() {
         when(userDao.save(
-                new User(firstUser.getFirstName(), firstUser.getLastName(), firstUser.getLogin(), firstUser.getPassword())))
+                new User(firstUser.getId(), firstUser.getFullName(),
+                        firstUser.getUsername(), firstUser.getPassword(), firstUser.getOrders())))
                 .thenReturn(firstUser);
 
         UserResponse actualResponse = userService.create(
-                new CreateUserRequest(firstUser.getFirstName(), firstUser.getLastName(), firstUser.getLogin(), firstUser.getPassword()));
-        UserResponse expectedResponse = new UserResponse(firstUser.getId(), firstUser.getFirstName(), firstUser.getLastName());
+                new CreateUserRequest(firstUser.getFullName(), firstUser.getUsername(), firstUser.getPassword()));
+        UserResponse expectedResponse = new UserResponse(firstUser.getId(), firstUser.getFullName());
         assertEquals(expectedResponse, actualResponse);
 
-        when(userDao.existsByLogin(firstUser.getLogin())).thenReturn(true);
+        when(userDao.existsByUsername(firstUser.getUsername())).thenReturn(true);
         assertThrows(EntityExistsException.class, () -> userService.create(
-                new CreateUserRequest(secondUser.getFirstName(), thirdUser.getLastName(), firstUser.getLogin(), firstUser.getPassword())));
+                new CreateUserRequest(secondUser.getFullName(), firstUser.getUsername(), firstUser.getPassword())));
         assertThrows(IllegalArgumentException.class, () -> userService.create(null));
     }
 
@@ -71,26 +84,26 @@ class UserServiceImplTest {
         int realId = firstUser.getId();
         int notRealId = 2;
 
-        String realLogin = firstUser.getLogin();
+        String realLogin = firstUser.getUsername();
         String notRealLogin = "notRealLogin";
 
-        UserResponse expectedResponse = new UserResponse(realId, firstUser.getFirstName(), firstUser.getLastName());
+        UserResponse expectedResponse = new UserResponse(realId, firstUser.getFullName());
 
         when(userDao.findById(realId)).thenReturn(Optional.of(firstUser));
         when(userDao.findById(notRealId)).thenReturn(Optional.empty());
-        when(userDao.findByLogin(realLogin)).thenReturn(Optional.of(firstUser));
-        when(userDao.findByLogin(notRealLogin)).thenReturn(Optional.empty());
+        when(userDao.findByUsername(realLogin)).thenReturn(Optional.of(firstUser));
+        when(userDao.findByUsername(notRealLogin)).thenReturn(Optional.empty());
 
         Optional<UserResponse> actualResponse = userService.findById(realId);
         assertTrue(actualResponse.isPresent());
         assertEquals(expectedResponse, actualResponse.get());
         assertFalse(userService.findById(notRealId).isPresent());
 
-        actualResponse = userService.findByLogin(realLogin);
+        actualResponse = userService.findByUsername(realLogin);
         assertTrue(actualResponse.isPresent());
         assertEquals(expectedResponse, actualResponse.get());
 
-        assertFalse(userService.findByLogin(notRealLogin).isPresent());
+        assertFalse(userService.findByUsername(notRealLogin).isPresent());
     }
 
     @Test
@@ -107,9 +120,9 @@ class UserServiceImplTest {
                 new PageImpl<>(Arrays.asList(firstUser, secondUser, thirdUser), thirdPageRequest, 3)
         );
 
-        UserResponse firstResponse = new UserResponse(firstUser.getId(), firstUser.getFirstName(), firstUser.getLastName());
-        UserResponse secondResponse = new UserResponse(secondUser.getId(), secondUser.getFirstName(), secondUser.getLastName());
-        UserResponse thirdResponse = new UserResponse(thirdUser.getId(), thirdUser.getFirstName(), thirdUser.getLastName());
+        UserResponse firstResponse = new UserResponse(firstUser.getId(), firstUser.getFullName());
+        UserResponse secondResponse = new UserResponse(secondUser.getId(), secondUser.getFullName());
+        UserResponse thirdResponse = new UserResponse(thirdUser.getId(), thirdUser.getFullName());
 
         assertEquals(Arrays.asList(firstResponse, secondResponse), userService.findAll(firstPageRequest).getContent());
         assertEquals(Collections.singletonList(thirdResponse), userService.findAll(secondPageRequest).getContent());

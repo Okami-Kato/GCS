@@ -1,10 +1,20 @@
 package com.epam.esm.entity;
 
+import lombok.Builder;
+import lombok.Getter;
+import lombok.Setter;
+import org.hibernate.Hibernate;
+import org.springframework.security.core.userdetails.UserDetails;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.PreRemove;
 import javax.persistence.Table;
@@ -14,35 +24,48 @@ import java.util.Set;
 
 @Entity
 @Table(name = "user")
-public class User {
+@Getter
+@Setter
+public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "id", nullable = false)
     private Integer id;
 
-    @Column(name = "first_name", nullable = false, length = 25)
-    private String firstName;
+    @Column(name = "full_name", nullable = false, length = 50)
+    private String fullName;
 
-    @Column(name = "last_name", nullable = false, length = 25)
-    private String lastName;
+    @Column(name = "username", nullable = false, unique = true, updatable = false, length = 50)
+    private String username;
 
-    @Column(name = "login", nullable = false, unique = true, length = 25)
-    private String login;
-
-    @Column(name = "password", nullable = false, length = 25)
+    @Column(name = "password", nullable = false, length = 50)
     private String password;
+
+    @Column(name = "enabled", nullable = false)
+    private boolean enabled = false;
 
     @OneToMany(mappedBy = "user")
     private final Set<UserOrder> orders = new HashSet<>();
 
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "user_role",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "role_id"))
+    private final Set<Role> authorities = new HashSet<>();
+
     protected User() {
     }
 
-    public User(String firstName, String lastName, String login, String password) {
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.login = login;
+    @Builder
+    public User(Integer id, String fullName, String username, String password, Set<UserOrder> orders) {
+        this.id = id;
+        this.fullName = fullName;
+        this.username = username;
         this.password = password;
+        if (orders != null) {
+            orders.forEach(this::addOrder);
+        }
     }
 
     @PreRemove
@@ -51,46 +74,6 @@ public class User {
         for (UserOrder order : ordersCopy) {
             removeOrder(order);
         }
-    }
-
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    public String getFirstName() {
-        return firstName;
-    }
-
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
-
-    public String getLastName() {
-        return lastName;
-    }
-
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
-    }
-
-    public String getLogin() {
-        return login;
-    }
-
-    public void setLogin(String login) {
-        this.login = login;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
     }
 
     public Set<UserOrder> getOrders() {
@@ -104,34 +87,58 @@ public class User {
         order.setUser(this);
     }
 
-    public void removeOrder(UserOrder order) {
+    void removeOrder(UserOrder order) {
         if (!orders.contains(order))
             return;
         orders.remove(order);
         order.removeUser();
     }
 
+    public Set<Role> getAuthorities() {
+        return new HashSet<>(authorities);
+    }
+
+    void addAuthority(Role role) {
+        authorities.add(role);
+    }
+
+    public void removeAuthority(Role role) {
+        authorities.remove(role);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
         User user = (User) o;
-        return Objects.equals(id, user.id) && Objects.equals(firstName, user.firstName) && Objects.equals(lastName, user.lastName) && Objects.equals(login, user.login) && Objects.equals(password, user.password);
+        return username != null && username.equals(user.username);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, firstName, lastName, login, password);
+        return Objects.hashCode(username);
     }
 
     @Override
     public String toString() {
         return "User{" +
                 "id=" + id +
-                ", firstName='" + firstName + '\'' +
-                ", lastName='" + lastName + '\'' +
-                ", login='" + login + '\'' +
-                ", password='" + password + '\'' +
+                ", fullName='" + fullName + '\'' +
                 '}';
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return enabled;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return enabled;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return enabled;
     }
 }

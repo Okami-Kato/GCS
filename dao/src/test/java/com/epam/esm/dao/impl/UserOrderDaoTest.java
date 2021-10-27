@@ -8,6 +8,7 @@ import com.epam.esm.entity.Certificate;
 import com.epam.esm.entity.Tag;
 import com.epam.esm.entity.User;
 import com.epam.esm.entity.UserOrder;
+import com.google.common.collect.Sets;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -18,7 +19,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
@@ -30,25 +30,67 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ActiveProfiles("test")
 class UserOrderDaoTest {
-    private final Certificate firstCertificate = new Certificate(
-            "first certificate", "first description", 1, 3);
-    private final Certificate secondCertificate = new Certificate(
-            "second certificate", "second description", 2, 5);
-    private final Certificate thirdCertificate = new Certificate(
-            "third certificate", "third description", 4, 12);
+    private final Tag firstTag = Tag.builder().name("first tag").build();
+    private final Tag secondTag = Tag.builder().name("second tag").build();
+    private final Tag thirdTag = Tag.builder().name("third tag").build();
 
-    private final Tag firstTag = new Tag("first tag", new HashSet<>());
-    private final Tag secondTag = new Tag("second tag", new HashSet<>());
-    private final Tag thirdTag = new Tag("third tag", new HashSet<>());
+    private final Certificate firstCertificate = Certificate.builder()
+            .name("first certificate")
+            .description("first description")
+            .price(1)
+            .duration(3)
+            .tags(Sets.newHashSet(firstTag, secondTag))
+            .build();
+    private final Certificate secondCertificate = Certificate.builder()
+            .name("second certificate")
+            .description("second description")
+            .price(2)
+            .duration(5)
+            .tags(Sets.newHashSet(firstTag, thirdTag))
+            .build();
+    private final Certificate thirdCertificate = Certificate.builder()
+            .name("third certificate")
+            .description("third description")
+            .price(2)
+            .duration(7)
+            .build();
 
-    private final User firstUser = new User("first", "user", "login1", "password");
-    private final User secondUser = new User("second", "user", "login2", "password");
-    private final User thirdUser = new User("third", "user", "login3", "password");
+    private final User firstUser = User.builder()
+            .fullName("first user")
+            .username("first")
+            .password("password")
+            .build();
+    private final User secondUser = User.builder()
+            .fullName("second user")
+            .username("second")
+            .password("password")
+            .build();
+    private final User thirdUser = User.builder()
+            .fullName("third user")
+            .username("third")
+            .password("password")
+            .build();
 
-    UserOrder firstOrder = new UserOrder(firstUser, firstCertificate, firstCertificate.getPrice());
-    UserOrder secondOrder = new UserOrder(firstUser, secondCertificate, secondCertificate.getPrice());
-    UserOrder thirdOrder = new UserOrder(secondUser, firstCertificate, firstCertificate.getPrice());
-    UserOrder forthOrder = new UserOrder(secondUser, secondCertificate, secondCertificate.getPrice());
+    private final UserOrder firstOrder = UserOrder.builder()
+            .user(firstUser)
+            .certificate(firstCertificate)
+            .cost(firstCertificate.getPrice())
+            .build();
+    private final UserOrder secondOrder = UserOrder.builder()
+            .user(firstUser)
+            .certificate(secondCertificate)
+            .cost(secondCertificate.getPrice())
+            .build();
+    private final UserOrder thirdOrder = UserOrder.builder()
+            .user(secondUser)
+            .certificate(firstCertificate)
+            .cost(firstCertificate.getPrice())
+            .build();
+    private final UserOrder forthOrder = UserOrder.builder()
+            .user(secondUser)
+            .certificate(secondCertificate)
+            .cost(secondCertificate.getPrice())
+            .build();
 
     @Autowired
     private CertificateDao certificateDao;
@@ -63,11 +105,6 @@ class UserOrderDaoTest {
     void init() {
         userDao.saveAll(Arrays.asList(firstUser, secondUser, thirdUser));
         tagDao.saveAll(Arrays.asList(firstTag, secondTag, thirdTag));
-
-        firstTag.addCertificate(firstCertificate);
-        firstTag.addCertificate(secondCertificate);
-        secondTag.addCertificate(firstCertificate);
-        thirdTag.addCertificate(secondCertificate);
 
         certificateDao.saveAll(Arrays.asList(firstCertificate, secondCertificate, thirdCertificate));
         userOrderDao.saveAll(Arrays.asList(firstOrder, secondOrder, thirdOrder, forthOrder));
@@ -84,7 +121,11 @@ class UserOrderDaoTest {
     @Test
     @Transactional
     void create() {
-        UserOrder order = new UserOrder(thirdUser, thirdCertificate, thirdCertificate.getPrice());
+        UserOrder order = UserOrder.builder()
+                .user(thirdUser)
+                .certificate(thirdCertificate)
+                .cost(thirdCertificate.getPrice())
+                .build();
         assertDoesNotThrow(() -> userOrderDao.save(order));
         Optional<UserOrder> persisted = userOrderDao.findById(order.getId());
         assertTrue(persisted.isPresent());

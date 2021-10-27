@@ -31,9 +31,21 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ActiveProfiles("test")
 class UserDaoTest {
-    private final User firstUser = new User("first", "user", "login1", "password");
-    private final User secondUser = new User("second", "user", "login2", "password");
-    private final User thirdUser = new User("third", "user", "login3", "password");
+    private final User firstUser = User.builder()
+            .fullName("first user")
+            .username("first")
+            .password("password")
+            .build();
+    private final User secondUser = User.builder()
+            .fullName("second user")
+            .username("second")
+            .password("password")
+            .build();
+    private final User thirdUser = User.builder()
+            .fullName("third user")
+            .username("third")
+            .password("password")
+            .build();
 
     @Autowired
     CertificateDao certificateDao;
@@ -54,10 +66,18 @@ class UserDaoTest {
 
     @Test
     void createAndDelete() {
-        User user = new User("new", "user", "new login", "password");
+        User user = User.builder()
+                .fullName("new user")
+                .username("new")
+                .password("password")
+                .build();
         assertDoesNotThrow(() -> userDao.save(user));
         assertThrows(DataIntegrityViolationException.class, () -> userDao.save(
-                new User("first name", "last name", user.getLogin(), "password")
+                User.builder()
+                        .fullName("name")
+                        .username(user.getUsername())
+                        .password("password")
+                        .build()
         ));
         Optional<User> persisted = userDao.findById(user.getId());
         assertTrue(persisted.isPresent());
@@ -69,18 +89,42 @@ class UserDaoTest {
     @Test
     @Transactional
     void findUsersWithTheHighestCost() {
-        Certificate firstCertificate = new Certificate(
-                "first certificate", "first description", 10, 3);
-        Certificate secondCertificate = new Certificate(
-                "second certificate", "second description", 10, 5);
+        Certificate firstCertificate = Certificate.builder()
+                .name("first certificate")
+                .description("first description")
+                .price(10)
+                .duration(3)
+                .build();
+        Certificate secondCertificate = Certificate.builder()
+                .name("second certificate")
+                .description("second description")
+                .price(10)
+                .duration(3)
+                .build();
         certificateDao.saveAll(Arrays.asList(firstCertificate, secondCertificate));
         userOrderDao.saveAll(Arrays.asList(
-                new UserOrder(firstUser, firstCertificate, 10),
-                new UserOrder(firstUser, secondCertificate, 10),
-                new UserOrder(secondUser, firstCertificate, 10)
+                UserOrder.builder()
+                        .user(firstUser)
+                        .certificate(firstCertificate)
+                        .cost(firstCertificate.getPrice())
+                        .build(),
+                UserOrder.builder()
+                        .user(firstUser)
+                        .certificate(secondCertificate)
+                        .cost(secondCertificate.getPrice())
+                        .build(),
+                UserOrder.builder()
+                        .user(secondUser)
+                        .certificate(firstCertificate)
+                        .cost(firstCertificate.getPrice())
+                        .build()
         ));
         assertEquals(Collections.singletonList(firstUser), userDao.findUsersWithTheHighestCost());
-        userOrderDao.save(new UserOrder(secondUser, secondCertificate, 10));
+        userOrderDao.save(UserOrder.builder()
+                .user(secondUser)
+                .certificate(secondCertificate)
+                .cost(secondCertificate.getPrice())
+                .build());
         assertEquals(Arrays.asList(firstUser, secondUser), userDao.findUsersWithTheHighestCost());
 
     }

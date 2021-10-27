@@ -46,9 +46,18 @@ class TagServiceImplTest {
 
     private TagService tagService;
 
-    private Tag firstTag = new Tag("first");
-    private Tag secondTag = new Tag("second");
-    private Tag thirdTag = new Tag("third");
+    private final Tag firstTag = Tag.builder()
+            .id(1)
+            .name("first")
+            .build();
+    private final Tag secondTag = Tag.builder()
+            .id(2)
+            .name("second")
+            .build();
+    private final Tag thirdTag = Tag.builder()
+            .id(3)
+            .name("third")
+            .build();
 
     @BeforeAll
     void init() {
@@ -56,15 +65,12 @@ class TagServiceImplTest {
         certificateDao = mock(CertificateDao.class);
         userDao = mock(UserDao.class);
         tagService = new TagServiceImpl(tagDao, certificateDao, mapper, userDao);
-        firstTag.setId(1);
-        secondTag.setId(2);
-        thirdTag.setId(3);
     }
 
     @Test
     void create() {
         when(tagDao.existsByName(thirdTag.getName())).thenReturn(true);
-        when(tagDao.save(new Tag(firstTag.getName()))).thenReturn(firstTag);
+        when(tagDao.save(Tag.builder().name(firstTag.getName()).build())).thenReturn(firstTag);
         TagResponse expectedResponse = new TagResponse(firstTag.getId(), firstTag.getName());
         TagResponse actualResponse = tagService.create(new TagRequest(firstTag.getName()));
         assertEquals(expectedResponse, actualResponse);
@@ -114,8 +120,14 @@ class TagServiceImplTest {
     @Test
     void read() {
         int certificateId = 1;
-        when(certificateDao.findById(certificateId)).thenReturn(Optional.of(
-                new Certificate("name", "description", 10, 12)));
+        when(certificateDao.findById(certificateId)).thenReturn(
+                Optional.of(
+                        Certificate.builder()
+                                .name("name")
+                                .description("description")
+                                .price(10)
+                                .duration(12)
+                                .build()));
 
         PageRequest firstPageRequest = PageRequest.of(0, 2);
         PageRequest secondPageRequest = PageRequest.of(1, 2);

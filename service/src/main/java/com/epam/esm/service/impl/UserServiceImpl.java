@@ -6,6 +6,7 @@ import com.epam.esm.service.UserService;
 import com.epam.esm.service.dto.request.CreateUserRequest;
 import com.epam.esm.service.dto.response.UserResponse;
 import com.epam.esm.service.exception.EntityExistsException;
+import com.epam.esm.service.exception.EntityNotFoundException;
 import com.epam.esm.service.exception.ErrorCode;
 import com.epam.esm.service.exception.InvalidEntityException;
 import org.modelmapper.ModelMapper;
@@ -13,6 +14,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
@@ -23,9 +27,9 @@ import java.util.stream.Collectors;
 
 @Service
 @Transactional
-public class UserServiceImpl implements UserService {
-    private ModelMapper mapper;
-    private UserDao userDao;
+public class UserServiceImpl implements UserService, UserDetailsService {
+    private final ModelMapper mapper;
+    private final UserDao userDao;
 
     @Autowired
     public UserServiceImpl(UserDao userDao, ModelMapper mapper) {
@@ -57,16 +61,16 @@ public class UserServiceImpl implements UserService {
     }
 
     /**
-     * Retrieves user with given login.
+     * Retrieves user with given username.
      *
-     * @param login login of user.
+     * @param username username of user.
      * @return Optional with user, if it was found, otherwise an empty Optional.
-     * @throws IllegalArgumentException if login is null.
+     * @throws IllegalArgumentException if username is null.
      */
     @Override
-    public Optional<UserResponse> findByLogin(String login) {
-        Assert.notNull(login, "User login can't be null");
-        return userDao.findByLogin(login).map(user -> mapper.map(user, UserResponse.class));
+    public Optional<UserResponse> findByUsername(String username) {
+        Assert.notNull(username, "Username can't be null");
+        return userDao.findByUsername(username).map(user -> mapper.map(user, UserResponse.class));
     }
 
     /**
@@ -103,8 +107,8 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserResponse create(CreateUserRequest user) {
         User userToCreate = mapper.map(user, User.class);
-        if (userDao.existsByLogin(userToCreate.getLogin())) {
-            throw new EntityExistsException("login=" + userToCreate.getLogin(), ErrorCode.USER_EXISTS);
+        if (userDao.existsByUsername(userToCreate.getUsername())) {
+            throw new EntityExistsException("username=" + userToCreate.getUsername(), ErrorCode.USER_EXISTS);
         }
         try {
             User created = userDao.save(userToCreate);
@@ -112,5 +116,13 @@ public class UserServiceImpl implements UserService {
         } catch (DataIntegrityViolationException e) {
             throw new InvalidEntityException(e.getMessage(), ErrorCode.INVALID_USER);
         }
+    }
+
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        return userDao.findByUsername(username)
+                .orElseThrow(
+                        () -> new EntityNotFoundException("username=" + username, ErrorCode.USER_NOT_FOUND)
+                );
     }
 }

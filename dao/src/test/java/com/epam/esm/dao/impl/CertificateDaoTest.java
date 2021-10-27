@@ -4,6 +4,7 @@ import com.epam.esm.dao.CertificateDao;
 import com.epam.esm.dao.TagDao;
 import com.epam.esm.entity.Certificate;
 import com.epam.esm.entity.Tag;
+import com.google.common.collect.Sets;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -31,15 +32,31 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ActiveProfiles("test")
 class CertificateDaoTest {
-    private final Certificate firstCertificate = new Certificate(
-            "first certificate", "first description", 1, 3);
-    private final Certificate secondCertificate = new Certificate(
-            "second certificate", "second description", 2, 5);
-    private final Certificate thirdCertificate = new Certificate(
-            "third certificate", "third description", 2, 7);
+    private final Tag firstTag = Tag.builder().name("first tag").build();
+    private final Tag secondTag = Tag.builder().name("second tag").build();
 
-    private final Tag firstTag = new Tag("first tag");
-    private final Tag secondTag = new Tag("second tag");
+    private final Certificate firstCertificate = Certificate.builder()
+            .name("first certificate")
+            .description("first description")
+            .price(1)
+            .duration(3)
+            .tags(Sets.newHashSet(firstTag, secondTag))
+            .build();
+    private final Certificate secondCertificate = Certificate.builder()
+            .name("second certificate")
+            .description("second description")
+            .price(2)
+            .duration(5)
+            .tags(Sets.newHashSet(firstTag))
+            .build();
+
+    private final Certificate thirdCertificate = Certificate.builder()
+            .name("third certificate")
+            .description("third description")
+            .price(2)
+            .duration(7)
+            .tags(Sets.newHashSet(secondTag))
+            .build();
 
     @Autowired
     private CertificateDao certificateDao;
@@ -49,10 +66,6 @@ class CertificateDaoTest {
     @BeforeAll
     void init() {
         tagDao.saveAll(Arrays.asList(firstTag, secondTag));
-        firstCertificate.addTag(firstTag);
-        firstCertificate.addTag(secondTag);
-        secondCertificate.addTag(firstTag);
-        thirdCertificate.addTag(secondTag);
     }
 
     @AfterAll
@@ -104,7 +117,12 @@ class CertificateDaoTest {
 
     @Test
     void createAndDelete() {
-        Certificate certificate = new Certificate("certificate", "description", 1, 3);
+        Certificate certificate = Certificate.builder()
+                .name("certificate")
+                .description("description")
+                .price(1)
+                .duration(4)
+                .build();
         assertDoesNotThrow(() -> certificateDao.save(certificate));
         Optional<Certificate> persisted = certificateDao.findById(certificate.getId());
         assertTrue(persisted.isPresent());

@@ -13,7 +13,7 @@ public interface UserService {
 
     Optional<UserResponse> findById(int id);
 
-    Optional<UserResponse> findByLogin(String login);
+    Optional<UserResponse> findByUsername(String username);
 
     List<UserResponse> findUsersWithTheHighestCost();
 

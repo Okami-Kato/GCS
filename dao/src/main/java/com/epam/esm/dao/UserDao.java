@@ -14,7 +14,7 @@ public interface UserDao extends JpaRepository<User, Integer> {
                     "    FROM user_order" +
                     "    GROUP BY user_id" +
                     ")" +
-                    "SELECT u.id, first_name, last_name, login, password " +
+                    "SELECT u.id, full_name, username, password, enabled " +
                     "FROM user u " +
                     "         INNER JOIN (" +
                     "    SELECT user_id" +
@@ -25,7 +25,7 @@ public interface UserDao extends JpaRepository<User, Integer> {
     @Query(value = GET_USERS_WITH_HIGHEST_COST, nativeQuery = true)
     List<User> findUsersWithTheHighestCost();
 
-    Optional<User> findByLogin(String login);
+    Optional<User> findByUsername(String username);
 
-    boolean existsByLogin(String login);
+    boolean existsByUsername(String username);
 }

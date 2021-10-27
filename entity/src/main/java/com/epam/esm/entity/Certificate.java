@@ -1,5 +1,10 @@
 package com.epam.esm.entity;
 
+import lombok.Builder;
+import lombok.Getter;
+import lombok.Setter;
+import org.hibernate.Hibernate;
+
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -15,11 +20,12 @@ import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 import java.time.Instant;
 import java.util.HashSet;
-import java.util.Objects;
 import java.util.Set;
 
 @Entity
 @Table(name = "certificate")
+@Getter
+@Setter
 public class Certificate {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -54,20 +60,15 @@ public class Certificate {
     protected Certificate() {
     }
 
-    public Certificate(String name, String description, Integer price, Integer duration) {
+    @Builder
+    public Certificate(Integer id, String name, String description, Integer price, Integer duration, Set<Tag> tags) {
+        this.id = id;
         this.name = name;
         this.description = description;
         this.price = price;
         this.duration = duration;
-    }
-
-    public Certificate(String name, String description, Integer price, Integer duration, Set<Tag> tags) {
-        this.name = name;
-        this.description = description;
-        this.price = price;
-        this.duration = duration;
-        for (Tag tag : tags) {
-            addTag(tag);
+        if (tags != null) {
+            tags.forEach(this::addTag);
         }
     }
 
@@ -79,80 +80,6 @@ public class Certificate {
     @PreUpdate
     private void toUpdate() {
         this.lastUpdateDate = Instant.now();
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Certificate that = (Certificate) o;
-        return Objects.equals(id, that.id) && Objects.equals(name, that.name) && Objects.equals(description, that.description) && Objects.equals(price, that.price) && Objects.equals(duration, that.duration) && Objects.equals(lastUpdateDate, that.lastUpdateDate) && Objects.equals(createDate, that.createDate);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id, name, description, price, duration, lastUpdateDate, createDate);
-    }
-
-    @Override
-    public String toString() {
-        return "Certificate{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                ", description='" + description + '\'' +
-                ", price=" + price +
-                ", duration=" + duration +
-                ", lastUpdateDate=" + lastUpdateDate +
-                ", createDate=" + createDate +
-                '}';
-    }
-
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public Integer getPrice() {
-        return price;
-    }
-
-    public void setPrice(Integer price) {
-        this.price = price;
-    }
-
-    public Integer getDuration() {
-        return duration;
-    }
-
-    public void setDuration(Integer duration) {
-        this.duration = duration;
-    }
-
-    public Instant getLastUpdateDate() {
-        return lastUpdateDate;
-    }
-
-    public Instant getCreateDate() {
-        return createDate;
     }
 
     public Set<Tag> getTags() {
@@ -171,5 +98,31 @@ public class Certificate {
             return;
         tags.remove(tag);
         tag.removeCertificate(this);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
+        Certificate that = (Certificate) o;
+        return id != null && id.equals(that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return 0;
+    }
+
+    @Override
+    public String toString() {
+        return "Certificate{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", description='" + description + '\'' +
+                ", price=" + price +
+                ", duration=" + duration +
+                ", lastUpdateDate=" + lastUpdateDate +
+                ", createDate=" + createDate +
+                '}';
     }
 }

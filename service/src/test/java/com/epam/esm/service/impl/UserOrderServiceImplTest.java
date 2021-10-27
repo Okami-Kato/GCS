@@ -30,6 +30,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -45,17 +46,45 @@ class UserOrderServiceImplTest {
 
     private UserOrderService userOrderService;
 
-    private User firstUser = new User("first", "test", "first", "password");
-    private User secondUser = new User("second", "test", "second", "password");
+    private final User firstUser = User.builder()
+            .id(1)
+            .fullName("first user")
+            .username("first")
+            .password("password")
+            .build();
+    private final User secondUser = User.builder()
+            .id(2)
+            .fullName("second user")
+            .username("second")
+            .password("password")
+            .build();
 
-    private Certificate firstCertificate = new Certificate("first", "first", 5, 1);
-    private Certificate secondCertificate = new Certificate("second", "second", 15, 3);
-    private Certificate thirdCertificate = new Certificate("third", "third", 25, 10);
+    private final Certificate firstCertificate = Certificate.builder()
+            .id(1)
+            .name("first name")
+            .description("first description")
+            .price(5)
+            .duration(1)
+            .build();
+    private final Certificate secondCertificate = Certificate.builder()
+            .id(2)
+            .name("second name")
+            .description("second description")
+            .price(15)
+            .duration(3)
+            .build();
+    private final Certificate thirdCertificate = Certificate.builder()
+            .id(3)
+            .name("third name")
+            .description("third description")
+            .price(25)
+            .duration(10)
+            .build();
 
-    private UserOrder firstOrder = new UserOrder(firstUser, firstCertificate, firstCertificate.getPrice());
-    private UserOrder secondOrder = new UserOrder(firstUser, thirdCertificate, thirdCertificate.getPrice());
-    private UserOrder thirdOrder = new UserOrder(secondUser, secondCertificate, secondCertificate.getPrice());
-    private UserOrder forthOrder = new UserOrder(secondUser, thirdCertificate, thirdCertificate.getPrice());
+    private final UserOrder firstOrder = new UserOrder(1, firstUser, firstCertificate, firstCertificate.getPrice());
+    private final UserOrder secondOrder = new UserOrder(2, firstUser, thirdCertificate, thirdCertificate.getPrice());
+    private final UserOrder thirdOrder = new UserOrder(3, secondUser, secondCertificate, secondCertificate.getPrice());
+    private final UserOrder forthOrder = new UserOrder(4, secondUser, thirdCertificate, thirdCertificate.getPrice());
 
     @BeforeAll
     void init() {
@@ -63,24 +92,16 @@ class UserOrderServiceImplTest {
         certificateDao = mock(CertificateDao.class);
         userOrderDao = mock(UserOrderDao.class);
         userOrderService = new UserOrderServiceImpl(mapper, userOrderDao, userDao, certificateDao);
-
-        firstUser.setId(1);
-        secondUser.setId(2);
-
-        firstCertificate.setId(1);
-        secondCertificate.setId(2);
-        thirdCertificate.setId(3);
-
-        firstOrder.setId(1);
-        secondOrder.setId(2);
-        thirdOrder.setId(3);
-        forthOrder.setId(4);
     }
 
     @Test
     void create() {
-        UserOrder order = new UserOrder(firstOrder.getUser(), firstOrder.getCertificate(), firstOrder.getCost());
-        when(userOrderDao.save(order)).thenReturn(firstOrder);
+        UserOrder order = UserOrder.builder()
+                .user(firstOrder.getUser())
+                .certificate(firstOrder.getCertificate())
+                .cost(firstOrder.getCost())
+                .build();
+        when(userOrderDao.save(any())).thenReturn(firstOrder);
 
         int notRealId = 10;
         when(userDao.findById(firstUser.getId())).thenReturn(Optional.of(firstUser));

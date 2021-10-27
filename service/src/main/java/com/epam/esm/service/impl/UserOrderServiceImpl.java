@@ -27,10 +27,10 @@ import java.util.Optional;
 @Service
 @Transactional
 public class UserOrderServiceImpl implements UserOrderService {
-    private ModelMapper mapper;
-    private UserOrderDao userOrderDao;
-    private UserDao userDao;
-    private CertificateDao certificateDao;
+    private final ModelMapper mapper;
+    private final UserOrderDao userOrderDao;
+    private final UserDao userDao;
+    private final CertificateDao certificateDao;
 
     @Autowired
     public UserOrderServiceImpl(ModelMapper mapper, UserOrderDao userOrderDao, UserDao userDao, CertificateDao certificateDao) {
@@ -121,13 +121,15 @@ public class UserOrderServiceImpl implements UserOrderService {
         Optional<User> user = userDao.findById(userOrder.getUserId());
         Optional<Certificate> certificate = certificateDao.findById(userOrder.getCertificateId());
 
-        UserOrder orderToCreate = new UserOrder(
-                user.orElseThrow(() -> new EntityNotFoundException("id=" + userOrder.getUserId(),
-                        ErrorCode.USER_NOT_FOUND)),
-                certificate.orElseThrow(() -> new EntityNotFoundException("id=" + userOrder.getCertificateId(),
-                        ErrorCode.CERTIFICATE_NOT_FOUND)),
-                certificate.get().getPrice()
-        );
+        UserOrder orderToCreate = UserOrder.builder()
+                .user(user.orElseThrow(
+                        () -> new EntityNotFoundException("id=" + userOrder.getUserId(), ErrorCode.USER_NOT_FOUND))
+                )
+                .certificate(certificate.orElseThrow(
+                        () -> new EntityNotFoundException("id=" + userOrder.getCertificateId(), ErrorCode.CERTIFICATE_NOT_FOUND))
+                )
+                .cost(certificate.get().getPrice())
+                .build();
         try {
             UserOrder created = userOrderDao.save(orderToCreate);
             return mapper.map(created, UserOrderResponse.class);
