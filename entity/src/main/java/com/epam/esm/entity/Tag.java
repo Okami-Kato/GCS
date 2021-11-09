@@ -10,6 +10,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.ManyToMany;
 import javax.persistence.PreRemove;
 import javax.persistence.Table;
@@ -19,7 +20,9 @@ import java.util.Objects;
 import java.util.Set;
 
 @Entity
-@Table(name = "tag")
+@Table(name = "tag", indexes = {
+        @Index(name = "name", columnList = "name", unique = true)
+})
 @Getter
 @Setter
 public class Tag {

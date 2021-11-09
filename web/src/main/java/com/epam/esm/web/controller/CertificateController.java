@@ -37,6 +37,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.annotation.security.RolesAllowed;
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
 import javax.validation.Valid;
@@ -119,6 +120,7 @@ public class CertificateController {
      * @throws IllegalArgumentException if certificate is null.
      * @throws InvalidEntityException   if certificate is invalid.
      */
+    @RolesAllowed("admin")
     @PostMapping(value = "/certificates")
     @ResponseStatus(HttpStatus.CREATED)
     public CertificateResponse createCertificate(@Valid @RequestBody CreateCertificateRequest certificate) {
@@ -133,6 +135,7 @@ public class CertificateController {
      * @param id id of desired certificate.
      * @throws EntityNotFoundException if certificate wasn't found.
      */
+    @RolesAllowed("admin")
     @DeleteMapping(value = "/certificates/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public ResponseEntity<Void> deleteCertificate(@PathVariable int id) {
@@ -151,6 +154,7 @@ public class CertificateController {
      * @throws JsonPatchException      if failed to apply patch.
      * @throws JsonProcessingException if structural conversion fails.
      */
+    @RolesAllowed("admin")
     @PatchMapping(path = "/certificates/{id}", consumes = "application/json-patch+json")
     public CertificateResponse updateCertificate(@PathVariable int id, @RequestBody JsonPatch patch) throws JsonPatchException, JsonProcessingException {
         CertificateResponse certificate = certificateService.findById(id)

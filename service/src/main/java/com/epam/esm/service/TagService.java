@@ -17,7 +17,7 @@ public interface TagService {
 
     Optional<TagResponse> findByName(String name);
 
-    List<TagResponse> findTheMostUsedTagsOfUser(int userId);
+    List<TagResponse> findTheMostUsedTagsOfUser(String userId);
 
     long getCount();
 

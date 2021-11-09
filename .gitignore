@@ -17,3 +17,4 @@ gradlew
 /web/src/main/resources/application-prod.yml
 /generation/src/main/resources/application-dev.yml
 /generation/src/main/resources/application-prod.yml
+/web/src/main/resources/application.yml

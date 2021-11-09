@@ -2,7 +2,6 @@ package com.epam.esm.service.impl;
 
 import com.epam.esm.dao.CertificateDao;
 import com.epam.esm.dao.TagDao;
-import com.epam.esm.dao.UserDao;
 import com.epam.esm.entity.Certificate;
 import com.epam.esm.entity.Tag;
 import com.epam.esm.service.TagService;
@@ -40,7 +39,6 @@ class TagServiceImplTest {
     @Autowired
     private ModelMapper mapper;
     private TagDao tagDao;
-    private UserDao userDao;
 
     private CertificateDao certificateDao;
 
@@ -63,8 +61,7 @@ class TagServiceImplTest {
     void init() {
         tagDao = mock(TagDao.class);
         certificateDao = mock(CertificateDao.class);
-        userDao = mock(UserDao.class);
-        tagService = new TagServiceImpl(tagDao, certificateDao, mapper, userDao);
+        tagService = new TagServiceImpl(tagDao, certificateDao, mapper);
     }
 
     @Test

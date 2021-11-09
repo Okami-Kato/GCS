@@ -10,6 +10,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @EqualsAndHashCode
 public class CreateUserOrderRequest {
-    private int userId;
+    private String userId;
     private int certificateId;
 }

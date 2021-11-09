@@ -2,11 +2,10 @@ package com.epam.esm.web.controller;
 
 import com.epam.esm.service.CertificateService;
 import com.epam.esm.service.TagService;
-import com.epam.esm.service.UserService;
+import com.epam.esm.service.UserOrderService;
 import com.epam.esm.service.dto.request.TagRequest;
 import com.epam.esm.service.dto.response.CertificateItem;
 import com.epam.esm.service.dto.response.TagResponse;
-import com.epam.esm.service.dto.response.UserResponse;
 import com.epam.esm.service.dto.response.UserWithTags;
 import com.epam.esm.service.exception.EntityExistsException;
 import com.epam.esm.service.exception.EntityNotFoundException;
@@ -34,6 +33,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.annotation.security.RolesAllowed;
 import javax.validation.Valid;
 import java.util.LinkedList;
 import java.util.List;
@@ -48,7 +48,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 public class TagController {
     private final CertificateService certificateService;
     private final TagService tagService;
-    private final UserService userService;
+    private final UserOrderService userOrderService;
 
     private final TagLinker tagPostProcessor;
     private final UserWithTagsLinker userWithTagsPostProcessor;
@@ -57,11 +57,11 @@ public class TagController {
 
     @Autowired
     public TagController(CertificateService certificateService, TagService tagService,
-                         UserService userService, TagLinker tagPostProcessor, UserWithTagsLinker userWithTagsPostProcessor,
+                         UserOrderService userOrderService, TagLinker tagPostProcessor, UserWithTagsLinker userWithTagsPostProcessor,
                          CertificateLinker certificateLinker, PagedResourcesAssembler pagedResourcesAssembler) {
         this.certificateService = certificateService;
         this.tagService = tagService;
-        this.userService = userService;
+        this.userOrderService = userOrderService;
         this.tagPostProcessor = tagPostProcessor;
         this.userWithTagsPostProcessor = userWithTagsPostProcessor;
         this.certificateLinker = certificateLinker;
@@ -104,8 +104,8 @@ public class TagController {
     @GetMapping(value = "/tags/theMostUsedTagsOfUsersWithTheHighestCost")
     public CollectionModel<? extends UserWithTags> findTheMostUsedTagsOfUsersWithTheHighestCost() {
         List<UserWithTags> list = new LinkedList<>();
-        List<UserResponse> users = userService.findUsersWithTheHighestCost();
-        users.forEach(u -> list.add(new UserWithTags(u.getId(), tagService.findTheMostUsedTagsOfUser(u.getId()))));
+        List<String> userIds = userOrderService.findUsersWithTheHighestCost();
+        userIds.forEach(id -> list.add(new UserWithTags(id, tagService.findTheMostUsedTagsOfUser(id))));
         CollectionModel<? extends UserWithTags> response = userWithTagsPostProcessor.processCollection(list);
         return response.add(linkTo(methodOn(TagController.class)
                 .findTheMostUsedTagsOfUsersWithTheHighestCost())
@@ -135,6 +135,7 @@ public class TagController {
      * @throws InvalidEntityException   if tag is invalid.
      * @throws EntityExistsException    if tag with the same name already exists.
      */
+    @RolesAllowed("admin")
     @PostMapping(value = "/tags")
     @ResponseStatus(HttpStatus.CREATED)
     public TagResponse createTag(@Valid @RequestBody TagRequest tag) {
@@ -149,6 +150,7 @@ public class TagController {
      * @param id id of desired tag.
      * @throws EntityNotFoundException if tag wasn't found.
      */
+    @RolesAllowed("admin")
     @DeleteMapping(value = "/tags/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public ResponseEntity<Void> deleteTag(@PathVariable int id) {

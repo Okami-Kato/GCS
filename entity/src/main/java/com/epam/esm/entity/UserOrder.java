@@ -25,9 +25,8 @@ public class UserOrder {
     @Column(name = "id", nullable = false)
     private Integer id;
 
-    @ManyToOne(cascade = CascadeType.MERGE)
-    @JoinColumn(name = "user_id")
-    private User user;
+    @Column(name = "user_id")
+    private String userId;
 
     @ManyToOne(cascade = {CascadeType.MERGE})
     @JoinColumn(name = "certificate_id")
@@ -43,9 +42,9 @@ public class UserOrder {
     }
 
     @Builder
-    public UserOrder(Integer id, User user, Certificate certificate, Integer cost) {
+    public UserOrder(Integer id, String userId, Certificate certificate, Integer cost) {
         this.id = id;
-        setUser(user);
+        this.userId = userId;
         this.certificate = certificate;
         this.cost = cost;
     }
@@ -53,21 +52,6 @@ public class UserOrder {
     @PrePersist
     private void toCreate() {
         timestamp = Instant.now();
-    }
-
-    void setUser(User user) {
-        if (this.user != null) {
-            return;
-        }
-        this.user = user;
-        user.addOrder(this);
-    }
-
-    void removeUser() {
-        if (this.user == null)
-            return;
-        user.removeOrder(this);
-        this.user = null;
     }
 
     @Override
@@ -87,7 +71,7 @@ public class UserOrder {
     public String toString() {
         return "UserOrder{" +
                 "id=" + id +
-                ", user=" + user +
+                ", userId=" + userId +
                 ", certificate=" + certificate +
                 ", cost=" + cost +
                 ", timestamp=" + timestamp +

@@ -33,7 +33,7 @@ public interface TagDao extends JpaRepository<Tag, Integer> {
     Page<Tag> findAllByCertificatesId(int certificateId, Pageable pageable);
 
     @Query(value = GET_THE_MOST_USED_TAG_OF_USER, nativeQuery = true)
-    List<Tag> findTheMostUsedTagsOfUser(int userId);
+    List<Tag> findTheMostUsedTagsOfUser(String userId);
 
     Optional<Tag> findByName(String name);
 

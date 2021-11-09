@@ -19,7 +19,7 @@ import java.time.LocalDateTime;
 @EqualsAndHashCode(callSuper = false)
 public class UserOrderResponse extends RepresentationModel<UserOrderResponse> {
     private Integer id;
-    private Integer userId;
+    private String userId;
     private CertificateItem certificate;
     private Integer cost;
 

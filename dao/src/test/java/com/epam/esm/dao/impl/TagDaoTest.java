@@ -2,11 +2,9 @@ package com.epam.esm.dao.impl;
 
 import com.epam.esm.dao.CertificateDao;
 import com.epam.esm.dao.TagDao;
-import com.epam.esm.dao.UserDao;
 import com.epam.esm.dao.UserOrderDao;
 import com.epam.esm.entity.Certificate;
 import com.epam.esm.entity.Tag;
-import com.epam.esm.entity.User;
 import com.epam.esm.entity.UserOrder;
 import com.google.common.collect.Sets;
 import org.junit.jupiter.api.AfterAll;
@@ -62,8 +60,6 @@ class TagDaoTest {
     private TagDao tagDao;
     @Autowired
     private UserOrderDao userOrderDao;
-    @Autowired
-    private UserDao userDao;
 
     @BeforeAll
     void init() {
@@ -121,46 +117,35 @@ class TagDaoTest {
         certificateDao.save(thirdCertificate);
         certificateDao.save(forthCertificate);
 
-        User firstUser = User.builder()
-                .fullName("first user")
-                .username("first")
-                .password("password")
-                .build();
-        User secondUser = User.builder()
-                .fullName("second user")
-                .username("second")
-                .password("password")
-                .build();
-
-        userDao.save(firstUser);
-        userDao.save(secondUser);
+        String firstUserId = "firstUser";
+        String secondUserId = "secondUser";
 
         userOrderDao.save(UserOrder.builder()
-                .user(firstUser)
+                .userId(firstUserId)
                 .certificate(firstCertificate)
                 .cost(firstCertificate.getPrice())
                 .build());
         userOrderDao.save(UserOrder.builder()
-                .user(firstUser)
+                .userId(firstUserId)
                 .certificate(thirdCertificate)
                 .cost(thirdCertificate.getPrice())
                 .build());
 
         userOrderDao.save(UserOrder.builder()
-                .user(secondUser)
+                .userId(secondUserId)
                 .certificate(secondCertificate)
                 .cost(secondCertificate.getPrice())
                 .build());
         userOrderDao.save(UserOrder.builder()
-                .user(secondUser)
+                .userId(secondUserId)
                 .certificate(thirdCertificate)
                 .cost(thirdCertificate.getPrice())
                 .build());
 
-        List<Tag> theMostUsedTagsOfFirstUser = tagDao.findTheMostUsedTagsOfUser(firstUser.getId());
+        List<Tag> theMostUsedTagsOfFirstUser = tagDao.findTheMostUsedTagsOfUser(firstUserId);
         assertEquals(Collections.singletonList(firstTag), theMostUsedTagsOfFirstUser);
 
-        List<Tag> theMostUsedTagsOfSecondUser = tagDao.findTheMostUsedTagsOfUser(secondUser.getId());
+        List<Tag> theMostUsedTagsOfSecondUser = tagDao.findTheMostUsedTagsOfUser(secondUserId);
         assertEquals(Arrays.asList(firstTag, thirdTag), theMostUsedTagsOfSecondUser);
     }
 }

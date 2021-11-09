@@ -15,6 +15,6 @@ import java.util.List;
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = false)
 public class UserWithTags extends RepresentationModel<UserWithTags> {
-    private Integer userId;
+    private String userId;
     private List<TagResponse> tags;
 }

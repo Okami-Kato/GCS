@@ -2,7 +2,6 @@ package com.epam.esm.service.impl;
 
 import com.epam.esm.dao.CertificateDao;
 import com.epam.esm.dao.TagDao;
-import com.epam.esm.dao.UserDao;
 import com.epam.esm.entity.Tag;
 import com.epam.esm.service.TagService;
 import com.epam.esm.service.dto.request.TagRequest;
@@ -31,14 +30,12 @@ public class TagServiceImpl implements TagService {
     private final ModelMapper mapper;
     private final TagDao tagDao;
     private final CertificateDao certificateDao;
-    private final UserDao userDao;
 
     @Autowired
-    public TagServiceImpl(TagDao tagDao, CertificateDao certificateDao, ModelMapper mapper, UserDao userDao) {
+    public TagServiceImpl(TagDao tagDao, CertificateDao certificateDao, ModelMapper mapper) {
         this.tagDao = tagDao;
         this.certificateDao = certificateDao;
         this.mapper = mapper;
-        this.userDao = userDao;
     }
 
     /**
@@ -100,10 +97,7 @@ public class TagServiceImpl implements TagService {
      * @return found users and corresponding tags.
      */
     @Override
-    public List<TagResponse> findTheMostUsedTagsOfUser(int userId) {
-        if (!userDao.existsById(userId)) {
-            throw new EntityNotFoundException("id=" + userId, ErrorCode.USER_NOT_FOUND);
-        }
+    public List<TagResponse> findTheMostUsedTagsOfUser(String userId) {
         return tagDao.findTheMostUsedTagsOfUser(userId).stream()
                 .map(tag -> mapper.map(tag, TagResponse.class))
                 .collect(Collectors.toList());

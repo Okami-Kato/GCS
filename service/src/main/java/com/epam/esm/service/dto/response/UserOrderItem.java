@@ -14,7 +14,7 @@ import org.springframework.hateoas.server.core.Relation;
 @EqualsAndHashCode(callSuper = false)
 public class UserOrderItem extends RepresentationModel<UserOrderItem> {
     private Integer id;
-    private Integer userId;
+    private String userId;
     private Integer certificateId;
     private Integer cost;
 }
