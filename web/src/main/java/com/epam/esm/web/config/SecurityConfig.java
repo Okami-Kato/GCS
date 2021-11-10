@@ -11,10 +11,14 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.mapping.SimpleAuthorityMapper;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.session.SessionRegistryImpl;
 import org.springframework.security.web.authentication.session.RegisterSessionAuthenticationStrategy;
 import org.springframework.security.web.authentication.session.SessionAuthenticationStrategy;
+
+import java.util.function.Supplier;
 
 @Configuration
 @EnableWebSecurity
@@ -43,5 +47,10 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
     @Bean
     public KeycloakConfigResolver KeycloakConfigResolver() {
         return new KeycloakSpringBootConfigResolver();
+    }
+
+    @Bean
+    public Supplier<Authentication> authenticationSupplier(){
+        return () -> SecurityContextHolder.getContext().getAuthentication();
     }
 }

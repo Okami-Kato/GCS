@@ -16,6 +16,7 @@ import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -91,9 +92,14 @@ public class UserOrderController {
      * @throws EntityNotFoundException if order wasn't found.
      */
     @GetMapping(value = "/orders/{id}")
-    public UserOrderResponse findOrder(@PathVariable int id) {
+    public UserOrderResponse findOrder(@PathVariable int id, Principal principal) {
         Optional<UserOrderResponse> response = orderService.findById(id);
-        response.ifPresent(orderResponseLinker::processEntity);
+        if (response.isPresent()) {
+            if (!response.get().getUserId().equals(principal.getName())) {
+                throw new AccessDeniedException("Can't access other user's order");
+            }
+            orderResponseLinker.processEntity(response.get());
+        }
         return response.orElseThrow(() -> new EntityNotFoundException("id=" + id, ErrorCode.USER_ORDER_NOT_FOUND));
     }
 
@@ -106,7 +112,6 @@ public class UserOrderController {
      * @throws IllegalArgumentException if order is null.
      * @throws InvalidEntityException   if order is invalid.
      */
-    @RolesAllowed("user")
     @PostMapping(value = "/orders")
     @ResponseStatus(HttpStatus.CREATED)
     public UserOrderResponse createUserOrder(@RequestParam Integer certificateId, Principal principal) {
