@@ -25,7 +25,7 @@ public abstract class TagCreator implements Creator {
                 do {
                     tag = getTag();
                 }
-                while (tagService.find(tag.getName()).isPresent());
+                while (tagService.findByName(tag.getName()).isPresent());
                 tagService.create(tag);
                 counter++;
             } catch (ServiceException e) {

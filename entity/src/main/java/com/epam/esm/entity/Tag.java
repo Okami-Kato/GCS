@@ -1,10 +1,16 @@
 package com.epam.esm.entity;
 
+import lombok.Builder;
+import lombok.Getter;
+import lombok.Setter;
+import org.hibernate.Hibernate;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.ManyToMany;
 import javax.persistence.PreRemove;
 import javax.persistence.Table;
@@ -14,18 +20,34 @@ import java.util.Objects;
 import java.util.Set;
 
 @Entity
-@Table(name = "tag")
+@Table(name = "tag", indexes = {
+        @Index(name = "name", columnList = "name", unique = true)
+})
+@Getter
+@Setter
 public class Tag {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "id", nullable = false)
     private Integer id;
 
-    @Column(name = "name", nullable = false, length = 25, unique = true)
+    @Column(name = "name", nullable = false, unique = true, updatable = false, length = 25)
     private String name;
 
     @ManyToMany(mappedBy = "tags")
-    private Set<Certificate> certificates = new HashSet<>();
+    private final Set<Certificate> certificates = new HashSet<>();
+
+    protected Tag() {
+    }
+
+    @Builder
+    public Tag(Integer id, String name, Set<Certificate> certificates) {
+        this.id = id;
+        this.name = name;
+        if (certificates != null) {
+            certificates.forEach(this::addCertificate);
+        }
+    }
 
     @PreRemove
     private void removeCertificateAssociations() {
@@ -34,51 +56,6 @@ public class Tag {
             iterator.remove();
             certificate.removeTag(this);
         }
-    }
-
-    protected Tag() {
-    }
-
-    public Tag(String name) {
-        this.name = name;
-        this.certificates = new HashSet<>();
-    }
-
-    public Tag(String name, Set<Certificate> certificates) {
-        this.name = name;
-        this.certificates = new HashSet<>();
-        for (Certificate certificate : certificates) {
-            addCertificate(certificate);
-        }
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Tag tag = (Tag) o;
-        return Objects.equals(id, tag.id) && name.equals(tag.name);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id, name);
-    }
-
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 
     public Set<Certificate> getCertificates() {
@@ -97,5 +74,26 @@ public class Tag {
             return;
         certificates.remove(certificate);
         certificate.removeTag(this);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
+        Tag tag = (Tag) o;
+        return name != null && name.equals(tag.name);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(name);
+    }
+
+    @Override
+    public String toString() {
+        return "Tag{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                '}';
     }
 }

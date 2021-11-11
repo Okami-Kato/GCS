@@ -6,18 +6,15 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class UserWithTagsLinker implements RepresentationModelLinker<UserWithTags> {
-    private final UserLinker userPostProcessor;
     private final TagLinker tagPostProcessor;
 
     @Autowired
-    public UserWithTagsLinker(UserLinker userPostProcessor, TagLinker tagPostProcessor) {
-        this.userPostProcessor = userPostProcessor;
+    public UserWithTagsLinker(TagLinker tagPostProcessor) {
         this.tagPostProcessor = tagPostProcessor;
     }
 
     @Override
     public void processEntity(UserWithTags entity) {
-        userPostProcessor.processEntity(entity.getUser());
         tagPostProcessor.processCollection(entity.getTags());
     }
 }

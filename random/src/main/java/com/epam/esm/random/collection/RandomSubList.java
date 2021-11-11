@@ -12,9 +12,10 @@ public class RandomSubList<T> {
 
     /**
      * Constructs random subList of given collection
+     *
      * @param collection targeted collection
-     * @param minSize min size of result list
-     * @param maxSize max size of result list
+     * @param minSize    min size of result list
+     * @param maxSize    max size of result list
      * @throws IllegalArgumentException if !(0 < minSize <= maxSize <= collection.size())
      */
     public RandomSubList(Collection<T> collection, int minSize, int maxSize) {

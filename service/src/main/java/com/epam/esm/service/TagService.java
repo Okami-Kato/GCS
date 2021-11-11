@@ -2,21 +2,22 @@ package com.epam.esm.service;
 
 import com.epam.esm.service.dto.request.TagRequest;
 import com.epam.esm.service.dto.response.TagResponse;
-import com.epam.esm.service.dto.response.UserWithTags;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 import java.util.Optional;
 
 public interface TagService {
-    List<TagResponse> findAll(int pageNumber, int pageSize);
+    Page<TagResponse> findAll(Pageable pageable);
 
-    List<TagResponse> findAllByCertificateId(int pageNumber, int pageSize, int certificateId);
+    Page<TagResponse> findAllByCertificateId(int certificateId, Pageable pageable);
 
-    Optional<TagResponse> find(int id);
+    Optional<TagResponse> findById(int id);
 
-    Optional<TagResponse> find(String name);
+    Optional<TagResponse> findByName(String name);
 
-    List<UserWithTags> findTheMostUsedTagsOfUsersWithTheHighestCost();
+    List<TagResponse> findTheMostUsedTagsOfUser(String userId);
 
     long getCount();
 

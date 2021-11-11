@@ -1,22 +1,24 @@
 package com.epam.esm.service;
 
+import com.epam.esm.entity.Certificate;
 import com.epam.esm.service.dto.request.CreateCertificateRequest;
 import com.epam.esm.service.dto.request.UpdateCertificateRequest;
 import com.epam.esm.service.dto.response.CertificateItem;
 import com.epam.esm.service.dto.response.CertificateResponse;
-import com.epam.esm.util.CertificateFilter;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 
-import java.util.List;
 import java.util.Optional;
 
 public interface CertificateService {
-    List<CertificateItem> findAll(int pageNumber, int pageSize);
+    Page<CertificateItem> findAll(Pageable pageable);
 
-    List<CertificateItem> findAllWithFilter(int pageNumber, int pageSize, CertificateFilter certificateFilter);
+    Page<CertificateItem> findAll(Specification<Certificate> specification, Pageable pageable);
 
-    List<CertificateItem> findAllByTagId(int pageNumber, int pageSize, int tagId);
+    Page<CertificateItem> findAllByTagId(int tagId, Pageable pageable);
 
-    Optional<CertificateResponse> find(int id);
+    Optional<CertificateResponse> findById(int id);
 
     long getCount();
 

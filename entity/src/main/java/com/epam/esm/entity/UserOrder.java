@@ -1,5 +1,9 @@
 package com.epam.esm.entity;
 
+import lombok.Builder;
+import lombok.Getter;
+import org.hibernate.Hibernate;
+
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -11,21 +15,20 @@ import javax.persistence.ManyToOne;
 import javax.persistence.PrePersist;
 import javax.persistence.Table;
 import java.time.Instant;
-import java.util.Objects;
 
 @Entity
 @Table(name = "user_order")
+@Getter
 public class UserOrder {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "id", nullable = false)
     private Integer id;
 
-    @ManyToOne(cascade = CascadeType.MERGE)
-    @JoinColumn(name = "user_id")
-    private User user;
+    @Column(name = "user_id")
+    private String userId;
 
-    @ManyToOne(cascade = CascadeType.MERGE)
+    @ManyToOne(cascade = {CascadeType.MERGE})
     @JoinColumn(name = "certificate_id")
     private Certificate certificate;
 
@@ -38,8 +41,10 @@ public class UserOrder {
     protected UserOrder() {
     }
 
-    public UserOrder(User user, Certificate certificate, Integer cost) {
-        setUser(user);
+    @Builder
+    public UserOrder(Integer id, String userId, Certificate certificate, Integer cost) {
+        this.id = id;
+        this.userId = userId;
         this.certificate = certificate;
         this.cost = cost;
     }
@@ -49,62 +54,24 @@ public class UserOrder {
         timestamp = Instant.now();
     }
 
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    public User getUser() {
-        return user;
-    }
-
-    void setUser(User user) {
-        if (this.user != null)
-            return;
-        this.user = user;
-        user.addOrder(this);
-    }
-
-    void removeUser() {
-        if (this.user == null)
-            return;
-        user.removeOrder(this);
-        this.user = null;
-    }
-
-    public Certificate getCertificate() {
-        return certificate;
-    }
-
-    public Integer getCost() {
-        return cost;
-    }
-
-    public Instant getTimestamp() {
-        return timestamp;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        UserOrder userOrder = (UserOrder) o;
-        return Objects.equals(id, userOrder.id) && Objects.equals(user, userOrder.user) && Objects.equals(certificate, userOrder.certificate) && Objects.equals(cost, userOrder.cost) && Objects.equals(timestamp, userOrder.timestamp);
+        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
+        UserOrder that = (UserOrder) o;
+        return id != null && id.equals(that.id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, user, certificate, cost, timestamp);
+        return 0;
     }
 
     @Override
     public String toString() {
         return "UserOrder{" +
                 "id=" + id +
-                ", user=" + user +
+                ", userId=" + userId +
                 ", certificate=" + certificate +
                 ", cost=" + cost +
                 ", timestamp=" + timestamp +

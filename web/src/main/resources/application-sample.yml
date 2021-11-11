@@ -1,3 +1,8 @@
+keycloak:
+  realm: <REALM NAME>
+  auth-server-url: <AUTH SERVER URL>
+  resource: <RESOURCE NAME>
+
 spring:
 
   #jpa properties

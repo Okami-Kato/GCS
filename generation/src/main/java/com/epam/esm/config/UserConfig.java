@@ -27,7 +27,7 @@ public class UserConfig {
     private CreateUserRequest generateRandomUser(GenerationProperties properties, Map<Integer, List<String>> dictionary) {
         UserProperties userProperties = properties.getUser();
         CreateUserRequest user = new CreateUserRequest();
-        user.setFirstName(
+        user.setFullName(
                 new RandomWord(dictionary,
                         userProperties.getFirstName().getMinSize(),
                         userProperties.getFirstName().getMaxSize()
@@ -39,7 +39,7 @@ public class UserConfig {
                         userProperties.getLastName().getMaxSize()
                 ).getValue()
         );
-        user.setLogin(
+        user.setUsername(
                 new RandomWord(dictionary,
                         userProperties.getLogin().getMinSize(),
                         userProperties.getLogin().getMaxSize()

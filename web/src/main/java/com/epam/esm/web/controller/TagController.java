@@ -2,6 +2,7 @@ package com.epam.esm.web.controller;
 
 import com.epam.esm.service.CertificateService;
 import com.epam.esm.service.TagService;
+import com.epam.esm.service.UserOrderService;
 import com.epam.esm.service.dto.request.TagRequest;
 import com.epam.esm.service.dto.response.CertificateItem;
 import com.epam.esm.service.dto.response.TagResponse;
@@ -14,7 +15,11 @@ import com.epam.esm.web.linker.CertificateLinker;
 import com.epam.esm.web.linker.TagLinker;
 import com.epam.esm.web.linker.UserWithTagsLinker;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.PagedModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -25,12 +30,12 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.annotation.security.RolesAllowed;
 import javax.validation.Valid;
-import javax.validation.constraints.Positive;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 
@@ -43,61 +48,52 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 public class TagController {
     private final CertificateService certificateService;
     private final TagService tagService;
+    private final UserOrderService userOrderService;
 
     private final TagLinker tagPostProcessor;
     private final UserWithTagsLinker userWithTagsPostProcessor;
     private final CertificateLinker certificateLinker;
+    private final PagedResourcesAssembler pagedResourcesAssembler;
 
     @Autowired
     public TagController(CertificateService certificateService, TagService tagService,
-                         TagLinker tagPostProcessor, UserWithTagsLinker userWithTagsPostProcessor,
-                         CertificateLinker certificateLinker) {
+                         UserOrderService userOrderService, TagLinker tagPostProcessor, UserWithTagsLinker userWithTagsPostProcessor,
+                         CertificateLinker certificateLinker, PagedResourcesAssembler pagedResourcesAssembler) {
         this.certificateService = certificateService;
         this.tagService = tagService;
+        this.userOrderService = userOrderService;
         this.tagPostProcessor = tagPostProcessor;
         this.userWithTagsPostProcessor = userWithTagsPostProcessor;
         this.certificateLinker = certificateLinker;
+        this.pagedResourcesAssembler = pagedResourcesAssembler;
     }
 
     /**
      * Retrieves all tags.
      *
-     * @param page number of page (starts from 1).
-     * @param size size of page.
-     * @return list of found tags.
-     * @throws IllegalArgumentException if pageNumber < 1, or pageSize < 0.
+     * @param pageable pagination restrictions.
+     * @return page of found tags.
      */
     @GetMapping(value = "/tags")
-    public CollectionModel<? extends TagResponse> findAllTags(
-            @RequestParam(defaultValue = "1")
-            @Positive(message = "Page must be a positive number") Integer page,
-            @RequestParam(defaultValue = "5")
-            @Positive(message = "Size must be a positive number") Integer size) {
-        List<TagResponse> response = tagService.findAll(page, size);
-        CollectionModel<? extends TagResponse> result = tagPostProcessor.processCollection(response);
-        return result.add(linkTo(methodOn(TagController.class).findAllTags(page, size)).withSelfRel());
+    public PagedModel<TagResponse> findAllTags(Pageable pageable) {
+        Page<TagResponse> tagsPage = tagService.findAll(pageable);
+        tagPostProcessor.processCollection(tagsPage.getContent());
+        return pagedResourcesAssembler.toModel(tagsPage);
     }
 
     /**
      * Retrieves all certificates, assigned to given tag.
      *
-     * @param page number of page (starts from 1).
-     * @param size size of page.
-     * @param id   id of tag.
+     * @param pageable pagination restrictions.
+     * @param id       id of tag.
      * @return list of found certificates.
-     * @throws IllegalArgumentException if pageNumber < 1, or pageSize < 0.
-     * @throws EntityNotFoundException  if tag with given id wasn't found.
+     * @throws EntityNotFoundException if tag with given id wasn't found.
      */
     @GetMapping(value = "/tags/{id}/certificates")
-    public CollectionModel<? extends CertificateItem> findCertificates(
-            @RequestParam(defaultValue = "1")
-            @Positive(message = "Page must be a positive number") Integer page,
-            @RequestParam(defaultValue = "5")
-            @Positive(message = "Size must be a positive number") Integer size,
-            @PathVariable int id) {
-        List<CertificateItem> response = certificateService.findAllByTagId(page, size, id);
-        CollectionModel<? extends CertificateItem> certificates = certificateLinker.processCollection(response);
-        return certificates.add(linkTo(methodOn(TagController.class).findCertificates(page, size, id)).withSelfRel());
+    public PagedModel<CertificateItem> findCertificates(Pageable pageable, @PathVariable int id) {
+        Page<CertificateItem> certificatesPage = certificateService.findAllByTagId(id, pageable);
+        certificateLinker.processCollection(certificatesPage.getContent());
+        return pagedResourcesAssembler.toModel(certificatesPage);
     }
 
     /**
@@ -107,8 +103,10 @@ public class TagController {
      */
     @GetMapping(value = "/tags/theMostUsedTagsOfUsersWithTheHighestCost")
     public CollectionModel<? extends UserWithTags> findTheMostUsedTagsOfUsersWithTheHighestCost() {
-        CollectionModel<? extends UserWithTags> response = userWithTagsPostProcessor.processCollection(
-                tagService.findTheMostUsedTagsOfUsersWithTheHighestCost());
+        List<UserWithTags> list = new LinkedList<>();
+        List<String> userIds = userOrderService.findUsersWithTheHighestCost();
+        userIds.forEach(id -> list.add(new UserWithTags(id, tagService.findTheMostUsedTagsOfUser(id))));
+        CollectionModel<? extends UserWithTags> response = userWithTagsPostProcessor.processCollection(list);
         return response.add(linkTo(methodOn(TagController.class)
                 .findTheMostUsedTagsOfUsersWithTheHighestCost())
                 .withSelfRel());
@@ -123,7 +121,7 @@ public class TagController {
      */
     @GetMapping(value = "/tags/{id}")
     public TagResponse findTag(@PathVariable int id) {
-        Optional<TagResponse> response = tagService.find(id);
+        Optional<TagResponse> response = tagService.findById(id);
         response.ifPresent(tagPostProcessor::processEntity);
         return response.orElseThrow(() -> new EntityNotFoundException("id=" + id, ErrorCode.TAG_NOT_FOUND));
     }
@@ -137,6 +135,7 @@ public class TagController {
      * @throws InvalidEntityException   if tag is invalid.
      * @throws EntityExistsException    if tag with the same name already exists.
      */
+    @RolesAllowed("admin")
     @PostMapping(value = "/tags")
     @ResponseStatus(HttpStatus.CREATED)
     public TagResponse createTag(@Valid @RequestBody TagRequest tag) {
@@ -151,6 +150,7 @@ public class TagController {
      * @param id id of desired tag.
      * @throws EntityNotFoundException if tag wasn't found.
      */
+    @RolesAllowed("admin")
     @DeleteMapping(value = "/tags/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public ResponseEntity<Void> deleteTag(@PathVariable int id) {

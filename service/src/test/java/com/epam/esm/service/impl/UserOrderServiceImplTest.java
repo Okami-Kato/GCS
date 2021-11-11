@@ -1,10 +1,8 @@
 package com.epam.esm.service.impl;
 
 import com.epam.esm.dao.CertificateDao;
-import com.epam.esm.dao.UserDao;
 import com.epam.esm.dao.UserOrderDao;
 import com.epam.esm.entity.Certificate;
-import com.epam.esm.entity.User;
 import com.epam.esm.entity.UserOrder;
 import com.epam.esm.service.UserOrderService;
 import com.epam.esm.service.dto.request.CreateUserOrderRequest;
@@ -18,7 +16,8 @@ import org.junit.jupiter.api.TestInstance;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.dao.InvalidDataAccessApiUsageException;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -29,9 +28,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.intThat;
-import static org.mockito.Mockito.doAnswer;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -42,67 +39,70 @@ class UserOrderServiceImplTest {
     @Autowired
     private ModelMapper mapper;
     private UserOrderDao userOrderDao;
-    private UserDao userDao;
     private CertificateDao certificateDao;
 
     private UserOrderService userOrderService;
 
-    private User firstUser = new User("first", "test", "first", "password");
-    private User secondUser = new User("second", "test", "second", "password");
+    private final String firstUserId = "first user";
+    private final String secondUserId = "second user";
 
-    private Certificate firstCertificate = new Certificate("first", "first", 5, 1);
-    private Certificate secondCertificate = new Certificate("second", "second", 15, 3);
-    private Certificate thirdCertificate = new Certificate("third", "third", 25, 10);
+    private final Certificate firstCertificate = Certificate.builder()
+            .id(1)
+            .name("first name")
+            .description("first description")
+            .price(5)
+            .duration(1)
+            .build();
+    private final Certificate secondCertificate = Certificate.builder()
+            .id(2)
+            .name("second name")
+            .description("second description")
+            .price(15)
+            .duration(3)
+            .build();
+    private final Certificate thirdCertificate = Certificate.builder()
+            .id(3)
+            .name("third name")
+            .description("third description")
+            .price(25)
+            .duration(10)
+            .build();
 
-    private UserOrder firstOrder = new UserOrder(firstUser, firstCertificate, firstCertificate.getPrice());
-    private UserOrder secondOrder = new UserOrder(firstUser, thirdCertificate, thirdCertificate.getPrice());
-    private UserOrder thirdOrder = new UserOrder(secondUser, secondCertificate, secondCertificate.getPrice());
-    private UserOrder forthOrder = new UserOrder(secondUser, thirdCertificate, thirdCertificate.getPrice());
+    private final UserOrder firstOrder = new UserOrder(1, firstUserId, firstCertificate, firstCertificate.getPrice());
+    private final UserOrder secondOrder = new UserOrder(2, firstUserId, thirdCertificate, thirdCertificate.getPrice());
+    private final UserOrder thirdOrder = new UserOrder(3, secondUserId, secondCertificate, secondCertificate.getPrice());
+    private final UserOrder forthOrder = new UserOrder(4, secondUserId, thirdCertificate, thirdCertificate.getPrice());
 
     @BeforeAll
     void init() {
-        userDao = mock(UserDao.class);
         certificateDao = mock(CertificateDao.class);
         userOrderDao = mock(UserOrderDao.class);
-        userOrderService = new UserOrderServiceImpl(mapper, userOrderDao, userDao, certificateDao);
-
-        firstUser.setId(1);
-        secondUser.setId(2);
-
-        firstCertificate.setId(1);
-        secondCertificate.setId(2);
-        thirdCertificate.setId(3);
-
-        firstOrder.setId(1);
-        secondOrder.setId(2);
-        thirdOrder.setId(3);
-        forthOrder.setId(4);
+        userOrderService = new UserOrderServiceImpl(mapper, userOrderDao, certificateDao);
     }
 
     @Test
     void create() {
-        doAnswer(invocation -> {
-            Object[] args = invocation.getArguments();
-            ((UserOrder) args[0]).setId(firstOrder.getId());
-            return null;
-        }).when(userOrderDao).create(new UserOrder(firstUser, firstCertificate, firstCertificate.getPrice()));
+        UserOrder order = UserOrder.builder()
+                .userId(firstOrder.getUserId())
+                .certificate(firstOrder.getCertificate())
+                .cost(firstOrder.getCost())
+                .build();
+        when(userOrderDao.save(any())).thenReturn(firstOrder);
 
         int notRealId = 10;
-        when(userDao.find(firstUser.getId())).thenReturn(Optional.of(firstUser));
-        when(userDao.find(notRealId)).thenReturn(Optional.empty());
-        when(certificateDao.find(firstCertificate.getId())).thenReturn(Optional.of(firstCertificate));
-        when(certificateDao.find(notRealId)).thenReturn(Optional.empty());
+        when(certificateDao.findById(firstCertificate.getId())).thenReturn(Optional.of(firstCertificate));
+        when(certificateDao.findById(notRealId)).thenReturn(Optional.empty());
 
-        UserOrderResponse actualResponse = userOrderService.create(new CreateUserOrderRequest(firstUser.getId(), firstCertificate.getId()));
+        UserOrderResponse actualResponse = userOrderService.create(new CreateUserOrderRequest(firstUserId, firstCertificate.getId()));
         UserOrderResponse expectedResponse = new UserOrderResponse(
-                firstOrder.getId(), firstUser.getId(),
+                firstOrder.getId(), firstUserId,
                 new CertificateItem(firstCertificate.getId(), firstCertificate.getName(), firstCertificate.getPrice(), new HashSet<>()),
                 firstCertificate.getPrice(), null);
 
         assertEquals(expectedResponse, actualResponse);
 
-        assertThrows(EntityNotFoundException.class, () -> userOrderService.create(new CreateUserOrderRequest(notRealId, firstCertificate.getId())));
-        assertThrows(EntityNotFoundException.class, () -> userOrderService.create(new CreateUserOrderRequest(firstUser.getId(), notRealId)));
+        assertThrows(EntityNotFoundException.class, () -> userOrderService.create(new CreateUserOrderRequest("not real id", firstCertificate.getId())));
+        assertThrows(EntityNotFoundException.class, () -> userOrderService.create(new CreateUserOrderRequest(firstUserId, notRealId)));
         assertThrows(IllegalArgumentException.class, () -> userOrderService.create(null));
     }
 
@@ -112,65 +112,76 @@ class UserOrderServiceImplTest {
         int notRealId = 2;
 
         UserOrderResponse expectedResponse = new UserOrderResponse(
-                firstOrder.getId(), firstUser.getId(),
+                firstOrder.getId(), firstUserId,
                 new CertificateItem(firstCertificate.getId(), firstCertificate.getName(), firstCertificate.getPrice(), new HashSet<>()),
                 firstCertificate.getPrice(), null);
 
-        when(userOrderDao.find(realId)).thenReturn(Optional.of(firstOrder));
-        when(userOrderDao.find(notRealId)).thenReturn(Optional.empty());
+        when(userOrderDao.findById(realId)).thenReturn(Optional.of(firstOrder));
+        when(userOrderDao.findById(notRealId)).thenReturn(Optional.empty());
 
-        Optional<UserOrderResponse> actualResponse = userOrderService.find(realId);
+        Optional<UserOrderResponse> actualResponse = userOrderService.findById(realId);
         assertTrue(actualResponse.isPresent());
         assertEquals(expectedResponse, actualResponse.get());
 
-        assertFalse(userOrderService.find(notRealId).isPresent());
+        assertFalse(userOrderService.findById(notRealId).isPresent());
     }
 
     @Test
     void read() {
-        when(userOrderDao.findAll(1, 2)).thenReturn(Arrays.asList(firstOrder, secondOrder));
-        when(userOrderDao.findAll(2, 2)).thenReturn(Arrays.asList(thirdOrder, forthOrder));
-        when(userOrderDao.findAll(1, 3)).thenReturn(Arrays.asList(firstOrder, secondOrder, thirdOrder));
-        when(userOrderDao.findAll(intThat(i -> i < 0), anyInt())).thenThrow(InvalidDataAccessApiUsageException.class);
-        when(userOrderDao.findAll(anyInt(), intThat(i -> i < 0))).thenThrow(InvalidDataAccessApiUsageException.class);
+        PageRequest firstPageRequest = PageRequest.of(0, 2);
+        PageRequest secondPageRequest = PageRequest.of(1, 2);
+        PageRequest thirdPageRequest = PageRequest.of(0, 3);
 
-        when(userOrderDao.findAllByUserId(1, 2, firstUser.getId())).thenReturn(Arrays.asList(firstOrder, secondOrder));
-        when(userOrderDao.findAllByUserId(1, 2, secondUser.getId())).thenReturn(Arrays.asList(thirdOrder, forthOrder));
-        when(userOrderDao.findAllByUserId(intThat(i -> i < 0), anyInt(), anyInt())).thenThrow(InvalidDataAccessApiUsageException.class);
-        when(userOrderDao.findAllByUserId(anyInt(), intThat(i -> i < 0), anyInt())).thenThrow(InvalidDataAccessApiUsageException.class);
+        when(userOrderDao.findAll(firstPageRequest)).thenReturn(
+                new PageImpl<>(Arrays.asList(firstOrder, secondOrder), firstPageRequest, 4));
+        when(userOrderDao.findAll(secondPageRequest)).thenReturn(
+                new PageImpl<>(Arrays.asList(thirdOrder, forthOrder), secondPageRequest, 4));
+        when(userOrderDao.findAll(thirdPageRequest)).thenReturn(
+                new PageImpl<>(Arrays.asList(firstOrder, secondOrder, thirdOrder), thirdPageRequest, 4));
 
-        when(userOrderDao.findAllByCertificateId(1, 2, firstCertificate.getId())).thenReturn(Collections.singletonList(firstOrder));
-        when(userOrderDao.findAllByCertificateId(1, 2, thirdCertificate.getId())).thenReturn(Arrays.asList(secondOrder, forthOrder));
-        when(userOrderDao.findAllByCertificateId(intThat(i -> i < 0), anyInt(), anyInt())).thenThrow(InvalidDataAccessApiUsageException.class);
-        when(userOrderDao.findAllByCertificateId(anyInt(), intThat(i -> i < 0), anyInt())).thenThrow(InvalidDataAccessApiUsageException.class);
+        when(userOrderDao.findAllByUserId(firstUserId, firstPageRequest)).thenReturn(
+                new PageImpl<>(Arrays.asList(firstOrder, secondOrder), firstPageRequest, 2));
+        when(userOrderDao.findAllByUserId(secondUserId, firstPageRequest)).thenReturn(
+                new PageImpl<>(Arrays.asList(thirdOrder, forthOrder), firstPageRequest, 2));
+
+        when(userOrderDao.findAllByCertificateId(firstCertificate.getId(), firstPageRequest)).thenReturn(
+                new PageImpl<>(Collections.singletonList(firstOrder), firstPageRequest, 1));
+        when(userOrderDao.findAllByCertificateId(thirdCertificate.getId(), firstPageRequest)).thenReturn(
+                new PageImpl<>(Arrays.asList(secondOrder, forthOrder), firstPageRequest, 2));
 
         UserOrderItem firstItem = new UserOrderItem(
-                firstOrder.getId(), firstOrder.getUser().getId(), firstOrder.getCertificate().getId(), firstOrder.getCost());
+                firstOrder.getId(), firstOrder.getUserId(), firstOrder.getCertificate().getId(), firstOrder.getCost());
         UserOrderItem secondItem = new UserOrderItem(
-                secondOrder.getId(), secondOrder.getUser().getId(), secondOrder.getCertificate().getId(), secondOrder.getCost());
+                secondOrder.getId(), secondOrder.getUserId(), secondOrder.getCertificate().getId(), secondOrder.getCost());
         UserOrderItem thirdItem = new UserOrderItem(
-                thirdOrder.getId(), thirdOrder.getUser().getId(), thirdOrder.getCertificate().getId(), thirdOrder.getCost());
+                thirdOrder.getId(), thirdOrder.getUserId(), thirdOrder.getCertificate().getId(), thirdOrder.getCost());
         UserOrderItem forthItem = new UserOrderItem(
-                forthOrder.getId(), forthOrder.getUser().getId(), forthOrder.getCertificate().getId(), forthOrder.getCost());
+                forthOrder.getId(), forthOrder.getUserId(), forthOrder.getCertificate().getId(), forthOrder.getCost());
 
-        assertEquals(Arrays.asList(firstItem, secondItem), userOrderService.findAll(1, 2));
-        assertEquals(Arrays.asList(thirdItem, forthItem), userOrderService.findAll(2, 2));
-        assertEquals(Arrays.asList(firstItem, secondItem, thirdItem), userOrderService.findAll(1, 3));
-        assertThrows(IllegalArgumentException.class, () -> userOrderService.findAll(-1, 2));
-        assertThrows(IllegalArgumentException.class, () -> userOrderService.findAll(1, -1));
+        assertEquals(Arrays.asList(firstItem, secondItem), userOrderService.findAll(firstPageRequest).getContent());
+        assertEquals(Arrays.asList(thirdItem, forthItem), userOrderService.findAll(secondPageRequest).getContent());
+        assertEquals(Arrays.asList(firstItem, secondItem, thirdItem), userOrderService.findAll(thirdPageRequest).getContent());
+        assertThrows(IllegalArgumentException.class, () -> userOrderService.findAll(PageRequest.of(-1, 1)));
+        assertThrows(IllegalArgumentException.class, () -> userOrderService.findAll(PageRequest.of(1, -1)));
 
-        when(userDao.find(firstUser.getId())).thenReturn(Optional.of(firstUser));
-        when(userDao.find(secondUser.getId())).thenReturn(Optional.of(secondUser));
-        assertEquals(Arrays.asList(firstItem, secondItem), userOrderService.findAllByUserId(1, 2, firstUser.getId()));
-        assertEquals(Arrays.asList(thirdItem, forthItem), userOrderService.findAllByUserId(1, 2, secondUser.getId()));
-        assertThrows(IllegalArgumentException.class, () -> userOrderService.findAllByUserId(-1, 2, firstUser.getId()));
-        assertThrows(IllegalArgumentException.class, () -> userOrderService.findAllByUserId(1, -1, firstUser.getId()));
+        assertEquals(Arrays.asList(firstItem, secondItem),
+                userOrderService.findAllByUserId(firstUserId, firstPageRequest).getContent());
+        assertEquals(Arrays.asList(thirdItem, forthItem),
+                userOrderService.findAllByUserId(secondUserId, firstPageRequest).getContent());
+        assertThrows(IllegalArgumentException.class,
+                () -> userOrderService.findAllByUserId(firstUserId, PageRequest.of(-1, 1)).getContent());
+        assertThrows(IllegalArgumentException.class,
+                () -> userOrderService.findAllByUserId(firstUserId, PageRequest.of(1, -1)).getContent());
 
-        when(certificateDao.find(firstCertificate.getId())).thenReturn(Optional.of(firstCertificate));
-        when(certificateDao.find(thirdCertificate.getId())).thenReturn(Optional.of(thirdCertificate));
-        assertEquals(Collections.singletonList(firstItem), userOrderService.findAllByCertificateId(1, 2, firstCertificate.getId()));
-        assertEquals(Arrays.asList(secondItem, forthItem), userOrderService.findAllByCertificateId(1, 2, thirdCertificate.getId()));
-        assertThrows(IllegalArgumentException.class, () -> userOrderService.findAllByCertificateId(-1, 2, firstCertificate.getId()));
-        assertThrows(IllegalArgumentException.class, () -> userOrderService.findAllByCertificateId(1, -1, firstCertificate.getId()));
+        when(certificateDao.existsById(firstCertificate.getId())).thenReturn(true);
+        when(certificateDao.existsById(thirdCertificate.getId())).thenReturn(true);
+        assertEquals(Collections.singletonList(firstItem),
+                userOrderService.findAllByCertificateId(firstCertificate.getId(), firstPageRequest).getContent());
+        assertEquals(Arrays.asList(secondItem, forthItem),
+                userOrderService.findAllByCertificateId(thirdCertificate.getId(), firstPageRequest).getContent());
+        assertThrows(IllegalArgumentException.class,
+                () -> userOrderService.findAllByCertificateId(firstCertificate.getId(), PageRequest.of(-1, 1)).getContent());
+        assertThrows(IllegalArgumentException.class,
+                () -> userOrderService.findAllByCertificateId(firstCertificate.getId(), PageRequest.of(1, -1)).getContent());
     }
 }
